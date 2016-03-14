@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MusicVoice</string>
+
+    <!-- LogInActivity Strings -->
+    <string name="login_failure">Login Failed</string>
+    <!-- End LoginActivity Strings -->
 </resources>
