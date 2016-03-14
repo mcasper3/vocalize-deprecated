@@ -33,6 +33,8 @@ dependencies {
     compile 'com.android.support:percent:23.1.1'
     compile 'com.spotify.sdk:spotify-auth:1.0.0-beta12@aar'
     compile 'com.spotify.sdk:spotify-player:1.0.0-beta12@aar'
+    compile 'com.squareup.retrofit2:retrofit:2.0.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0'
     compile files('libs/pocketsphinx-android-5prealpha-nolib.jar')
 }
 

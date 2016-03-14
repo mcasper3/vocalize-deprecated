@@ -11,15 +11,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.spotify.sdk.android.player.ConnectionStateCallback;
 
-public class LogInActivity extends AppCompatActivity {
+public class LogInActivity extends AppCompatActivity implements ConnectionStateCallback {
 
     private static final int REQUEST_CODE = 9001;
-    private static final String REDIRECT_URI = "mikecasper.me://callback";
+    private static final String CLIENT_ID = "6efaf35f4aa84d029e9a319eebb73211";
+    private static final String REDIRECT_URI = "musicvoice-request://callback";
+    private static final String TAG = "LogInActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +51,9 @@ public class LogInActivity extends AppCompatActivity {
 
     private void onLogIn() {
         AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder("clientId", AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
-        builder.setScopes(new String[] { "streaming" });
+        builder.setScopes(new String[] {"user-read-private", "streaming" });
         AuthenticationRequest request = builder.build();
 
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
@@ -65,12 +69,39 @@ public class LogInActivity extends AppCompatActivity {
             switch (response.getType()) {
                 case TOKEN:
                     // TODO go to next page
+                    Log.i(TAG, "Logged in");
                     break;
                 case ERROR:
-                    Log.e("DS", "DSDSF");
+                    Log.e(TAG, response.getError());
+                    Toast.makeText(this, R.string.login_failure, Toast.LENGTH_SHORT).show();
                     break;
                 default:
             }
         }
+    }
+
+    @Override
+    public void onLoggedIn() {
+
+    }
+
+    @Override
+    public void onLoggedOut() {
+
+    }
+
+    @Override
+    public void onLoginFailed(Throwable throwable) {
+        throwable.printStackTrace();
+    }
+
+    @Override
+    public void onTemporaryError() {
+
+    }
+
+    @Override
+    public void onConnectionMessage(String s) {
+
     }
 }
