@@ -1,0 +1,10 @@
+#JSGF V1.0;
+
+grammar com.musicvoice.commands;
+
+<command> = (resume music)	|
+		  (pause music)		|
+		  (next song)		|
+		  (previous song)	;
+
+public <commands> = <command>	;
