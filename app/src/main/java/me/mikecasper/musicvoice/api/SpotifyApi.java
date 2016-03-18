@@ -1,5 +1,7 @@
 package me.mikecasper.musicvoice.api;
 
+import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
+import me.mikecasper.musicvoice.api.responses.TrackResponse;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -12,8 +14,8 @@ public interface SpotifyApi {
     Call<SpotifyUser> getUserInfo();
 
     @GET("/v1/users/{user_id}/playlists")
-    void getUserPlaylists(@Path("user_id") String userId, Callback<PlaylistResponse> response);
+    Call<PlaylistResponse> getUserPlaylists(@Path("user_id") String userId);
 
     @GET("/v1/users/{user_id}/playlists/{playlist_id}/tracks")
-    void getPlaylistTracks(@Path("user_id") String userId, @Path("playlist_id") String playlistId, @Query("offset") int offset, Callback<TrackResponse> response);
+    Call<TrackResponse> getPlaylistTracks(@Path("user_id") String userId, @Path("playlist_id") String playlistId, @Query("offset") int offset);
 }

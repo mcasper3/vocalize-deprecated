@@ -29,8 +29,6 @@
         app:layout_marginBottomPercent="15%"
         android:id="@+id/logInButton"
         android:src="@drawable/log_in_ripple"
-        android:clickable="true"
-        android:focusable="true"
         android:adjustViewBounds="true"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
