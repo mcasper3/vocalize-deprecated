@@ -1,4 +1,4 @@
-package me.mikecasper.musicvoice;
+package me.mikecasper.musicvoice.login;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,17 +20,22 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 import java.util.Date;
 
-import me.mikecasper.musicvoice.services.LogInService;
+import me.mikecasper.musicvoice.R;
+import me.mikecasper.musicvoice.login.events.LogInEvent;
+import me.mikecasper.musicvoice.services.ApplicationEventManager;
+import me.mikecasper.musicvoice.services.EventManagerProvider;
 
 public class LogInActivity extends AppCompatActivity {
 
     private static final String TAG = "LogInActivity";
+    private ApplicationEventManager mEventManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
+        mEventManager = EventManagerProvider.getInstance();
         ImageView logInButton = (ImageView) findViewById(R.id.logInButton);
 
         if (logInButton != null) {
@@ -51,7 +56,7 @@ public class LogInActivity extends AppCompatActivity {
     }
 
     private void onLogIn() {
-        // TODO send log in event
+        mEventManager.postEvent(new LogInEvent(this));
     }
 
     @Override
@@ -69,6 +74,7 @@ public class LogInActivity extends AppCompatActivity {
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                     sharedPreferences.edit()
                             .putLong(LogInService.LAST_LOGIN_TIME, new Date().getTime())
+                            .putInt(LogInService.LOGIN_EXPIRATION_TIME, response.getExpiresIn())
                             .apply();
                     break;
                 case ERROR:

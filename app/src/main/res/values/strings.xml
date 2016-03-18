@@ -3,5 +3,11 @@
 
     <!-- LogInActivity Strings -->
     <string name="login_failure">Login Failed</string>
+    <string name="title_activity_music_overview">MusicOverviewActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
     <!-- End LoginActivity Strings -->
 </resources>
