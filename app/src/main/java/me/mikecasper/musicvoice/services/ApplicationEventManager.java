@@ -40,11 +40,11 @@ public class ApplicationEventManager {
     public void postEvent(Object object) {
         if (object instanceof SpotifyEvent) {
             // todo check for token expiration time and do authentication if needed
-            if () {
+            /*if () {
 
             } else {
 
-            }
+            }*/
         } else {
             mBus.post(object);
         }

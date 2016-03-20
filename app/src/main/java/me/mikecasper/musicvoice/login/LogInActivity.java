@@ -22,6 +22,7 @@ import java.util.Date;
 
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
+import me.mikecasper.musicvoice.overview.MusicOverviewActivity;
 import me.mikecasper.musicvoice.services.ApplicationEventManager;
 import me.mikecasper.musicvoice.services.EventManagerProvider;
 
@@ -76,6 +77,9 @@ public class LogInActivity extends AppCompatActivity {
                             .putLong(LogInService.LAST_LOGIN_TIME, new Date().getTime())
                             .putInt(LogInService.LOGIN_EXPIRATION_TIME, response.getExpiresIn())
                             .apply();
+
+                    Intent intent = new Intent(this, MusicOverviewActivity.class);
+                    startActivity(intent);
                     break;
                 case ERROR:
                     Log.e(TAG, response.getError());
