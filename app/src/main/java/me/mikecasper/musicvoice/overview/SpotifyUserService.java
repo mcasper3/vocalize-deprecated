@@ -1,5 +1,9 @@
 package me.mikecasper.musicvoice.overview;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -14,10 +18,12 @@ public class SpotifyUserService {
 
     private Bus mBus;
     private SpotifyApi mApi;
+    private Context mContext;
 
-    public SpotifyUserService(Bus mBus, SpotifyApi mApi) {
-        this.mBus = mBus;
-        this.mApi = mApi;
+    public SpotifyUserService(Bus bus, SpotifyApi api, Context context) {
+        this.mBus = bus;
+        this.mApi = api;
+        this.mContext = context;
     }
 
     @Subscribe
@@ -27,8 +33,18 @@ public class SpotifyUserService {
         call.enqueue(new Callback<SpotifyUser>() {
             @Override
             public void onResponse(Call<SpotifyUser> call, Response<SpotifyUser> response) {
-                if (response.body() != null) {
+                SpotifyUser user = response.body();
+                if (user != null) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString(SpotifyUser.NAME, user.getDisplay_name());
 
+                    if (user.getImages().length > 0)
+                        editor.putString(SpotifyUser.PROFILE_IMAGE, user.getImages()[0].getUrl());
+
+                    editor.apply();
+
+                    mBus.post(user);
                 }
             }
 

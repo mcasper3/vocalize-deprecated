@@ -21,22 +21,23 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import java.util.Date;
 
 import me.mikecasper.musicvoice.R;
+import me.mikecasper.musicvoice.api.requests.GetUserRequest;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.overview.MusicOverviewActivity;
-import me.mikecasper.musicvoice.services.ApplicationEventManager;
+import me.mikecasper.musicvoice.services.EventManager;
 import me.mikecasper.musicvoice.services.EventManagerProvider;
 
 public class LogInActivity extends AppCompatActivity {
 
     private static final String TAG = "LogInActivity";
-    private ApplicationEventManager mEventManager;
+    private EventManager mEventManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
-        mEventManager = EventManagerProvider.getInstance();
+        mEventManager = EventManagerProvider.getInstance(this);
         ImageView logInButton = (ImageView) findViewById(R.id.logInButton);
 
         if (logInButton != null) {
@@ -69,14 +70,15 @@ public class LogInActivity extends AppCompatActivity {
 
             switch (response.getType()) {
                 case TOKEN:
-                    // TODO go to next page
-                    Log.i(TAG, "Logged in");
-                    Log.i(TAG, Integer.toString(response.getExpiresIn())); // amount of time until token expires and new on is required
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                     sharedPreferences.edit()
                             .putLong(LogInService.LAST_LOGIN_TIME, new Date().getTime())
                             .putInt(LogInService.LOGIN_EXPIRATION_TIME, response.getExpiresIn())
+                            .putString(LogInService.SPOTIFY_TOKEN, response.getAccessToken())
                             .apply();
+
+                    Log.i(TAG, "Logged in");
+                    mEventManager.postEvent(new GetUserRequest());
 
                     Intent intent = new Intent(this, MusicOverviewActivity.class);
                     startActivity(intent);

@@ -13,6 +13,7 @@ public class LogInService {
     private static final String CLIENT_ID = "6efaf35f4aa84d029e9a319eebb73211";
     private static final String REDIRECT_URI = "musicvoice-request://callback";
 
+    public static final String SPOTIFY_TOKEN = "spotifyToken";
     public static final String LOGIN_EXPIRATION_TIME = "loginExpirationTime";
     public static final String LAST_LOGIN_TIME = "lastLoginTime";
     public static final int LOGIN_REQUEST_CODE = 9001;

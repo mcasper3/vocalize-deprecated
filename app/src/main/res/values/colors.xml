@@ -3,6 +3,7 @@
     <color name="colorPrimary">#212121</color>
     <color name="colorPrimaryDark">#616161</color>
     <color name="colorAccent">#00BFA5</color>
+    <color name="colorAccentTransparent">#3300BFA5</color>
     <color name="darkGray">#424242</color>
     <color name="center_log_in_gradient">#cc222222</color>
     <color name="start_log_in_gradient">#ee222222</color>

@@ -10,17 +10,15 @@
         android:src="@drawable/header_background"
         android:scaleType="centerCrop"/>
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/profileImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_above="@+id/userName"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:src="@android:drawable/sym_def_app_icon" />
+        android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
     <TextView
         android:layout_width="match_parent"
@@ -28,12 +26,9 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:gravity="end"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:paddingBottom="@dimen/nav_header_vertical_spacing"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:text="Michael Casper"
+        android:layout_marginLeft="@dimen/nav_header_vertical_spacing"
+        android:layout_marginRight="@dimen/nav_header_vertical_spacing"
+        android:layout_marginBottom="@dimen/nav_header_vertical_spacing"
         android:layout_alignParentBottom="true"
         android:id="@+id/userName"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />

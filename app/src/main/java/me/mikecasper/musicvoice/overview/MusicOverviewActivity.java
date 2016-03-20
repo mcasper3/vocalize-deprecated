@@ -1,23 +1,32 @@
 package me.mikecasper.musicvoice.overview;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.squareup.otto.Subscribe;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
-import me.mikecasper.musicvoice.api.requests.GetUserRequest;
-import me.mikecasper.musicvoice.services.ApplicationEventManager;
+import me.mikecasper.musicvoice.login.LogInService;
+import me.mikecasper.musicvoice.models.SpotifyUser;
+import me.mikecasper.musicvoice.services.EventManager;
 import me.mikecasper.musicvoice.services.EventManagerProvider;
 
-public class MusicOverviewActivity extends AppCompatActivity
+public class MusicOverviewActivity extends MusicVoiceActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ApplicationEventManager mManager;
+    private EventManager mEventManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +35,7 @@ public class MusicOverviewActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mManager = EventManagerProvider.getInstance();
-        mManager.postEvent(new GetUserRequest());
+        mEventManager = EventManagerProvider.getInstance(this);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -38,6 +46,32 @@ public class MusicOverviewActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        mEventManager.unregister(this);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mEventManager.register(this);
+    }
+
+    @Subscribe
+    public void onUserObtained(SpotifyUser user) {
+        // TODO set the picture and the name
+        CircleImageView profileImage = (CircleImageView) findViewById(R.id.profileImage);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String imageUrl = preferences.getString(SpotifyUser.PROFILE_IMAGE, null);
+        if (imageUrl != null) {
+            Picasso.with(this).load(imageUrl).into(profileImage);
+        }
+
+        TextView profileName = (TextView) findViewById(R.id.userName);
+        profileName.setText(preferences.getString(SpotifyUser.NAME, "Jake Sanchez"));
     }
 
     @Override

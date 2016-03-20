@@ -1,9 +1,9 @@
 package me.mikecasper.musicvoice.models;
 
-/**
- * Created by mikec_000 on 6/25/2015.
- */
 public class SpotifyUser {
+
+    public static final String NAME = "spotifyUserName";
+    public static final String PROFILE_IMAGE = "spotifyUserProfileImage";
 
     private String id;
     private String uri;
