@@ -9,7 +9,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
@@ -18,7 +17,6 @@ import com.squareup.picasso.Picasso;
 import de.hdodenhof.circleimageview.CircleImageView;
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
-import me.mikecasper.musicvoice.login.LogInService;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.services.EventManager;
 import me.mikecasper.musicvoice.services.EventManagerProvider;
@@ -46,6 +44,21 @@ public class MusicOverviewActivity extends MusicVoiceActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String imageUrl = preferences.getString(SpotifyUser.PROFILE_IMAGE, null);
+        String userName = preferences.getString(SpotifyUser.NAME, null);
+
+        // TODO change storage location to use some sort of unique identifier per user
+        if (imageUrl != null) {
+            CircleImageView profileImage = (CircleImageView) findViewById(R.id.profileImage);
+            Picasso.with(this).load(imageUrl).into(profileImage);
+        }
+
+        if (userName != null) {
+            TextView profileName = (TextView) findViewById(R.id.userName);
+            profileName.setText(preferences.getString(SpotifyUser.NAME, "Jake Sanchez"));
+        }
     }
 
     @Override
