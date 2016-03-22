@@ -9,6 +9,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
@@ -38,7 +39,6 @@ public class MusicOverviewActivity extends MusicVoiceActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        //drawer.setDrawerListener(toggle);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -49,15 +49,17 @@ public class MusicOverviewActivity extends MusicVoiceActivity
         String imageUrl = preferences.getString(SpotifyUser.PROFILE_IMAGE, null);
         String userName = preferences.getString(SpotifyUser.NAME, null);
 
-        // TODO change storage location to use some sort of unique identifier per user
+        View headerView = navigationView.getHeaderView(0);
+        CircleImageView profileImage = (CircleImageView) headerView.findViewById(R.id.profileImage);
         if (imageUrl != null) {
-            CircleImageView profileImage = (CircleImageView) findViewById(R.id.profileImage);
             Picasso.with(this).load(imageUrl).into(profileImage);
+        } else {
+            profileImage.setImageResource(R.drawable.default_profile);
         }
 
         if (userName != null) {
-            TextView profileName = (TextView) findViewById(R.id.userName);
-            profileName.setText(preferences.getString(SpotifyUser.NAME, "Jake Sanchez"));
+            TextView profileName = (TextView) headerView.findViewById(R.id.userName);
+            profileName.setText(userName);
         }
     }
 
@@ -75,7 +77,6 @@ public class MusicOverviewActivity extends MusicVoiceActivity
 
     @Subscribe
     public void onUserObtained(SpotifyUser user) {
-        // TODO set the picture and the name
         CircleImageView profileImage = (CircleImageView) findViewById(R.id.profileImage);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String imageUrl = preferences.getString(SpotifyUser.PROFILE_IMAGE, null);
