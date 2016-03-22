@@ -13,8 +13,8 @@ public interface SpotifyApi {
     @GET("/v1/me")
     Call<SpotifyUser> getUserInfo();
 
-    @GET("/v1/users/{user_id}/playlists")
-    Call<PlaylistResponse> getUserPlaylists(@Path("user_id") String userId);
+    @GET("/v1/me/playlists")
+    Call<PlaylistResponse> getUserPlaylists();
 
     @GET("/v1/users/{user_id}/playlists/{playlist_id}/tracks")
     Call<TrackResponse> getPlaylistTracks(@Path("user_id") String userId, @Path("playlist_id") String playlistId, @Query("offset") int offset);

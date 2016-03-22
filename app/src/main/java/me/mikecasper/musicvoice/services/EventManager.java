@@ -12,6 +12,7 @@ import java.io.IOException;
 import me.mikecasper.musicvoice.api.SpotifyApi;
 import me.mikecasper.musicvoice.login.LogInService;
 import me.mikecasper.musicvoice.events.spotify.SpotifyEvent;
+import me.mikecasper.musicvoice.overview.PlaylistService;
 import me.mikecasper.musicvoice.overview.SpotifyUserService;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -27,6 +28,7 @@ public class EventManager {
     private Bus mBus;
     private LogInService mLogInService;
     private SpotifyUserService mSpotifyUserService;
+    private PlaylistService mPlaylistService;
     private Context mContext;
 
     EventManager(Context context) {
@@ -57,6 +59,7 @@ public class EventManager {
         mBus = BusProvider.getBus();
         mLogInService = new LogInService();
         mSpotifyUserService = new SpotifyUserService(mBus, api, mContext);
+        mPlaylistService = new PlaylistService(mBus, api);
 
         subscribeServices();
     }
@@ -100,5 +103,6 @@ public class EventManager {
     private void subscribeServices() {
         mBus.register(mLogInService);
         mBus.register(mSpotifyUserService);
+        mBus.register(mPlaylistService);
     }
 }

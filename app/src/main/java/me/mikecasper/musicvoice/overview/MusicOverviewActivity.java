@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.GridView;
 import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
@@ -19,6 +20,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.models.SpotifyUser;
+import me.mikecasper.musicvoice.overview.events.PlaylistsObtainedEvent;
 import me.mikecasper.musicvoice.services.EventManager;
 import me.mikecasper.musicvoice.services.EventManagerProvider;
 
@@ -86,6 +88,14 @@ public class MusicOverviewActivity extends MusicVoiceActivity
 
         TextView profileName = (TextView) findViewById(R.id.userName);
         profileName.setText(preferences.getString(SpotifyUser.NAME, "Jake Sanchez"));
+    }
+
+    @Subscribe
+    public void onPlaylistsObtained(PlaylistsObtainedEvent event) {
+        // TODO do the thing with the adapter and grid view
+        GridView playlistGridView = (GridView) findViewById(R.id.playlistGrid);
+
+        playlistGridView.setAdapter(new PlaylistAdapter(this, event.getPlaylists()));
     }
 
     @Override

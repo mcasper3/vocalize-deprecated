@@ -21,6 +21,7 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import java.util.Date;
 
 import me.mikecasper.musicvoice.R;
+import me.mikecasper.musicvoice.api.requests.GetPlaylistsRequest;
 import me.mikecasper.musicvoice.api.requests.GetUserRequest;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.overview.MusicOverviewActivity;
@@ -79,6 +80,7 @@ public class LogInActivity extends AppCompatActivity {
 
                     Log.i(TAG, "Logged in");
                     mEventManager.postEvent(new GetUserRequest());
+                    mEventManager.postEvent(new GetPlaylistsRequest());
 
                     Intent intent = new Intent(this, MusicOverviewActivity.class);
                     startActivity(intent);
