@@ -18,8 +18,8 @@ import com.squareup.picasso.Picasso;
 import de.hdodenhof.circleimageview.CircleImageView;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
-import me.mikecasper.musicvoice.services.EventManager;
-import me.mikecasper.musicvoice.services.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.EventManager;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 
 public class MainActivity extends MusicVoiceActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -90,14 +90,25 @@ public class MainActivity extends MusicVoiceActivity
     @Subscribe
     public void onUserObtained(SpotifyUser user) {
         CircleImageView profileImage = (CircleImageView) findViewById(R.id.profileImage);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String imageUrl = preferences.getString(SpotifyUser.PROFILE_IMAGE, null);
-        if (imageUrl != null) {
-            Picasso.with(this).load(imageUrl).into(profileImage);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit()
+                .putString(SpotifyUser.ID, user.getId())
+                .putString(SpotifyUser.NAME, user.getDisplay_name());
+
+        if (user.getImages() != null && user.getImages().length > 0) {
+            String firstImageUrl = user.getImages()[0].getUrl();
+
+            Picasso.with(this).load(firstImageUrl).into(profileImage);
+
+            editor.putString(SpotifyUser.PROFILE_IMAGE, user.getImages()[0].getUrl());
         }
 
         TextView profileName = (TextView) findViewById(R.id.userName);
-        profileName.setText(preferences.getString(SpotifyUser.NAME, "Jake Sanchez"));
+        profileName.setText(user.getDisplay_name());
+
+        editor.apply();
     }
 
     @Override

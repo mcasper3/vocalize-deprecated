@@ -2,9 +2,6 @@ package me.mikecasper.musicvoice.models;
 
 import java.util.List;
 
-/**
- * Created by Mike on 3/14/2016.
- */
 public class Track {
     private int duration_ms;
     private String uri;
@@ -22,5 +19,33 @@ public class Track {
         this.album = album;
         this.artists = artists;
         this.total = total;
+    }
+
+    public int getDuration() {
+        return duration_ms;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isPlayable() {
+        return is_playable;
+    }
+
+    public Album getAlbum() {
+        return album;
+    }
+
+    public List<Artist> getArtists() {
+        return artists;
+    }
+
+    public int getTotal() {
+        return total;
     }
 }

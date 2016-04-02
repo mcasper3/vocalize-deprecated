@@ -8,6 +8,5 @@
     <color name="darkGray">#424242</color>
     <color name="center_log_in_gradient">#cc222222</color>
     <color name="start_log_in_gradient">#ee222222</color>
-    <color name="spotify_green">#638E00</color>
-    <color name="spotify_green_pressed">#577909</color>
+    <color name="spotify_green">#1ED760</color>
 </resources>

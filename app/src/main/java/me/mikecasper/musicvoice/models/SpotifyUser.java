@@ -4,6 +4,7 @@ public class SpotifyUser {
 
     public static final String NAME = "spotifyUserName";
     public static final String PROFILE_IMAGE = "spotifyUserProfileImage";
+    public static final String ID = "spotifyUserId";
 
     private String id;
     private String uri;

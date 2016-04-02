@@ -14,15 +14,18 @@ import java.util.List;
 
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.models.Playlist;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
+    private RecyclerViewItemClickListener mListener;
     private List<Playlist> mPlaylists;
     private Context mContext;
 
-    public PlaylistAdapter(Context context, List<Playlist> playlists) {
+    public PlaylistAdapter(Context context, List<Playlist> playlists, RecyclerViewItemClickListener listener) {
         mPlaylists = playlists;
         mContext = context;
+        mListener = listener;
     }
 
     public void setPlaylists(List<Playlist> playlists) {
@@ -32,18 +35,26 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
-        View playlistView = LayoutInflater.from(context).inflate(R.layout.layout_playlist_item, parent, false);
+        View playlistView = LayoutInflater.from(context).inflate(R.layout.item_playlist, parent, false);
 
         return new ViewHolder(playlistView);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         Playlist playlist = mPlaylists.get(position);
+        holder.mPlaylist = playlist;
 
-        Picasso.with(mContext).load(playlist.getImages().get(0).getUrl()).placeholder(R.drawable.default_playlist).into(holder.playlistArt);
+        Picasso.with(mContext).load(playlist.getImages().get(0).getUrl()).placeholder(R.drawable.default_playlist).into(holder.mPlaylistArt);
 
-        holder.playlistTitle.setText(playlist.getName());
+        holder.mPlaylistTitle.setText(playlist.getName());
+
+        holder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onItemClick(holder);
+            }
+        });
     }
 
     @Override
@@ -52,15 +63,16 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        public ImageView playlistArt;
-        public TextView playlistTitle;
+        public Playlist mPlaylist;
+        public final View mView;
+        public final ImageView mPlaylistArt;
+        public final TextView mPlaylistTitle;
 
         public ViewHolder(View itemView) {
             super(itemView);
-
-            playlistArt = (ImageView) itemView.findViewById(R.id.playlistArt);
-            playlistTitle = (TextView) itemView.findViewById(R.id.playlistTitle);
+            mView = itemView;
+            mPlaylistArt = (ImageView) itemView.findViewById(R.id.playlistArt);
+            mPlaylistTitle = (TextView) itemView.findViewById(R.id.playlistTitle);
         }
     }
 }

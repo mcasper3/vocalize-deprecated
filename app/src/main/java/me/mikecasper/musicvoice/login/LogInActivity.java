@@ -21,12 +21,13 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import java.util.Date;
 
 import me.mikecasper.musicvoice.R;
-import me.mikecasper.musicvoice.api.requests.GetPlaylistsRequest;
-import me.mikecasper.musicvoice.api.requests.GetUserRequest;
+import me.mikecasper.musicvoice.api.services.LogInService;
+import me.mikecasper.musicvoice.playlist.events.GetPlaylistsEvent;
+import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.MainActivity;
-import me.mikecasper.musicvoice.services.EventManager;
-import me.mikecasper.musicvoice.services.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.EventManager;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 
 public class LogInActivity extends AppCompatActivity {
 
@@ -39,16 +40,9 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         mEventManager = EventManagerProvider.getInstance(this);
-        ImageView logInButton = (ImageView) findViewById(R.id.logInButton);
+        View logInButton = findViewById(R.id.logInButton);
 
         if (logInButton != null) {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Drawable image = ContextCompat.getDrawable(this, R.drawable.log_in_button);
-                RippleDrawable drawable = new RippleDrawable(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.spotify_green_pressed)), image, null);
-                logInButton.setImageDrawable(drawable);
-            }
-
             logInButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -79,8 +73,8 @@ public class LogInActivity extends AppCompatActivity {
                             .apply();
 
                     Log.i(TAG, "Logged in");
-                    mEventManager.postEvent(new GetUserRequest());
-                    mEventManager.postEvent(new GetPlaylistsRequest());
+                    mEventManager.postEvent(new GetUserEvent());
+                    mEventManager.postEvent(new GetPlaylistsEvent());
 
                     Intent intent = new Intent(this, MainActivity.class);
                     startActivity(intent);

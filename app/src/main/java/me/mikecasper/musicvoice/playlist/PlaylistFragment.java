@@ -2,6 +2,7 @@ package me.mikecasper.musicvoice.playlist;
 
 
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,13 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.mikecasper.musicvoice.R;
+import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
 import me.mikecasper.musicvoice.models.Playlist;
-import me.mikecasper.musicvoice.playlist.events.PlaylistsObtainedEvent;
-import me.mikecasper.musicvoice.services.EventManager;
-import me.mikecasper.musicvoice.services.EventManagerProvider;
+import me.mikecasper.musicvoice.models.SpotifyUser;
+import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
+import me.mikecasper.musicvoice.services.eventmanager.EventManager;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 import me.mikecasper.musicvoice.util.Utility;
 
-public class PlaylistFragment extends Fragment {
+public class PlaylistFragment extends Fragment implements RecyclerViewItemClickListener {
 
     private static final String TAG = "PlaylistFragment";
 
@@ -56,7 +60,7 @@ public class PlaylistFragment extends Fragment {
         playlistRecyclerView.setHasFixedSize(true);
         playlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         playlistRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(Utility.convertDpToPixel(10, getContext())));
-        playlistRecyclerView.setAdapter(new PlaylistAdapter(getContext(), mPlaylists));
+        playlistRecyclerView.setAdapter(new PlaylistAdapter(getContext(), mPlaylists, this));
     }
 
     @Override
@@ -72,10 +76,10 @@ public class PlaylistFragment extends Fragment {
     }
 
     @Subscribe
-    public void onPlaylistsObtained(PlaylistsObtainedEvent event) {
+    public void onPlaylistsObtained(PlaylistResponse response) {
         Log.i(TAG, "Playlists obtained");
 
-        mPlaylists = event.getPlaylists();
+        mPlaylists = response.getPlaylists();
 
         View view = getView();
 
@@ -84,6 +88,21 @@ public class PlaylistFragment extends Fragment {
             PlaylistAdapter playlistAdapter = (PlaylistAdapter) playlistRecyclerView.getAdapter();
             playlistAdapter.setPlaylists(mPlaylists);
             playlistAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onItemClick(RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof PlaylistAdapter.ViewHolder) {
+            PlaylistAdapter.ViewHolder selectedPlaylist = (PlaylistAdapter.ViewHolder) viewHolder;
+            Playlist playlist = selectedPlaylist.mPlaylist;
+
+            String userId = PreferenceManager.getDefaultSharedPreferences(getContext())
+                    .getString(SpotifyUser.ID, null);
+
+            if (userId != null) {
+                mEventManager.postEvent(new GetPlaylistTracksEvent(userId, playlist.getId(), 0));
+            }
         }
     }
 }

@@ -5,12 +5,12 @@
             <solid android:color="@color/colorPrimaryDark" />
         </shape>
     </item>
-    <item>
+    <item
+        android:top="10dp"
+        android:bottom="10dp"
+        android:right="10dp"
+        android:left="10dp" >
         <bitmap
-            android:src="@drawable/ic_action_music_note"
-            android:top="10dp"
-            android:bottom="10dp"
-            android:right="10dp"
-            android:left="10dp" />
+            android:src="@drawable/ic_action_music_note" />
     </item>
 </layer-list>

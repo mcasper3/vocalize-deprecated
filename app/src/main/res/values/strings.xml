@@ -5,12 +5,15 @@
     <string name="login_failure">Login Failed</string>
     <string name="title_activity_music_overview">Music Home</string>
 
+    <string name="log_in_button_text">Log in with Spotify</string>
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <!-- End LoginActivity Strings -->
+
+    <!-- TrackFragment Strings -->
+    <string name="artists_and_album">%1$s - %2$s</string>
 </resources>

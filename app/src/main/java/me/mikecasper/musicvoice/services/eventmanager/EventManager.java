@@ -1,4 +1,4 @@
-package me.mikecasper.musicvoice.services;
+package me.mikecasper.musicvoice.services.eventmanager;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,10 +11,10 @@ import java.io.IOException;
 
 import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.api.SpotifyApi;
-import me.mikecasper.musicvoice.login.LogInService;
+import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.events.spotify.SpotifyEvent;
-import me.mikecasper.musicvoice.playlist.PlaylistService;
-import me.mikecasper.musicvoice.playlist.SpotifyUserService;
+import me.mikecasper.musicvoice.api.services.PlaylistService;
+import me.mikecasper.musicvoice.api.services.SpotifyUserService;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -68,7 +68,7 @@ public class EventManager {
 
         mBus = BusProvider.getBus();
         mLogInService = new LogInService();
-        mSpotifyUserService = new SpotifyUserService(mBus, api, mContext);
+        mSpotifyUserService = new SpotifyUserService(mBus, api);
         mPlaylistService = new PlaylistService(mBus, api);
 
         subscribeServices();

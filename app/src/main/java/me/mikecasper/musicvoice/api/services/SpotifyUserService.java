@@ -1,4 +1,4 @@
-package me.mikecasper.musicvoice.playlist;
+package me.mikecasper.musicvoice.api.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,7 +8,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.api.SpotifyApi;
-import me.mikecasper.musicvoice.api.requests.GetUserRequest;
+import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -18,16 +18,14 @@ public class SpotifyUserService {
 
     private Bus mBus;
     private SpotifyApi mApi;
-    private Context mContext;
 
-    public SpotifyUserService(Bus bus, SpotifyApi api, Context context) {
+    public SpotifyUserService(Bus bus, SpotifyApi api) {
         this.mBus = bus;
         this.mApi = api;
-        this.mContext = context;
     }
 
     @Subscribe
-    public void onGetUser(GetUserRequest request) {
+    public void onGetUser(GetUserEvent request) {
         Call<SpotifyUser> call = mApi.getUserInfo();
 
         call.enqueue(new Callback<SpotifyUser>() {
@@ -35,15 +33,6 @@ public class SpotifyUserService {
             public void onResponse(Call<SpotifyUser> call, Response<SpotifyUser> response) {
                 SpotifyUser user = response.body();
                 if (user != null) {
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putString(SpotifyUser.NAME, user.getDisplay_name());
-
-                    if (user.getImages().length > 0)
-                        editor.putString(SpotifyUser.PROFILE_IMAGE, user.getImages()[0].getUrl());
-
-                    editor.apply();
-
                     mBus.post(user);
                 }
             }
