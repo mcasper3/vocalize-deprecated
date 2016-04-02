@@ -24,7 +24,7 @@ import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.requests.GetPlaylistsRequest;
 import me.mikecasper.musicvoice.api.requests.GetUserRequest;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
-import me.mikecasper.musicvoice.overview.MusicOverviewActivity;
+import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.services.EventManager;
 import me.mikecasper.musicvoice.services.EventManagerProvider;
 
@@ -82,7 +82,7 @@ public class LogInActivity extends AppCompatActivity {
                     mEventManager.postEvent(new GetUserRequest());
                     mEventManager.postEvent(new GetPlaylistsRequest());
 
-                    Intent intent = new Intent(this, MusicOverviewActivity.class);
+                    Intent intent = new Intent(this, MainActivity.class);
                     startActivity(intent);
                     break;
                 case ERROR:

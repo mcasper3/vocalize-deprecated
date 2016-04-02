@@ -25,7 +25,7 @@
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
-            android:name=".overview.MusicOverviewActivity"
+            android:name=".MainActivity"
             android:label="@string/title_activity_music_overview"
             android:theme="@style/AppTheme" />
     </application>

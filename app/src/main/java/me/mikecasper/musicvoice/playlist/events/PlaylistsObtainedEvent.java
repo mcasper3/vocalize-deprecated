@@ -1,4 +1,4 @@
-package me.mikecasper.musicvoice.overview.events;
+package me.mikecasper.musicvoice.playlist.events;
 
 import java.util.List;
 

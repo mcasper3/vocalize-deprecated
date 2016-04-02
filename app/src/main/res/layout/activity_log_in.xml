@@ -23,14 +23,22 @@
         app:layout_marginTopPercent="20%"
         android:src="@drawable/log_in_name" />
 
-    <ImageView
-        android:layout_width="244dp"
+    <FrameLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_marginBottomPercent="15%"
-        android:id="@+id/logInButton"
-        android:src="@drawable/log_in_ripple"
-        android:adjustViewBounds="true"
+        android:foreground="?selectableItemBackground"
+        android:clickable="true"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true" >
+
+        <ImageView
+            android:layout_width="244dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/logInButton"
+            android:src="@drawable/log_in_button"
+            android:adjustViewBounds="true" />
+
+    </FrameLayout>
 
 </android.support.percent.PercentRelativeLayout>

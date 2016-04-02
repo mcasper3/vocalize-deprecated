@@ -1,4 +1,4 @@
-package me.mikecasper.musicvoice.overview;
+package me.mikecasper.musicvoice.playlist;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -6,7 +6,7 @@ import com.squareup.otto.Subscribe;
 import me.mikecasper.musicvoice.api.SpotifyApi;
 import me.mikecasper.musicvoice.api.requests.GetPlaylistsRequest;
 import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
-import me.mikecasper.musicvoice.overview.events.PlaylistsObtainedEvent;
+import me.mikecasper.musicvoice.playlist.events.PlaylistsObtainedEvent;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

@@ -9,15 +9,17 @@ import com.squareup.otto.Bus;
 
 import java.io.IOException;
 
+import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.api.SpotifyApi;
 import me.mikecasper.musicvoice.login.LogInService;
 import me.mikecasper.musicvoice.events.spotify.SpotifyEvent;
-import me.mikecasper.musicvoice.overview.PlaylistService;
-import me.mikecasper.musicvoice.overview.SpotifyUserService;
+import me.mikecasper.musicvoice.playlist.PlaylistService;
+import me.mikecasper.musicvoice.playlist.SpotifyUserService;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -34,19 +36,27 @@ public class EventManager {
     EventManager(Context context) {
         mContext = context;
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Request request = chain.request()
-                                .newBuilder()
-                                .addHeader("Authorization", "Bearer " + getSpotifyToken())
-                                .build();
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request()
+                        .newBuilder()
+                        .addHeader("Authorization", "Bearer " + getSpotifyToken())
+                        .build();
 
-                        return chain.proceed(request);
-                    }
-                })
-                .build();
+                return chain.proceed(request);
+            }
+        });
+
+        if (MusicVoiceApplication.LOG_LEVEL == MusicVoiceApplication.LogLevel.FULL) {
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            builder.addInterceptor(loggingInterceptor);
+        }
+
+        OkHttpClient client = builder.build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.spotify.com/")
