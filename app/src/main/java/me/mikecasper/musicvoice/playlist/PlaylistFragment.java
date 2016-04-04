@@ -21,8 +21,8 @@ import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
 import me.mikecasper.musicvoice.models.Playlist;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
-import me.mikecasper.musicvoice.services.eventmanager.EventManager;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 import me.mikecasper.musicvoice.util.Utility;
 
@@ -31,7 +31,7 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
     private static final String TAG = "PlaylistFragment";
 
     private List<Playlist> mPlaylists;
-    private EventManager mEventManager;
+    private IEventManager mEventManager;
 
     public PlaylistFragment() {
         // Required empty public constructor

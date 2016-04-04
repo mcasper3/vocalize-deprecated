@@ -18,15 +18,15 @@ import com.squareup.picasso.Picasso;
 import de.hdodenhof.circleimageview.CircleImageView;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
-import me.mikecasper.musicvoice.services.eventmanager.EventManager;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 
 public class MainActivity extends MusicVoiceActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
 
-    private EventManager mEventManager;
+    private IEventManager mEventManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

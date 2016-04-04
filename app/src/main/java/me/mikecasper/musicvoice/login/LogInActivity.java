@@ -2,17 +2,11 @@ package me.mikecasper.musicvoice.login;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
-import android.os.Build;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -26,13 +20,13 @@ import me.mikecasper.musicvoice.playlist.events.GetPlaylistsEvent;
 import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.MainActivity;
-import me.mikecasper.musicvoice.services.eventmanager.EventManager;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 
 public class LogInActivity extends AppCompatActivity {
 
     private static final String TAG = "LogInActivity";
-    private EventManager mEventManager;
+    private IEventManager mEventManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

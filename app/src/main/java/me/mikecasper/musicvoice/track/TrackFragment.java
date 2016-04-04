@@ -13,8 +13,8 @@ import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.models.Track;
-import me.mikecasper.musicvoice.services.eventmanager.EventManager;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.List;
 public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
 
     private List<Track> mTracks;
-    private EventManager mEventManager;
+    private IEventManager mEventManager;
 
     public TrackFragment() { }
 

@@ -23,7 +23,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class EventManager {
+public class EventManager implements IEventManager {
 
     private static final String TAG = "EventManager";
 
@@ -80,6 +80,7 @@ public class EventManager {
         return sharedPreferences.getString(LogInService.SPOTIFY_TOKEN, "Empty");
     }
 
+    @Override
     public void register(Object object) {
         try {
             mBus.register(object);
@@ -88,6 +89,7 @@ public class EventManager {
         }
     }
 
+    @Override
     public void unregister(Object object) {
         try {
             mBus.unregister(object);
@@ -96,6 +98,7 @@ public class EventManager {
         }
     }
 
+    @Override
     public void postEvent(Object object) {
         if (object instanceof SpotifyEvent) {
             // todo check for token expiration time and do authentication if needed
