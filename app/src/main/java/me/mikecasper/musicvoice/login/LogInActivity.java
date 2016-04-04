@@ -12,8 +12,6 @@ import android.widget.Toast;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
-import java.util.Date;
-
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistsEvent;
@@ -25,6 +23,8 @@ import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 
 public class LogInActivity extends AppCompatActivity {
 
+    public static final String IS_LOGGED_IN = "isLoggedIn";
+
     private static final String TAG = "LogInActivity";
     private IEventManager mEventManager;
 
@@ -33,17 +33,27 @@ public class LogInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
-        mEventManager = EventManagerProvider.getInstance(this);
-        View logInButton = findViewById(R.id.logInButton);
+        boolean isLoggedIn = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(IS_LOGGED_IN, false);
 
-        if (logInButton != null) {
-            logInButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onLogIn();
-                }
-            });
+        if (isLoggedIn) {
+            Intent mainIntent = new Intent(this, MainActivity.class);
+            startActivity(mainIntent);
+        } else {
+            View logInButton = findViewById(R.id.logInButton);
+            logInButton.setVisibility(View.VISIBLE);
+
+            if (logInButton != null) {
+                logInButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onLogIn();
+                    }
+                });
+            }
         }
+
+        mEventManager = EventManagerProvider.getInstance(this);
     }
 
     private void onLogIn() {
@@ -61,9 +71,10 @@ public class LogInActivity extends AppCompatActivity {
                 case TOKEN:
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                     sharedPreferences.edit()
-                            .putLong(LogInService.LAST_LOGIN_TIME, new Date().getTime())
+                            .putLong(LogInService.LAST_LOGIN_TIME, System.currentTimeMillis())
                             .putInt(LogInService.LOGIN_EXPIRATION_TIME, response.getExpiresIn())
                             .putString(LogInService.SPOTIFY_TOKEN, response.getAccessToken())
+                            .putBoolean(IS_LOGGED_IN, true)
                             .apply();
 
                     Log.i(TAG, "Logged in");

@@ -1,5 +1,8 @@
 package me.mikecasper.musicvoice.api.services;
 
+import android.content.Context;
+import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -7,7 +10,9 @@ import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.squareup.otto.Subscribe;
 
+import me.mikecasper.musicvoice.login.LogInActivity;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
+import me.mikecasper.musicvoice.login.events.LogOutEvent;
 
 public class LogInService {
     private static final String CLIENT_ID = "6efaf35f4aa84d029e9a319eebb73211";
@@ -32,5 +37,22 @@ public class LogInService {
         AuthenticationRequest request = builder.build();
 
         AuthenticationClient.openLoginActivity(event.getActivity(), LOGIN_REQUEST_CODE, request);
+    }
+
+    @Subscribe
+    public void onLogOut(LogOutEvent event) {
+        Context context = event.getContext();
+
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(LogInActivity.IS_LOGGED_IN, false)
+                .putString(SPOTIFY_TOKEN, null)
+                .putLong(LAST_LOGIN_TIME, 0)
+                .putInt(LOGIN_EXPIRATION_TIME, 0)
+                .apply();
+
+        Intent intent = new Intent(context, LogInActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
     }
 }
