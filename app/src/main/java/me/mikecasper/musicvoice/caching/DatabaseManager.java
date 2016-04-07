@@ -2,10 +2,15 @@ package me.mikecasper.musicvoice.caching;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.util.concurrent.Semaphore;
 
+import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.caching.track.TrackTableManager;
 
 public class DatabaseManager {
