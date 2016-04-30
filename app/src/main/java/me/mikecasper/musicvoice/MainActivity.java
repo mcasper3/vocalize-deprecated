@@ -97,7 +97,7 @@ public class MainActivity extends MusicVoiceActivity
                 .putString(SpotifyUser.ID, user.getId())
                 .putString(SpotifyUser.NAME, user.getDisplay_name());
 
-        if (user.getImages() != null && user.getImages().length > 0) {
+        if (profileImage != null && user.getImages() != null && user.getImages().length > 0) {
             String firstImageUrl = user.getImages()[0].getUrl();
 
             Picasso.with(this).load(firstImageUrl).into(profileImage);
