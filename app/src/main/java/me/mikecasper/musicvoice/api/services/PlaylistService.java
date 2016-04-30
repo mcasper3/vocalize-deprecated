@@ -1,7 +1,5 @@
 package me.mikecasper.musicvoice.api.services;
 
-import android.util.Log;
-
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 

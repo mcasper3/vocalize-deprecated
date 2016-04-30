@@ -10,10 +10,10 @@ public class Playlist implements Parcelable {
     private String name;
     private String id;
     private List<Image> images;
-    private Track tracks;
+    private TrackInfo tracks;
     private SpotifyUser owner;
 
-    public Playlist(String uri, String name, String id, List<Image> images, Track tracks, SpotifyUser owner) {
+    public Playlist(String uri, String name, String id, List<Image> images, TrackInfo tracks, SpotifyUser owner) {
         this.uri = uri;
         this.name = name;
         this.id = id;
@@ -38,7 +38,7 @@ public class Playlist implements Parcelable {
         return images;
     }
 
-    public Track getTracks() {
+    public TrackInfo getTracks() {
         return tracks;
     }
 
@@ -77,6 +77,6 @@ public class Playlist implements Parcelable {
         this.name = in.readString();
         this.id = in.readString();
         this.images = in.createTypedArrayList(Image.CREATOR);
-        this.tracks = Track.CREATOR.createFromParcel(in);
+        this.tracks = TrackInfo.CREATOR.createFromParcel(in);
     }
 }
