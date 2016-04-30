@@ -1,14 +1,11 @@
 package me.mikecasper.musicvoice.api.services;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.api.SpotifyApi;
 import me.mikecasper.musicvoice.login.events.GetUserEvent;
+import me.mikecasper.musicvoice.login.events.RefreshTokenEvent;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,9 +28,13 @@ public class SpotifyUserService {
         call.enqueue(new Callback<SpotifyUser>() {
             @Override
             public void onResponse(Call<SpotifyUser> call, Response<SpotifyUser> response) {
-                SpotifyUser user = response.body();
-                if (user != null) {
-                    mBus.post(user);
+                if (response.code() == 401) {
+                    mBus.post(new RefreshTokenEvent(call, this));
+                } else {
+                    SpotifyUser user = response.body();
+                    if (user != null) {
+                        mBus.post(user);
+                    }
                 }
             }
 

@@ -13,11 +13,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
+import java.util.LinkedList;
+
 import de.hdodenhof.circleimageview.CircleImageView;
+import me.mikecasper.musicvoice.api.services.LogInService;
+import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.login.events.LogOutEvent;
+import me.mikecasper.musicvoice.login.events.RefreshTokenEvent;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
@@ -29,6 +36,7 @@ public class MainActivity extends MusicVoiceActivity
     private static final String TAG = "MainActivity";
 
     private IEventManager mEventManager;
+    private LinkedList<RefreshTokenEvent> mEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +44,7 @@ public class MainActivity extends MusicVoiceActivity
         setContentView(R.layout.activity_main);
 
         mEventManager = EventManagerProvider.getInstance(this);
+        mEvents = new LinkedList<>();
 
         if (savedInstanceState == null) {
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -136,20 +145,32 @@ public class MainActivity extends MusicVoiceActivity
 
         if (id == R.id.nav_log_out) {
             mEventManager.postEvent(new LogOutEvent(this));
-        }/* else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }*/
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Subscribe
+    public void onRefreshToken(RefreshTokenEvent event) {
+        mEventManager.postEvent(new LogInEvent(this));
+        mEvents.push(event);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == LogInService.LOGIN_REQUEST_CODE) {
+            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
+
+            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
+                while (mEvents.size() > 0) {
+                    RefreshTokenEvent event = mEvents.pop();
+                    event.getCall().enqueue(event.getCallback());
+                }
+            }
+        }
     }
 }

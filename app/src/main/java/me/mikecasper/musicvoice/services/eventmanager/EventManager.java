@@ -11,9 +11,9 @@ import java.io.IOException;
 import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.api.SpotifyApi;
 import me.mikecasper.musicvoice.api.services.LogInService;
-import me.mikecasper.musicvoice.events.spotify.SpotifyEvent;
 import me.mikecasper.musicvoice.api.services.PlaylistService;
 import me.mikecasper.musicvoice.api.services.SpotifyUserService;
+import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.util.Logger;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -31,6 +31,7 @@ public class EventManager implements IEventManager {
     private LogInService mLogInService;
     private SpotifyUserService mSpotifyUserService;
     private PlaylistService mPlaylistService;
+    private MusicPlayer mMusicPlayer;
     private Context mContext;
 
     EventManager(Context context) {
@@ -70,6 +71,7 @@ public class EventManager implements IEventManager {
         mLogInService = new LogInService();
         mSpotifyUserService = new SpotifyUserService(mBus, api);
         mPlaylistService = new PlaylistService(mBus, api);
+        mMusicPlayer = new MusicPlayer();
 
         subscribeServices();
     }
@@ -100,22 +102,13 @@ public class EventManager implements IEventManager {
 
     @Override
     public void postEvent(Object object) {
-        if (object instanceof SpotifyEvent) {
-            // todo check for token expiration time and do authentication if needed
-            /*if () {
-
-            } else {
-
-            }*/
-            mBus.post(object);
-        } else {
-            mBus.post(object);
-        }
+        mBus.post(object);
     }
 
     private void subscribeServices() {
         mBus.register(mLogInService);
         mBus.register(mSpotifyUserService);
         mBus.register(mPlaylistService);
+        mBus.register(mMusicPlayer);
     }
 }

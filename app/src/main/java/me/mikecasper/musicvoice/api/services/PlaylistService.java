@@ -5,6 +5,7 @@ import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.api.SpotifyApi;
 import me.mikecasper.musicvoice.api.responses.TrackResponse;
+import me.mikecasper.musicvoice.login.events.RefreshTokenEvent;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistsEvent;
 import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
@@ -29,10 +30,14 @@ public class PlaylistService {
         call.enqueue(new Callback<PlaylistResponse>() {
             @Override
             public void onResponse(Call<PlaylistResponse> call, Response<PlaylistResponse> response) {
-                PlaylistResponse playlistResponse = response.body();
+                if (response.code() == 401) {
+                    mBus.post(new RefreshTokenEvent(call, this));
+                } else {
+                    PlaylistResponse playlistResponse = response.body();
 
-                if (playlistResponse != null) {
-                    mBus.post(playlistResponse);
+                    if (playlistResponse != null) {
+                        mBus.post(playlistResponse);
+                    }
                 }
             }
 
@@ -50,10 +55,14 @@ public class PlaylistService {
         call.enqueue(new Callback<TrackResponse>() {
             @Override
             public void onResponse(Call<TrackResponse> call, Response<TrackResponse> response) {
-                TrackResponse trackResponse = response.body();
+                if (response.code() == 401) {
+                    mBus.post(new RefreshTokenEvent(call, this));
+                } else {
+                    TrackResponse trackResponse = response.body();
 
-                if (trackResponse != null) {
-                    mBus.post(trackResponse);
+                    if (trackResponse != null) {
+                        mBus.post(trackResponse);
+                    }
                 }
             }
 

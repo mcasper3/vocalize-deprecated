@@ -17,10 +17,12 @@ import me.mikecasper.musicvoice.api.responses.TrackResponse;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.models.Playlist;
 import me.mikecasper.musicvoice.models.SpotifyUser;
+import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 import me.mikecasper.musicvoice.views.DividerItemDecoration;
@@ -126,8 +128,9 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
     public void onItemClick(RecyclerView.ViewHolder viewHolder) {
         if (viewHolder instanceof TrackAdapter.ViewHolder) {
             TrackAdapter.ViewHolder selectedTrack = (TrackAdapter.ViewHolder) viewHolder;
+            Track track = selectedTrack.mTrack;
 
-            // TODO play track
+            mEventManager.postEvent(new PlaySongEvent(track.getUri()));
         }
     }
 }
