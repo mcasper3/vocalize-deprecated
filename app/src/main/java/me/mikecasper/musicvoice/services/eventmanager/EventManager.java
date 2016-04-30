@@ -3,7 +3,6 @@ package me.mikecasper.musicvoice.services.eventmanager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.squareup.otto.Bus;
 
@@ -15,6 +14,7 @@ import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.events.spotify.SpotifyEvent;
 import me.mikecasper.musicvoice.api.services.PlaylistService;
 import me.mikecasper.musicvoice.api.services.SpotifyUserService;
+import me.mikecasper.musicvoice.util.Logger;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -85,7 +85,7 @@ public class EventManager implements IEventManager {
         try {
             mBus.register(object);
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Error subscribing object", e);
+            Logger.e(TAG, "Error subscribing object", e);
         }
     }
 
@@ -94,7 +94,7 @@ public class EventManager implements IEventManager {
         try {
             mBus.unregister(object);
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Error un-subscribing object", e);
+            Logger.e(TAG, "Error un-subscribing object", e);
         }
     }
 

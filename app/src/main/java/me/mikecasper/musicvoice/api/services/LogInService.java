@@ -3,7 +3,6 @@ package me.mikecasper.musicvoice.api.services;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -13,6 +12,7 @@ import com.squareup.otto.Subscribe;
 import me.mikecasper.musicvoice.login.LogInActivity;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.login.events.LogOutEvent;
+import me.mikecasper.musicvoice.util.Logger;
 
 public class LogInService {
     private static final String CLIENT_ID = "6efaf35f4aa84d029e9a319eebb73211";
@@ -29,7 +29,7 @@ public class LogInService {
 
     @Subscribe
     public void onLogIn(LogInEvent event) {
-        Log.i("LogInService", "Received request");
+        Logger.i("LogInService", "Received request");
         AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 

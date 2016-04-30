@@ -1,5 +1,6 @@
 package me.mikecasper.musicvoice;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -16,6 +17,7 @@ import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import me.mikecasper.musicvoice.login.events.LogOutEvent;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
@@ -97,12 +99,12 @@ public class MainActivity extends MusicVoiceActivity
                 .putString(SpotifyUser.ID, user.getId())
                 .putString(SpotifyUser.NAME, user.getDisplay_name());
 
-        if (profileImage != null && user.getImages() != null && user.getImages().length > 0) {
-            String firstImageUrl = user.getImages()[0].getUrl();
+        if (profileImage != null && user.getImages() != null && user.getImages().size() > 0) {
+            String firstImageUrl = user.getImages().get(0).getUrl();
 
             Picasso.with(this).load(firstImageUrl).into(profileImage);
 
-            editor.putString(SpotifyUser.PROFILE_IMAGE, user.getImages()[0].getUrl());
+            editor.putString(SpotifyUser.PROFILE_IMAGE, firstImageUrl);
         }
 
         TextView profileName = (TextView) findViewById(R.id.userName);
@@ -117,7 +119,13 @@ public class MainActivity extends MusicVoiceActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                super.onBackPressed();
+            } else {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                startActivity(intent);
+            }
         }
     }
 
@@ -126,9 +134,9 @@ public class MainActivity extends MusicVoiceActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        /*if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_log_out) {
+            mEventManager.postEvent(new LogOutEvent(this));
+        }/* else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
 

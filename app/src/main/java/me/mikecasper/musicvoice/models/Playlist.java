@@ -11,13 +11,15 @@ public class Playlist implements Parcelable {
     private String id;
     private List<Image> images;
     private Track tracks;
+    private SpotifyUser owner;
 
-    public Playlist(String uri, String name, String id, List<Image> images, Track tracks) {
+    public Playlist(String uri, String name, String id, List<Image> images, Track tracks, SpotifyUser owner) {
         this.uri = uri;
         this.name = name;
         this.id = id;
         this.images = images;
         this.tracks = tracks;
+        this.owner = owner;
     }
 
     public String getUri() {
@@ -38,6 +40,10 @@ public class Playlist implements Parcelable {
 
     public Track getTracks() {
         return tracks;
+    }
+
+    public SpotifyUser getOwner() {
+        return owner;
     }
 
     @Override
