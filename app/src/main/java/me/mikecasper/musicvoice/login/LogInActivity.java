@@ -42,21 +42,12 @@ public class LogInActivity extends AppCompatActivity {
         } else {
             View logInButton = findViewById(R.id.logInButton);
             logInButton.setVisibility(View.VISIBLE);
-
-            if (logInButton != null) {
-                logInButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onLogIn();
-                    }
-                });
-            }
         }
 
         mEventManager = EventManagerProvider.getInstance(this);
     }
 
-    private void onLogIn() {
+    public void onLogIn(View view) {
         mEventManager.postEvent(new LogInEvent(this));
     }
 
