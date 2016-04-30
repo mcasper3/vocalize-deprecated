@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import me.mikecasper.musicvoice.R;
+import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.models.Album;
 import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
@@ -18,14 +19,14 @@ import java.util.List;
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> {
 
     private RecyclerViewItemClickListener mListener;
-    private List<Track> mTracks;
+    private List<TrackResponseItem> mTracks;
 
-    public TrackAdapter(List<Track> tracks, RecyclerViewItemClickListener listener) {
+    public TrackAdapter(List<TrackResponseItem> tracks, RecyclerViewItemClickListener listener) {
         mListener = listener;
         mTracks = tracks;
     }
 
-    public void updateTracks(List<Track> tracks) {
+    public void updateTracks(List<TrackResponseItem> tracks) {
         mTracks = tracks;
         notifyDataSetChanged();
     }
@@ -39,7 +40,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        Track track = mTracks.get(position);
+        Track track = mTracks.get(position).getTrack();
         holder.mTrack = track;
         List<Artist> artists = track.getArtists();
         StringBuilder artistNamesBuilder = new StringBuilder();

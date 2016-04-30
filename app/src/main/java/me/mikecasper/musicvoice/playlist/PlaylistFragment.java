@@ -1,12 +1,9 @@
 package me.mikecasper.musicvoice.playlist;
 
-
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,14 +16,17 @@ import java.util.List;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
 import me.mikecasper.musicvoice.models.Playlist;
-import me.mikecasper.musicvoice.models.SpotifyUser;
-import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.track.TrackFragment;
+import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 import me.mikecasper.musicvoice.util.Utility;
+import me.mikecasper.musicvoice.views.VerticalSpaceItemDecoration;
 
 public class PlaylistFragment extends Fragment implements RecyclerViewItemClickListener {
+
+    public static final String SELECTED_PLAYLIST = "selectedPlaylist";
 
     private static final String TAG = "PlaylistFragment";
 
@@ -73,11 +73,13 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
     public void onResume() {
         super.onResume();
         mEventManager.register(this);
+
+        getActivity().setTitle(R.string.title_playlists);
     }
 
     @Subscribe
     public void onPlaylistsObtained(PlaylistResponse response) {
-        Log.i(TAG, "Playlists obtained");
+        Logger.i(TAG, "Playlists obtained");
 
         mPlaylists = response.getPlaylists();
 
@@ -97,12 +99,15 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
             PlaylistAdapter.ViewHolder selectedPlaylist = (PlaylistAdapter.ViewHolder) viewHolder;
             Playlist playlist = selectedPlaylist.mPlaylist;
 
-            String userId = PreferenceManager.getDefaultSharedPreferences(getContext())
-                    .getString(SpotifyUser.ID, null);
+            Fragment fragment = new TrackFragment();
+            Bundle args = new Bundle();
+            args.putParcelable(SELECTED_PLAYLIST, playlist);
+            fragment.setArguments(args);
 
-            if (userId != null) {
-                mEventManager.postEvent(new GetPlaylistTracksEvent(userId, playlist.getId(), 0));
-            }
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.mainContent, fragment)
+                    .addToBackStack(null)
+                    .commit();
         }
     }
 }

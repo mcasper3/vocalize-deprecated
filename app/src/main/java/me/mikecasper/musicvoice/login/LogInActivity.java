@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -20,6 +19,7 @@ import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.util.Logger;
 
 public class LogInActivity extends AppCompatActivity {
 
@@ -36,27 +36,14 @@ public class LogInActivity extends AppCompatActivity {
         boolean isLoggedIn = PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean(IS_LOGGED_IN, false);
 
-        if (isLoggedIn) {
-            Intent mainIntent = new Intent(this, MainActivity.class);
-            startActivity(mainIntent);
-        } else {
-            View logInButton = findViewById(R.id.logInButton);
-            logInButton.setVisibility(View.VISIBLE);
-
-            if (logInButton != null) {
-                logInButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onLogIn();
-                    }
-                });
-            }
-        }
-
         mEventManager = EventManagerProvider.getInstance(this);
+
+        if (isLoggedIn) {
+            moveToMainView();
+        }
     }
 
-    private void onLogIn() {
+    public void onLogIn(View view) {
         mEventManager.postEvent(new LogInEvent(this));
     }
 
@@ -77,19 +64,23 @@ public class LogInActivity extends AppCompatActivity {
                             .putBoolean(IS_LOGGED_IN, true)
                             .apply();
 
-                    Log.i(TAG, "Logged in");
-                    mEventManager.postEvent(new GetUserEvent());
-                    mEventManager.postEvent(new GetPlaylistsEvent());
-
-                    Intent intent = new Intent(this, MainActivity.class);
-                    startActivity(intent);
+                    Logger.i(TAG, "Logged in");
+                    moveToMainView();
                     break;
                 case ERROR:
-                    Log.e(TAG, response.getError());
+                    Logger.e(TAG, response.getError());
                     Toast.makeText(this, R.string.login_failure, Toast.LENGTH_SHORT).show();
                     break;
                 default:
             }
         }
+    }
+
+    private void moveToMainView() {
+        mEventManager.postEvent(new GetUserEvent());
+        mEventManager.postEvent(new GetPlaylistsEvent());
+
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 }

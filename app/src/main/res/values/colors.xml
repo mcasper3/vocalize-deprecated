@@ -9,4 +9,5 @@
     <color name="center_log_in_gradient">#cc222222</color>
     <color name="start_log_in_gradient">#ee222222</color>
     <color name="spotify_green">#1ED760</color>
+    <color name="light_gray">#c3c3c3</color>
 </resources>

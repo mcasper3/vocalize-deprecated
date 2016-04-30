@@ -3,6 +3,7 @@ package me.mikecasper.musicvoice.track;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,16 +13,25 @@ import android.view.ViewGroup;
 import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.R;
-import me.mikecasper.musicvoice.models.Track;
+import me.mikecasper.musicvoice.api.responses.TrackResponse;
+import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
+import me.mikecasper.musicvoice.models.Playlist;
+import me.mikecasper.musicvoice.models.SpotifyUser;
+import me.mikecasper.musicvoice.playlist.PlaylistFragment;
+import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
+import me.mikecasper.musicvoice.views.DividerItemDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
 
-    private List<Track> mTracks;
+    private static final String TAG = "TrackFragment";
+    private List<TrackResponseItem> mTracks;
     private IEventManager mEventManager;
 
     public TrackFragment() { }
@@ -31,6 +41,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         super.onCreate(savedInstanceState);
 
         mEventManager = EventManagerProvider.getInstance(getContext());
+        mTracks = new ArrayList<>();
     }
 
     @Override
@@ -38,13 +49,23 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_track_list, container, false);
 
+        getTracks();
+
         // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new TrackAdapter(mTracks, this));
-        }
+        Context context = view.getContext();
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.trackList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setAdapter(new TrackAdapter(mTracks, this));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+
+        SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.trackRefreshLayout);
+        refreshLayout.setColorSchemeResources(R.color.colorAccent);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getTracks();
+            }
+        });
 
         return view;
     }
@@ -61,11 +82,44 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         super.onResume();
 
         mEventManager.register(this);
+
+        Bundle args = getArguments();
+
+        if (args != null && args.containsKey(PlaylistFragment.SELECTED_PLAYLIST)) {
+            Playlist playlist = args.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
+            getActivity().setTitle(playlist.getName());
+        }
+    }
+
+    private void getTracks() {
+        Bundle args = getArguments();
+
+        if (args != null && args.containsKey(PlaylistFragment.SELECTED_PLAYLIST)) {
+            Playlist playlist = args.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
+
+            SpotifyUser owner = playlist.getOwner();
+
+            mEventManager.postEvent(new GetPlaylistTracksEvent(owner.getId(), playlist.getId(), 0));
+        }
     }
 
     @Subscribe
-    public void onTracksObtained() {
+    public void onTracksObtained(TrackResponse response) {
+        Logger.i(TAG, "Tracks obtained");
 
+        View view = getView();
+        if (view != null) {
+            mTracks = response.getItems();
+            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.trackList);
+            TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
+            adapter.updateTracks(mTracks);
+
+            View progressBar = view.findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.INVISIBLE);
+
+            SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.trackRefreshLayout);
+            refreshLayout.setRefreshing(false);
+        }
     }
 
     @Override

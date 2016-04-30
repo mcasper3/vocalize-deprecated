@@ -90,7 +90,8 @@ public class ModelTest {
         List<Artist> artists = new ArrayList<>();
         artists.add(new Artist("1", "artist1"));
         Track track = new Track(1000, "uri", "track1", true, album, artists, 1);
-        Playlist playlist = new Playlist("uri", "playlist1", "1", images, track);
+        SpotifyUser owner = new SpotifyUser("1", "uri", images, "display");
+        Playlist playlist = new Playlist("uri", "playlist1", "1", images, track, owner);
 
         Parcel parcel = Parcel.obtain();
         playlist.writeToParcel(parcel, playlist.describeContents());
@@ -101,9 +102,11 @@ public class ModelTest {
 
         Image imageFromParcel = createdFromParcel.getImages().get(0);
         Track trackFromParcel = createdFromParcel.getTracks();
+        SpotifyUser ownerFromParcel = createdFromParcel.getOwner();
 
         assertThat(imageFromParcel.getUrl(), is("3"));
         assertThat(trackFromParcel.getName(), is("track1"));
+        assertThat(ownerFromParcel.getDisplay_name(), is("display"));
         assertThat(createdFromParcel.getName(), is("playlist1"));
         assertThat(createdFromParcel.getUri(), is("uri"));
         assertThat(createdFromParcel.getId(), is("1"));

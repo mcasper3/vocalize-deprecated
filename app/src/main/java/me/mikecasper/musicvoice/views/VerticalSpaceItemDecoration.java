@@ -1,4 +1,4 @@
-package me.mikecasper.musicvoice.playlist;
+package me.mikecasper.musicvoice.views;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
