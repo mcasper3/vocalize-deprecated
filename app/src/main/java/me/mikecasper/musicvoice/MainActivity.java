@@ -29,6 +29,7 @@ import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import retrofit2.Call;
 
 public class MainActivity extends MusicVoiceActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -37,6 +38,7 @@ public class MainActivity extends MusicVoiceActivity
 
     private IEventManager mEventManager;
     private LinkedList<RefreshTokenEvent> mEvents;
+    private boolean mRefreshingToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class MainActivity extends MusicVoiceActivity
 
         mEventManager = EventManagerProvider.getInstance(this);
         mEvents = new LinkedList<>();
+        mRefreshingToken = false;
 
         if (savedInstanceState == null) {
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -154,7 +157,10 @@ public class MainActivity extends MusicVoiceActivity
 
     @Subscribe
     public void onRefreshToken(RefreshTokenEvent event) {
-        mEventManager.postEvent(new LogInEvent(this));
+        if (!mRefreshingToken) {
+            mRefreshingToken = true;
+            mEventManager.postEvent(new LogInEvent(this));
+        }
         mEvents.push(event);
     }
 
@@ -168,8 +174,12 @@ public class MainActivity extends MusicVoiceActivity
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
                 while (mEvents.size() > 0) {
                     RefreshTokenEvent event = mEvents.pop();
-                    event.getCall().enqueue(event.getCallback());
+
+                    Call call = event.getCall().clone();
+                    call.enqueue(event.getCallback());
                 }
+
+                mRefreshingToken = false;
             }
         }
     }

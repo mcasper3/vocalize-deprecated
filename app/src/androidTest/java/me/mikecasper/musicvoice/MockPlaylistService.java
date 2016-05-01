@@ -22,11 +22,11 @@ public class MockPlaylistService {
     public void onGetPlaylists(GetPlaylistsEvent event) {
         List<Playlist> playlists = new ArrayList<>();
 
-        playlists.add(new Playlist("uri1", "playlist1", "1", null, null));
-        playlists.add(new Playlist("uri1", "playlist1", "1", null, null));
-        playlists.add(new Playlist("uri1", "playlist1", "1", null, null));
-        playlists.add(new Playlist("uri1", "playlist1", "1", null, null));
-        playlists.add(new Playlist("uri1", "playlist1", "1", null, null));
+        playlists.add(new Playlist("uri1", "playlist1", "1", null, null, null));
+        playlists.add(new Playlist("uri1", "playlist1", "1", null, null, null));
+        playlists.add(new Playlist("uri1", "playlist1", "1", null, null, null));
+        playlists.add(new Playlist("uri1", "playlist1", "1", null, null, null));
+        playlists.add(new Playlist("uri1", "playlist1", "1", null, null, null));
 
         mBus.post(new PlaylistResponse(playlists));
     }

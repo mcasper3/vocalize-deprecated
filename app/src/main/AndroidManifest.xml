@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".login.LogInActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,6 +29,18 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_music_overview"
             android:theme="@style/AppTheme" />
+
+        <!-- This service is only used on devices with API v17+ -->
+        <service
+            android:name=".nowplaying.MusicVoiceDaydreamService"
+            android:permission="android.permission.BIND_DREAM_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

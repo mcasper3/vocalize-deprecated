@@ -58,6 +58,7 @@ public class Playlist implements Parcelable {
         dest.writeString(id);
         dest.writeTypedList(images);
         tracks.writeToParcel(dest, tracks.describeContents());
+        owner.writeToParcel(dest, owner.describeContents());
     }
 
     public static final Parcelable.Creator<Playlist> CREATOR = new Parcelable.Creator<Playlist>() {
@@ -78,5 +79,6 @@ public class Playlist implements Parcelable {
         this.id = in.readString();
         this.images = in.createTypedArrayList(Image.CREATOR);
         this.tracks = TrackInfo.CREATOR.createFromParcel(in);
+        this.owner = SpotifyUser.CREATOR.createFromParcel(in);
     }
 }

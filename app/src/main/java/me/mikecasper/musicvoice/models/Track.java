@@ -12,16 +12,14 @@ public class Track implements Parcelable {
     private boolean is_playable;
     private Album album;
     private List<Artist> artists;
-    private int total;
 
-    public Track(int duration_ms, String uri, String name, boolean is_playable, Album album, List<Artist> artists, int total) {
+    public Track(int duration_ms, String uri, String name, boolean is_playable, Album album, List<Artist> artists) {
         this.duration_ms = duration_ms;
         this.uri = uri;
         this.name = name;
         this.is_playable = is_playable;
         this.album = album;
         this.artists = artists;
-        this.total = total;
     }
 
     public int getDuration() {
@@ -48,10 +46,6 @@ public class Track implements Parcelable {
         return artists;
     }
 
-    public int getTotal() {
-        return total;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -65,7 +59,6 @@ public class Track implements Parcelable {
         dest.writeInt(is_playable ? 1 : 0);
         album.writeToParcel(dest, album.describeContents());
         dest.writeTypedList(artists);
-        dest.writeInt(total);
     }
 
     public static final Parcelable.Creator<Track> CREATOR = new Parcelable.Creator<Track>() {
@@ -87,6 +80,5 @@ public class Track implements Parcelable {
         this.is_playable = in.readInt() == 1;
         this.album = Album.CREATOR.createFromParcel(in);
         this.artists = in.createTypedArrayList(Artist.CREATOR);
-        this.total = in.readInt();
     }
 }

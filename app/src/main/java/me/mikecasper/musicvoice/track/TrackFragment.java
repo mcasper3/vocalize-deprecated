@@ -35,6 +35,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
     private static final String TAG = "TrackFragment";
     private List<TrackResponseItem> mTracks;
     private IEventManager mEventManager;
+    private Playlist mPlaylist;
 
     public TrackFragment() { }
 
@@ -88,8 +89,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         Bundle args = getArguments();
 
         if (args != null && args.containsKey(PlaylistFragment.SELECTED_PLAYLIST)) {
-            Playlist playlist = args.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
-            getActivity().setTitle(playlist.getName());
+            getActivity().setTitle(mPlaylist.getName());
         }
     }
 
@@ -97,11 +97,11 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         Bundle args = getArguments();
 
         if (args != null && args.containsKey(PlaylistFragment.SELECTED_PLAYLIST)) {
-            Playlist playlist = args.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
+            mPlaylist = args.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
 
-            SpotifyUser owner = playlist.getOwner();
+            SpotifyUser owner = mPlaylist.getOwner();
 
-            mEventManager.postEvent(new GetPlaylistTracksEvent(owner.getId(), playlist.getId(), 0));
+            mEventManager.postEvent(new GetPlaylistTracksEvent(owner.getId(), mPlaylist.getId(), 0));
         }
     }
 

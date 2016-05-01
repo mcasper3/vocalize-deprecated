@@ -38,7 +38,7 @@ public class ModelTest {
         Album album = new Album(images, "album1", "uri", "1");
         List<Artist> artists = new ArrayList<>();
         artists.add(new Artist("1", "artist1"));
-        Track track = new Track(1000, "uri", "track1", true, album, artists, 1);
+        Track track = new Track(1000, "uri", "track1", true, album, artists);
 
         Parcel parcel = Parcel.obtain();
         track.writeToParcel(parcel, track.describeContents());
@@ -58,7 +58,6 @@ public class ModelTest {
         assertThat(createdFromParcel.getDuration(), is(1000));
         assertThat(createdFromParcel.getUri(), is("uri"));
         assertThat(createdFromParcel.isPlayable(), is(true));
-        assertThat(createdFromParcel.getTotal(), is(1));
     }
 
     @Test
@@ -86,12 +85,9 @@ public class ModelTest {
     public void playlist_ParcelableWriteRead() {
         List<Image> images = new ArrayList<>();
         images.add(new Image(1, 2, "3"));
-        Album album = new Album(images, "album1", "uri", "1");
-        List<Artist> artists = new ArrayList<>();
-        artists.add(new Artist("1", "artist1"));
-        Track track = new Track(1000, "uri", "track1", true, album, artists, 1);
+        TrackInfo trackInfo = new TrackInfo(1, "a");
         SpotifyUser owner = new SpotifyUser("1", "uri", images, "display");
-        Playlist playlist = new Playlist("uri", "playlist1", "1", images, track, owner);
+        Playlist playlist = new Playlist("uri", "playlist1", "1", images, trackInfo, owner);
 
         Parcel parcel = Parcel.obtain();
         playlist.writeToParcel(parcel, playlist.describeContents());
@@ -101,11 +97,11 @@ public class ModelTest {
         Playlist createdFromParcel = Playlist.CREATOR.createFromParcel(parcel);
 
         Image imageFromParcel = createdFromParcel.getImages().get(0);
-        Track trackFromParcel = createdFromParcel.getTracks();
+        TrackInfo trackInfoFromParcel = createdFromParcel.getTracks();
         SpotifyUser ownerFromParcel = createdFromParcel.getOwner();
 
         assertThat(imageFromParcel.getUrl(), is("3"));
-        assertThat(trackFromParcel.getName(), is("track1"));
+        assertThat(trackInfoFromParcel.getTotal(), is(1));
         assertThat(ownerFromParcel.getDisplay_name(), is("display"));
         assertThat(createdFromParcel.getName(), is("playlist1"));
         assertThat(createdFromParcel.getUri(), is("uri"));
