@@ -120,7 +120,9 @@ public class MainActivity extends MusicVoiceActivity
         }
 
         TextView profileName = (TextView) findViewById(R.id.userName);
-        profileName.setText(user.getDisplay_name());
+        if (profileName != null) {
+            profileName.setText(user.getDisplay_name());
+        }
 
         editor.apply();
     }
@@ -128,7 +130,7 @@ public class MainActivity extends MusicVoiceActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             if (getSupportFragmentManager().getBackStackEntryCount() > 0) {

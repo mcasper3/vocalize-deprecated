@@ -18,6 +18,7 @@ import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.models.Playlist;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.models.Track;
+import me.mikecasper.musicvoice.nowplaying.NowPlayingFragment;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
@@ -31,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
+
+    public static final String TRACK = "track";
 
     private static final String TAG = "TrackFragment";
     private List<TrackResponseItem> mTracks;
@@ -129,6 +132,16 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         if (viewHolder instanceof TrackAdapter.ViewHolder) {
             TrackAdapter.ViewHolder selectedTrack = (TrackAdapter.ViewHolder) viewHolder;
             Track track = selectedTrack.mTrack;
+
+            Fragment fragment = new NowPlayingFragment();
+
+            Bundle args = new Bundle();
+            args.putParcelable(TRACK, track);
+            fragment.setArguments(args);
+
+            getFragmentManager().beginTransaction()
+                    .add(android.R.id.content, fragment)
+                    .commit();
 
             mEventManager.postEvent(new PlaySongEvent(track.getUri()));
         }

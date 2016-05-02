@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/skipPreviousButton"
+        android:layout_toStartOf="@+id/skipPreviousButton"
+        app:srcCompat="@drawable/ic_repeat_disabled"/>
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_centerVertical="true"
+        android:id="@+id/skipPreviousButton"
+        android:layout_toLeftOf="@+id/playPauseButton"
+        android:layout_toStartOf="@+id/playPauseButton"
+        app:srcCompat="@drawable/ic_skip_previous"/>
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/playPauseButton"
+        android:layout_centerHorizontal="true"
+        app:srcCompat="@drawable/ic_play"/>
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_centerVertical="true"
+        android:id="@+id/skipNextButton"
+        android:layout_toRightOf="@+id/playPauseButton"
+        android:layout_toEndOf="@+id/playPauseButton"
+        app:srcCompat="@drawable/ic_skip_next"/>
+
+    <ImageView
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_centerVertical="true"
+        android:id="@+id/shuffleButton"
+        android:layout_toRightOf="@+id/skipNextButton"
+        android:layout_toEndOf="@+id/skipNextButton"
+        app:srcCompat="@drawable/ic_shuffle_disabled"/>
+
+</RelativeLayout>
