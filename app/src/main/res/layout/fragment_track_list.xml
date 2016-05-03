@@ -5,6 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
+    android:clickable="true"
+    android:background="?selectableItemBackground"
     tools:context="me.mikecasper.musicvoice.track.TrackFragment" >
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -17,6 +19,8 @@
             android:name="me.mikecasper.musicvoice.track.TrackFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
             app:layoutManager="LinearLayoutManager"
             tools:listitem="@layout/item_track" />
 

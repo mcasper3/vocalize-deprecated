@@ -49,7 +49,7 @@ public class PlaylistService {
     }
 
     @Subscribe
-    public void onGetPlaylistTracks(GetPlaylistTracksEvent event) {
+    public void onGetPlaylistTracks(final GetPlaylistTracksEvent event) {
         Call<TrackResponse> call = mApi.getPlaylistTracks(event.getUserId(), event.getPlaylistId(), event.getOffset());
 
         call.enqueue(new Callback<TrackResponse>() {
@@ -62,6 +62,10 @@ public class PlaylistService {
 
                     if (trackResponse != null) {
                         mBus.post(trackResponse);
+
+                        if (trackResponse.getNext() != null) {
+                            onGetPlaylistTracks(new GetPlaylistTracksEvent(event.getUserId(), event.getPlaylistId(), trackResponse.getOffset() + trackResponse.getItems().size()));
+                        }
                     }
                 }
             }

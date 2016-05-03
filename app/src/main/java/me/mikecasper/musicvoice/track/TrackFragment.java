@@ -1,6 +1,7 @@
 package me.mikecasper.musicvoice.track;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -18,12 +19,11 @@ import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.models.Playlist;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.models.Track;
-import me.mikecasper.musicvoice.nowplaying.NowPlayingFragment;
+import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 import me.mikecasper.musicvoice.views.DividerItemDecoration;
@@ -105,6 +105,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             SpotifyUser owner = mPlaylist.getOwner();
 
             mEventManager.postEvent(new GetPlaylistTracksEvent(owner.getId(), mPlaylist.getId(), 0));
+            mTracks.clear();
         }
     }
 
@@ -114,7 +115,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
         View view = getView();
         if (view != null) {
-            mTracks = response.getItems();
+            mTracks.addAll(response.getItems());
             RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.trackList);
             TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
             adapter.updateTracks(mTracks);
@@ -133,17 +134,11 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             TrackAdapter.ViewHolder selectedTrack = (TrackAdapter.ViewHolder) viewHolder;
             Track track = selectedTrack.mTrack;
 
-            Fragment fragment = new NowPlayingFragment();
+            Intent intent = new Intent(getContext(), NowPlayingActivity.class);
+            intent.putExtra(TRACK, track);
+            startActivity(intent);
 
-            Bundle args = new Bundle();
-            args.putParcelable(TRACK, track);
-            fragment.setArguments(args);
-
-            getFragmentManager().beginTransaction()
-                    .add(android.R.id.content, fragment)
-                    .commit();
-
-            mEventManager.postEvent(new PlaySongEvent(track.getUri()));
+            //mEventManager.postEvent(new PlaySongEvent(track.getUri()));
         }
     }
 }

@@ -4,5 +4,5 @@
     android:propertyName="pathData"
     android:valueFrom="@string/play_path"
     android:valueTo="@string/pause_path"
-    android:duration="600"
+    android:duration="400"
     android:valueType="pathType" />

@@ -61,6 +61,11 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
         playlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         playlistRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(Utility.convertDpToPixel(10, getContext())));
         playlistRecyclerView.setAdapter(new PlaylistAdapter(getContext(), mPlaylists, this));
+
+        if (!mPlaylists.isEmpty()) {
+            View progressBar = view.findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -90,6 +95,9 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
             PlaylistAdapter playlistAdapter = (PlaylistAdapter) playlistRecyclerView.getAdapter();
             playlistAdapter.setPlaylists(mPlaylists);
             playlistAdapter.notifyDataSetChanged();
+
+            View progressBar = view.findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
