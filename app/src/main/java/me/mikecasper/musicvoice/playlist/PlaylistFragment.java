@@ -16,6 +16,7 @@ import java.util.List;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
 import me.mikecasper.musicvoice.models.Playlist;
+import me.mikecasper.musicvoice.playlist.events.GetPlaylistsEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.track.TrackFragment;
@@ -48,6 +49,9 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        mEventManager.postEvent(new GetPlaylistsEvent());
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_playlist, container, false);
     }

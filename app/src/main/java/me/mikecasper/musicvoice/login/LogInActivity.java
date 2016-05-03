@@ -74,7 +74,6 @@ public class LogInActivity extends MusicVoiceActivity {
 
     private void moveToMainView() {
         mEventManager.postEvent(new GetUserEvent());
-        mEventManager.postEvent(new GetPlaylistsEvent());
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);

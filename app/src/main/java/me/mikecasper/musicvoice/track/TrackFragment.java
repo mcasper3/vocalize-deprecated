@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,6 +26,7 @@ import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 import me.mikecasper.musicvoice.views.DividerItemDecoration;
+import me.mikecasper.musicvoice.views.Scrollbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,14 +64,8 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         recyclerView.setAdapter(new TrackAdapter(mTracks, this));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
-        SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.trackRefreshLayout);
-        refreshLayout.setColorSchemeResources(R.color.colorAccent);
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getTracks();
-            }
-        });
+        Scrollbar scrollbar = (Scrollbar) view.findViewById(R.id.trackScrollbar);
+        scrollbar.setRecyclerView(recyclerView);
 
         return view;
     }
@@ -122,9 +116,6 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
             View progressBar = view.findViewById(R.id.progressBar);
             progressBar.setVisibility(View.INVISIBLE);
-
-            SwipeRefreshLayout refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.trackRefreshLayout);
-            refreshLayout.setRefreshing(false);
         }
     }
 
