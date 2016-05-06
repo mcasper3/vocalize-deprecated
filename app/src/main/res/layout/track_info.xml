@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:text="3:14"
+            android:text="@string/initial_time"
             android:gravity="left"
             android:id="@+id/currentTime" />
 
@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:text="3:14"
+            android:text="@string/initial_time"
             android:gravity="right"
             android:id="@+id/remainingTime" />
 

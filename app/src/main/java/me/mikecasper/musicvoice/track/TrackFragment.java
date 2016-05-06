@@ -23,12 +23,14 @@ import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
 import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 import me.mikecasper.musicvoice.views.DividerItemDecoration;
 import me.mikecasper.musicvoice.views.Scrollbar;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
@@ -125,11 +127,17 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             TrackAdapter.ViewHolder selectedTrack = (TrackAdapter.ViewHolder) viewHolder;
             Track track = selectedTrack.mTrack;
 
+            int position = viewHolder.getAdapterPosition();
+
+            List<TrackResponseItem> copy = new ArrayList<>();
+            Collections.copy(copy, mTracks);
+
+            //mEventManager.postEvent(new PlaySongEvent(track.getUri()));
+            mEventManager.postEvent(new SetPlaylistEvent(copy, position));
+
             Intent intent = new Intent(getContext(), NowPlayingActivity.class);
             intent.putExtra(TRACK, track);
             startActivity(intent);
-
-            //mEventManager.postEvent(new PlaySongEvent(track.getUri()));
         }
     }
 }

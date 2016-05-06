@@ -2,9 +2,11 @@ package me.mikecasper.musicvoice.nowplaying;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -24,12 +26,18 @@ import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.ToggleRepeatEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.ToggleShuffleEvent;
 import me.mikecasper.musicvoice.track.TrackFragment;
+import me.mikecasper.musicvoice.util.DateUtility;
 
 public class NowPlayingActivity extends MusicVoiceActivity {
 
+    // Constants for repeat mode
     private static final int MODE_DISABLED = 0;
     private static final int MODE_ENABLED = 1;
     private static final int MODE_SINGLE = 2;
+
+    // Constants for storing preferences
+    private static final String SHUFFLE_ENABLED = "shuffleEnabled";
+    private static final String REPEAT_MORE = "repeatMode";
 
     // Services
     private IEventManager mEventManager;
@@ -56,7 +64,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         ImageView albumArt = (ImageView) findViewById(R.id.albumArt);
         TextView trackName = (TextView) findViewById(R.id.trackName);
         TextView artistName = (TextView) findViewById(R.id.artistName);
-        TextView currentTime = (TextView) findViewById(R.id.currentTime);
         TextView remainingTime = (TextView) findViewById(R.id.remainingTime);
 
         Intent intent = getIntent();
@@ -67,10 +74,13 @@ public class NowPlayingActivity extends MusicVoiceActivity {
                     .load(track.getAlbum().getImages().get(0).getUrl())
                     .placeholder(R.drawable.default_playlist)
                     .error(R.drawable.default_playlist)
+                    .centerCrop()
                     .into(albumArt);
 
             trackName.setText(track.getName());
             artistName.setText(track.getArtists().get(0).getName());
+
+            remainingTime.setText(DateUtility.formatDuration(track.getDuration()));
         }
     }
 
@@ -101,7 +111,12 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             }
         });
 
-        View repeatButton = findViewById(R.id.repeatButton);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        mRepeatMode = preferences.getInt(REPEAT_MORE, MODE_DISABLED);
+        mShuffleEnabled = preferences.getBoolean(SHUFFLE_ENABLED, false);
+
+        ImageView repeatButton = (ImageView) findViewById(R.id.repeatButton);
         repeatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,7 +125,13 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             }
         });
 
-        View shuffleButton = findViewById(R.id.shuffleButton);
+        if (mRepeatMode == MODE_ENABLED) {
+            repeatButton.setImageResource(R.drawable.ic_repeat);
+        } else if (mRepeatMode == MODE_SINGLE) {
+            repeatButton.setImageResource(R.drawable.ic_repeat_song);
+        }
+
+        ImageView shuffleButton = (ImageView) findViewById(R.id.shuffleButton);
         shuffleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,6 +139,10 @@ public class NowPlayingActivity extends MusicVoiceActivity {
                 updateShuffleButton();
             }
         });
+
+        if (mShuffleEnabled) {
+            shuffleButton.setImageResource(R.drawable.ic_shuffle);
+        }
     }
 
     private void updateShuffleButton() {
@@ -131,7 +156,11 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             }
 
             mShuffleEnabled = !mShuffleEnabled;
-            // TODO update in shared prefs
+
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putBoolean(SHUFFLE_ENABLED, mShuffleEnabled)
+                    .apply();
         }
     }
 
@@ -150,7 +179,10 @@ public class NowPlayingActivity extends MusicVoiceActivity {
                 mRepeatMode = MODE_DISABLED;
             }
 
-            // TODO update shared prefs
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putInt(REPEAT_MORE, mRepeatMode)
+                    .apply();
         }
     }
 

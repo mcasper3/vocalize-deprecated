@@ -13,6 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
         tools:listitem="@layout/item_track" />
 
@@ -20,7 +22,7 @@
         android:id="@+id/trackScrollbar"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:paddingLeft="4dp"
+        android:paddingLeft="8dp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
 
