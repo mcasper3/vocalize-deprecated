@@ -71,7 +71,7 @@ public class EventManager implements IEventManager {
         mLogInService = new LogInService();
         mSpotifyUserService = new SpotifyUserService(mBus, api);
         mPlaylistService = new PlaylistService(mBus, api);
-        mMusicPlayer = new MusicPlayer();
+        mMusicPlayer = new MusicPlayer(this);
 
         subscribeServices();
     }

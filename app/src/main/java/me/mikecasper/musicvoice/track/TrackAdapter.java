@@ -49,10 +49,10 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 
         for (Artist artist : artists) {
             artistNamesBuilder.append(artist.getName());
-            artistNamesBuilder.append(',');
+            artistNamesBuilder.append(", ");
         }
 
-        String artistNames = artistNamesBuilder.substring(0, artistNamesBuilder.length() - 1);
+        String artistNames = artistNamesBuilder.substring(0, artistNamesBuilder.length() - 2);
 
         String artistAndAlbumName = context.getString(R.string.artists_and_album, artistNames, album.getName());
 

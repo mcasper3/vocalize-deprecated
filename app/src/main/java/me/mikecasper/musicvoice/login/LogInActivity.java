@@ -13,7 +13,7 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.services.LogInService;
-import me.mikecasper.musicvoice.playlist.events.GetPlaylistsEvent;
+import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.MainActivity;
@@ -41,8 +41,11 @@ public class LogInActivity extends MusicVoiceActivity {
         mEventManager = EventManagerProvider.getInstance(this);
 
         if (isLoggedIn) {
+            boolean shuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
+            int repeatMode = sharedPreferences.getInt(NowPlayingActivity.REPEAT_MODE, 0);
+
             String token = sharedPreferences.getString(LogInService.SPOTIFY_TOKEN, null);
-            mEventManager.postEvent(new CreatePlayerEvent(this, token));
+            mEventManager.postEvent(new CreatePlayerEvent(this, token, shuffleEnabled, repeatMode));
             moveToMainView();
         }
     }

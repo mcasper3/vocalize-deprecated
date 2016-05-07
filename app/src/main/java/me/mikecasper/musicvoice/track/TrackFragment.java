@@ -34,8 +34,6 @@ import java.util.List;
 
 public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
 
-    public static final String TRACK = "track";
-
     private static final String TAG = "TrackFragment";
     private List<TrackResponseItem> mTracks;
     private IEventManager mEventManager;
@@ -138,7 +136,8 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             mEventManager.postEvent(new SetPlaylistEvent(copy, position));
 
             Intent intent = new Intent(getContext(), NowPlayingActivity.class);
-            intent.putExtra(TRACK, track);
+            intent.putExtra(NowPlayingActivity.TRACK, track);
+            intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
             startActivity(intent);
         }
     }

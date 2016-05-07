@@ -7,20 +7,24 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:gravity="center"
         android:maxLines="1"
+        android:ellipsize="end"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:textSize="18sp"
         android:id="@+id/trackName" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:gravity="center"
         android:maxLines="1"
+        android:ellipsize="end"
         android:id="@+id/artistName"/>
 
     <RelativeLayout

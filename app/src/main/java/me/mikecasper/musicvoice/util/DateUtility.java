@@ -18,7 +18,13 @@ public final class DateUtility {
             result += hours + ":";
         }
 
-        result += minutes + ":" + seconds;
+        result += minutes + ":";
+
+        if (seconds < 10) {
+            result += "0";
+        }
+
+        result += seconds;
 
         return result;
     }
