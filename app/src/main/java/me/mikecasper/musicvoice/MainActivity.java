@@ -77,7 +77,7 @@ public class MainActivity extends MusicVoiceActivity
             View headerView = navigationView.getHeaderView(0);
             CircleImageView profileImage = (CircleImageView) headerView.findViewById(R.id.profileImage);
             if (imageUrl != null) {
-                Picasso.with(this).load(imageUrl).centerCrop().into(profileImage);
+                Picasso.with(this).load(imageUrl).fit().into(profileImage);
             } else {
                 profileImage.setImageResource(R.drawable.ic_action_default_profile);
             }
@@ -114,7 +114,7 @@ public class MainActivity extends MusicVoiceActivity
         if (profileImage != null && user.getImages() != null && user.getImages().size() > 0) {
             String firstImageUrl = user.getImages().get(0).getUrl();
 
-            Picasso.with(this).load(firstImageUrl).centerCrop().into(profileImage);
+            Picasso.with(this).load(firstImageUrl).fit().into(profileImage);
 
             editor.putString(SpotifyUser.PROFILE_IMAGE, firstImageUrl);
         }

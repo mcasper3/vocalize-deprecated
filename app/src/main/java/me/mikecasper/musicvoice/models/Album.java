@@ -3,6 +3,7 @@ package me.mikecasper.musicvoice.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Album implements Parcelable {
@@ -16,6 +17,17 @@ public class Album implements Parcelable {
         this.name = name;
         this.uri = uri;
         this.id = id;
+    }
+
+    public Album(Album album) {
+        this.name = album.getName();
+        this.uri = album.getUri();
+        this.id = album.getId();
+        this.images = new ArrayList<>(album.getImages().size());
+
+        for (Image image : album.getImages()) {
+            this.images.add(new Image(image));
+        }
     }
 
     public List<Image> getImages() {

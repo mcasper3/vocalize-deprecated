@@ -24,7 +24,6 @@ public class MusicPlayer implements ConnectionStateCallback {
     private static final String TAG = "MusicPlayer";
     private Player mPlayer;
     private List<TrackResponseItem> mTracks;
-    private List<String> mUris;
     private boolean mShuffleEnabled;
     private int mRepeatMode;
 
@@ -64,20 +63,27 @@ public class MusicPlayer implements ConnectionStateCallback {
         mTracks = new ArrayList<>(temp.subList(event.getPosition(), temp.size()));
         mTracks.addAll(new ArrayList<>(temp.subList(0, event.getPosition())));
 
-        mUris = new ArrayList<>();
+        List<String> uris = getUris();
+
+        mPlayer.play(uris);
+    }
+
+    private List<String> getUris() {
+        List<String> uris = new ArrayList<>();
 
         for (TrackResponseItem track : mTracks) {
-            mUris.add(track.getTrack().getUri());
+            uris.add(track.getTrack().getUri());
         }
 
-        String firstUri = mUris.remove(0);
+        String firstUri = uris.remove(0);
 
         if (mShuffleEnabled) {
-            Collections.shuffle(mUris);
+            Collections.shuffle(uris);
         }
 
-        mUris.add(0, firstUri);
-        mPlayer.play(mUris);
+        uris.add(0, firstUri);
+
+        return uris;
     }
 
     @Subscribe
@@ -93,26 +99,26 @@ public class MusicPlayer implements ConnectionStateCallback {
     // ConnectionStateCallback Methods
     @Override
     public void onLoggedIn() {
-
+        Logger.d(TAG, "Logged in");
     }
 
     @Override
     public void onLoggedOut() {
-
+        Logger.d(TAG, "Logged out");
     }
 
     @Override
     public void onLoginFailed(Throwable throwable) {
-
+        Logger.e(TAG, "Login failed", throwable);
     }
 
     @Override
     public void onTemporaryError() {
-
+        Logger.d(TAG, "Temporary error");
     }
 
     @Override
     public void onConnectionMessage(String s) {
-
+        Logger.d(TAG, s);
     }
 }

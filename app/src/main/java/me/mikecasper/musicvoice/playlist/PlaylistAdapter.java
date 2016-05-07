@@ -45,9 +45,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         Playlist playlist = mPlaylists.get(position);
         holder.mPlaylist = playlist;
 
-        Picasso.with(mContext).load(playlist.getImages().get(0).getUrl())
+        Picasso.with(mContext)
+                .load(playlist.getImages().get(0).getUrl())
                 .placeholder(R.drawable.default_playlist)
-                .centerInside()
+                .fit()
                 .into(holder.mPlaylistArt);
 
         holder.mPlaylistTitle.setText(playlist.getName());

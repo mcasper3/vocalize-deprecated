@@ -12,6 +12,11 @@ public class Artist implements Parcelable {
         this.name = name;
     }
 
+    public Artist(Artist artist) {
+        this.id = artist.getId();
+        this.name = artist.getName();
+    }
+
     public String getName() {
         return name;
     }

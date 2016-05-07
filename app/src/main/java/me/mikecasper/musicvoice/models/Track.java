@@ -3,6 +3,7 @@ package me.mikecasper.musicvoice.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Track implements Parcelable {
@@ -20,6 +21,19 @@ public class Track implements Parcelable {
         this.is_playable = is_playable;
         this.album = album;
         this.artists = artists;
+    }
+
+    public Track(Track track) {
+        this.duration_ms = track.getDuration();
+        this.uri = track.getUri();
+        this.name = track.getName();
+        this.is_playable = track.isPlayable();
+        this.album = new Album(track.getAlbum());
+        this.artists = new ArrayList<>(track.getArtists().size());
+
+        for (Artist artist : track.artists) {
+            this.artists.add(new Artist(artist));
+        }
     }
 
     public int getDuration() {

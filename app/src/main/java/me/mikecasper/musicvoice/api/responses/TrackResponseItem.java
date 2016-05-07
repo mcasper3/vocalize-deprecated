@@ -12,6 +12,10 @@ public class TrackResponseItem {
         this.track = track;
     }
 
+    public TrackResponseItem(TrackResponseItem item) {
+        this.track = new Track(item.getTrack());
+    }
+
     public Track getTrack() {
         return track;
     }

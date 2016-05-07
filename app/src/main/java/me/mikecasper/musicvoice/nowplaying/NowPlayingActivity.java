@@ -74,7 +74,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
                     .load(track.getAlbum().getImages().get(0).getUrl())
                     .placeholder(R.drawable.default_playlist)
                     .error(R.drawable.default_playlist)
-                    .centerCrop()
+                    .fit()
                     .into(albumArt);
 
             trackName.setText(track.getName());

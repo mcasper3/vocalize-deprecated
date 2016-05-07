@@ -30,7 +30,6 @@ import me.mikecasper.musicvoice.views.DividerItemDecoration;
 import me.mikecasper.musicvoice.views.Scrollbar;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
@@ -129,8 +128,11 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
             int position = viewHolder.getAdapterPosition();
 
-            List<TrackResponseItem> copy = new ArrayList<>();
-            Collections.copy(copy, mTracks);
+            List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
+
+            for (TrackResponseItem item : mTracks) {
+                copy.add(new TrackResponseItem(item));
+            }
 
             //mEventManager.postEvent(new PlaySongEvent(track.getUri()));
             mEventManager.postEvent(new SetPlaylistEvent(copy, position));

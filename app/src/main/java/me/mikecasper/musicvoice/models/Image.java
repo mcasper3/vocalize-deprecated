@@ -14,6 +14,12 @@ public class Image implements Parcelable {
         this.url = url;
     }
 
+    public Image(Image image) {
+        this.height = image.getHeight();
+        this.width = image.getWidth();
+        this.url = image.getUrl();
+    }
+
     public int getHeight() {
         return height;
     }
