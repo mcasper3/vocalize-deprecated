@@ -155,6 +155,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
                 mIsPlayingMusic = !mIsPlayingMusic;
 
                 if (mIsPlayingMusic) {
+                    mPreviousTime = SystemClock.elapsedRealtime();
                     scheduleSeekBarUpdate();
                 } else {
                     stopSeekBarUpdate();
@@ -283,19 +284,22 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         Intent intent = getIntent();
         intent.putExtra(TRACK, track);
 
-        if (!mIsPlayingMusic) {
-            mIsPlayingMusic = true;
-            updatePlayButton();
+        mPreviousSongTime = 0;
+
+        mIsPlayingMusic = event.isPlayingSong();
+        updatePlayButton();
+
+        if (event.isPlayingSong()) {
+            mPreviousTime = SystemClock.elapsedRealtime();
+            scheduleSeekBarUpdate();
+        } else {
+            stopSeekBarUpdate();
         }
 
         TextView currentTime = (TextView) findViewById(R.id.currentTime);
         if (currentTime != null) {
             currentTime.setText(R.string.initial_time);
         }
-
-        mPreviousTime = SystemClock.elapsedRealtime();
-        mPreviousSongTime = 0;
-        scheduleSeekBarUpdate();
 
         updateView(track);
     }
@@ -311,7 +315,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         Picasso.with(this)
                 .load(track.getAlbum().getImages().get(0).getUrl())
                 .error(R.drawable.default_playlist)
-                .fit()
                 .into(albumArt);
 
         if (trackName != null && artistName != null && remainingTime != null) {

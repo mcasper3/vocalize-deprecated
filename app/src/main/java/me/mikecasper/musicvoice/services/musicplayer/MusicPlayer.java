@@ -15,6 +15,7 @@ import java.util.List;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.models.Track;
+import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
@@ -35,6 +36,7 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
     private boolean mShuffleEnabled;
     private int mRepeatMode;
     private int mSongIndex;
+    private int mActualIndex;
     private int mPlaylistSize;
     private List<Track> mTracks;
     private boolean mIsPlaying;
@@ -70,7 +72,6 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         mShuffleEnabled = !mShuffleEnabled;
 
         getTracks();
-
     }
 
     @Subscribe
@@ -92,7 +93,8 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         mTracksItems.addAll(new ArrayList<>(temp.subList(0, event.getPosition())));
 
         mPlaylistSize = mTracksItems.size();
-        mSongIndex = event.getPosition();
+        mSongIndex = 0;
+        mActualIndex = event.getPosition();
 
         mTracks = getTracks();
     }
@@ -133,7 +135,6 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
     @Subscribe
     public void onSkipForward(SkipForwardEvent event) {
-        // TODO account for no repeat in skip forward and backward
         playNextSong();
         mIsPlaying = true;
     }
@@ -145,13 +146,46 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
     }
 
     private void playNextSong() {
-        mPlayer.play(mTracks.get(++mSongIndex % mPlaylistSize).getUri());
-        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex)));
+        boolean shouldPlaySong = true;
+
+        mSongIndex = ++mSongIndex % mPlaylistSize;
+        mActualIndex = ++ mActualIndex % mPlaylistSize;
+
+        if (mActualIndex == 0) {
+            if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
+                shouldPlaySong = false;
+            }
+        }
+
+        if (shouldPlaySong) {
+            mPlayer.play(mTracks.get(mSongIndex).getUri());
+        } else {
+            mPlayer.pause();
+        }
+
+        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex), shouldPlaySong));
     }
 
     private void playPreviousSong() {
-        mPlayer.play(mTracks.get(--mSongIndex % mPlaylistSize).getUri());
-        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex)));
+        boolean shouldPlaySong = true;
+
+        --mSongIndex;
+        --mActualIndex;
+
+        if (mActualIndex == -1) {
+            mSongIndex = mPlaylistSize - 1;
+            mActualIndex = mPlaylistSize - 1;
+
+            if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
+                shouldPlaySong = false;
+            }
+        }
+
+        if (shouldPlaySong) {
+            mPlayer.play(mTracks.get(mSongIndex).getUri());
+        }
+
+        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex), shouldPlaySong));
     }
 
     // ConnectionStateCallback Methods
