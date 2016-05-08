@@ -117,7 +117,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
         if (args != null && args.containsKey(PlaylistFragment.SELECTED_PLAYLIST)) {
             mPlaylist = args.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
-            
+
             if (mPlaylist != null) {
                 SpotifyUser owner = mPlaylist.getOwner();
                 mEventManager.postEvent(new GetPlaylistTracksEvent(owner.getId(), mPlaylist.getId(), 0));
