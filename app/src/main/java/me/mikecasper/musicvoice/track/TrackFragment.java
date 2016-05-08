@@ -3,7 +3,9 @@ package me.mikecasper.musicvoice.track;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.squareup.otto.Subscribe;
 
+import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.TrackResponse;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
@@ -85,8 +88,28 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         Bundle args = getArguments();
 
         if (args != null && args.containsKey(PlaylistFragment.SELECTED_PLAYLIST)) {
-            getActivity().setTitle(mPlaylist.getName());
+
+            ActionBar actionBar = ((MusicVoiceActivity) getActivity()).getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(mPlaylist.getName());
+            }
         }
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mPlaylist = savedInstanceState.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(PlaylistFragment.SELECTED_PLAYLIST, mPlaylist);
     }
 
     private void getTracks() {
@@ -94,11 +117,12 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
         if (args != null && args.containsKey(PlaylistFragment.SELECTED_PLAYLIST)) {
             mPlaylist = args.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
-
-            SpotifyUser owner = mPlaylist.getOwner();
-
-            mEventManager.postEvent(new GetPlaylistTracksEvent(owner.getId(), mPlaylist.getId(), 0));
-            mTracks.clear();
+            
+            if (mPlaylist != null) {
+                SpotifyUser owner = mPlaylist.getOwner();
+                mEventManager.postEvent(new GetPlaylistTracksEvent(owner.getId(), mPlaylist.getId(), 0));
+                mTracks.clear();
+            }
         }
     }
 

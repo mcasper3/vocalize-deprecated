@@ -174,9 +174,7 @@ public class MainActivity extends MusicVoiceActivity
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
 
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                while (mEvents.size() > 0) {
-                    RefreshTokenEvent event = mEvents.pop();
-
+                for (RefreshTokenEvent event : mEvents) {
                     Call call = event.getCall().clone();
                     call.enqueue(event.getCallback());
                 }

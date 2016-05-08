@@ -51,6 +51,11 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     public static final String SHUFFLE_ENABLED = "shuffleEnabled";
     public static final String REPEAT_MODE = "repeatMode";
 
+    // Constants for Saving View State
+    private static final String IS_PLAYING = "isPlaying";
+    private static final String PREVIOUS_SONG_TIME = "previousSongTime";
+    private static final String PREVIOUS_TIME = "previousTime";
+
     // Constants for intents
     public static final String TRACK = "track";
     public static final String SHOULD_PLAY_TRACK = "shouldPlayTrack";
@@ -83,6 +88,17 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         // Required empty public constructor
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(IS_PLAYING, mIsPlayingMusic);
+        outState.putBoolean(SHUFFLE_ENABLED, mShuffleEnabled);
+        outState.putInt(REPEAT_MODE, mRepeatMode);
+        outState.putInt(PREVIOUS_SONG_TIME, mPreviousSongTime);
+        outState.putLong(PREVIOUS_TIME, mPreviousTime);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -96,12 +112,24 @@ public class NowPlayingActivity extends MusicVoiceActivity {
 
         boolean shouldPlaySong = intent.getBooleanExtra(SHOULD_PLAY_TRACK, false);
 
-        if (shouldPlaySong) {
-            mIsPlayingMusic = true;
-            mPreviousTime = SystemClock.elapsedRealtime();
-            mPreviousSongTime = 0;
-            mEventManager.postEvent(new PlaySongEvent());
-            scheduleSeekBarUpdate();
+        if (savedInstanceState == null) {
+            if (shouldPlaySong) {
+                mIsPlayingMusic = true;
+                mPreviousTime = SystemClock.elapsedRealtime();
+                mPreviousSongTime = 0;
+                mEventManager.postEvent(new PlaySongEvent());
+                scheduleSeekBarUpdate();
+            }
+        } else {
+            mIsPlayingMusic = savedInstanceState.getBoolean(IS_PLAYING);
+            mPreviousSongTime = savedInstanceState.getInt(PREVIOUS_SONG_TIME);
+            mPreviousTime = savedInstanceState.getLong(PREVIOUS_TIME);
+            mShuffleEnabled = savedInstanceState.getBoolean(SHUFFLE_ENABLED);
+            mRepeatMode = savedInstanceState.getInt(REPEAT_MODE);
+
+            if (mIsPlayingMusic) {
+                scheduleSeekBarUpdate();
+            }
         }
 
         setUpButtons();
@@ -286,8 +314,12 @@ public class NowPlayingActivity extends MusicVoiceActivity {
 
         mPreviousSongTime = 0;
 
+        boolean wasPreviouslyPlaying = mIsPlayingMusic;
         mIsPlayingMusic = event.isPlayingSong();
-        updatePlayButton();
+
+        if (!wasPreviouslyPlaying && mIsPlayingMusic || wasPreviouslyPlaying && !mIsPlayingMusic) {
+            updatePlayButton();
+        }
 
         if (event.isPlayingSong()) {
             mPreviousTime = SystemClock.elapsedRealtime();

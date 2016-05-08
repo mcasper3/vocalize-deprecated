@@ -2,6 +2,7 @@ package me.mikecasper.musicvoice.playlist;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,10 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.squareup.otto.Subscribe;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
 import me.mikecasper.musicvoice.models.Playlist;
@@ -83,7 +86,10 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
         super.onResume();
         mEventManager.register(this);
 
-        getActivity().setTitle(R.string.title_playlists);
+        ActionBar actionBar = ((MusicVoiceActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(R.string.title_playlists);
+        }
     }
 
     @Subscribe
