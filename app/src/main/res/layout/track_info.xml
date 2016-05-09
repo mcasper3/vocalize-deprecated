@@ -16,7 +16,7 @@
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:id="@+id/trackName" />
+        android:id="@+id/track_name" />
 
     <TextView
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
         android:gravity="center"
         android:maxLines="1"
         android:ellipsize="end"
-        android:id="@+id/artistName"/>
+        android:id="@+id/artist_name"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -39,16 +39,16 @@
             android:layout_alignParentStart="true"
             android:text="@string/initial_time"
             android:gravity="left"
-            android:id="@+id/currentTime" />
+            android:id="@+id/current_time" />
 
         <SeekBar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/currentTime"
-            android:layout_toEndOf="@+id/currentTime"
-            android:layout_toLeftOf="@+id/remainingTime"
-            android:layout_toStartOf="@+id/remainingTime"
-            android:id="@+id/songSeekBar" />
+            android:layout_toRightOf="@+id/current_time"
+            android:layout_toEndOf="@+id/current_time"
+            android:layout_toLeftOf="@+id/remaining_time"
+            android:layout_toStartOf="@+id/remaining_time"
+            android:id="@+id/song_seek_bar" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -57,7 +57,7 @@
             android:layout_alignParentEnd="true"
             android:text="@string/initial_time"
             android:gravity="right"
-            android:id="@+id/remainingTime" />
+            android:id="@+id/remaining_time" />
 
     </RelativeLayout>
 

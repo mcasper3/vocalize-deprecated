@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.squareup.otto.Subscribe;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +62,7 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        RecyclerView playlistRecyclerView = (RecyclerView) view.findViewById(R.id.playlistGrid);
+        RecyclerView playlistRecyclerView = (RecyclerView) view.findViewById(R.id.playlist_grid);
         playlistRecyclerView.setHasFixedSize(true);
         playlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         playlistRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(Utility.convertDpToPixel(10, getContext())));
@@ -101,7 +100,7 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
         View view = getView();
 
         if (view != null) {
-            RecyclerView playlistRecyclerView = (RecyclerView) view.findViewById(R.id.playlistGrid);
+            RecyclerView playlistRecyclerView = (RecyclerView) view.findViewById(R.id.playlist_grid);
             PlaylistAdapter playlistAdapter = (PlaylistAdapter) playlistRecyclerView.getAdapter();
             playlistAdapter.setPlaylists(mPlaylists);
             playlistAdapter.notifyDataSetChanged();
@@ -123,7 +122,7 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
             fragment.setArguments(args);
 
             getFragmentManager().beginTransaction()
-                    .replace(R.id.mainContent, fragment)
+                    .replace(R.id.main_content, fragment)
                     .addToBackStack(null)
                     .commit();
         }

@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:scaleType="centerCrop"
-        android:id="@+id/albumArt" />
+        android:id="@+id/album_art" />
 
     <View
         android:layout_height="match_parent"

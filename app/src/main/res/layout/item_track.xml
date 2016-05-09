@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/trackName"
+        android:id="@+id/track_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
@@ -18,7 +18,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/artistAndAlbum"
+        android:id="@+id/artist_and_album"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"

@@ -8,7 +8,7 @@
     tools:context="me.mikecasper.musicvoice.track.TrackFragment" >
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/trackList"
+        android:id="@+id/track_list"
         android:name="me.mikecasper.musicvoice.track.TrackFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

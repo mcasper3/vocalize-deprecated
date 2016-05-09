@@ -2,8 +2,8 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:height="72dp"
     android:width="72dp"
-    android:viewportWidth="72"
-    android:viewportHeight="72">
+    android:viewportWidth="48"
+    android:viewportHeight="48">
     <path
         android:fillColor="#FFF"
         android:name="@string/pause"

@@ -67,7 +67,7 @@ public class MainActivity extends MusicVoiceActivity
 
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.mainContent, playlistFragment)
+                    .add(R.id.main_content, playlistFragment)
                     .commit();
 
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -75,7 +75,7 @@ public class MainActivity extends MusicVoiceActivity
             String userName = sharedPreferences.getString(SpotifyUser.NAME, null);
 
             View headerView = navigationView.getHeaderView(0);
-            CircleImageView profileImage = (CircleImageView) headerView.findViewById(R.id.profileImage);
+            CircleImageView profileImage = (CircleImageView) headerView.findViewById(R.id.profile_image);
             if (imageUrl != null) {
                 Picasso.with(this).load(imageUrl).fit().into(profileImage);
             } else {
@@ -83,7 +83,7 @@ public class MainActivity extends MusicVoiceActivity
             }
 
             if (userName != null) {
-                TextView profileName = (TextView) headerView.findViewById(R.id.userName);
+                TextView profileName = (TextView) headerView.findViewById(R.id.user_name);
                 profileName.setText(userName);
             }
         }
@@ -103,7 +103,7 @@ public class MainActivity extends MusicVoiceActivity
 
     @Subscribe
     public void onUserObtained(SpotifyUser user) {
-        CircleImageView profileImage = (CircleImageView) findViewById(R.id.profileImage);
+        CircleImageView profileImage = (CircleImageView) findViewById(R.id.profile_image);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -119,7 +119,7 @@ public class MainActivity extends MusicVoiceActivity
             editor.putString(SpotifyUser.PROFILE_IMAGE, firstImageUrl);
         }
 
-        TextView profileName = (TextView) findViewById(R.id.userName);
+        TextView profileName = (TextView) findViewById(R.id.user_name);
         if (profileName != null) {
             profileName.setText(user.getDisplay_name());
         }

@@ -17,9 +17,10 @@ import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.MainActivity;
+import me.mikecasper.musicvoice.onboarding.OnboardingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.CreatePlayerEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
 public class LogInActivity extends MusicVoiceActivity {
@@ -46,7 +47,8 @@ public class LogInActivity extends MusicVoiceActivity {
 
             String token = sharedPreferences.getString(LogInService.SPOTIFY_TOKEN, null);
             mEventManager.postEvent(new CreatePlayerEvent(this, token, shuffleEnabled, repeatMode));
-            moveToMainView();
+            //todo moveToMainView();
+            moveToOnboarding();
         }
     }
 
@@ -64,7 +66,7 @@ public class LogInActivity extends MusicVoiceActivity {
             switch (response.getType()) {
                 case TOKEN:
                     Logger.i(TAG, "Logged in");
-                    moveToMainView();
+                    determineNextView();
                     break;
                 case ERROR:
                     Logger.e(TAG, response.getError());
@@ -73,6 +75,21 @@ public class LogInActivity extends MusicVoiceActivity {
                 default:
             }
         }
+    }
+
+    private void determineNextView() {
+        // TODO account for user's first time in app
+
+        if (true) {
+            moveToOnboarding();
+        } else {
+            moveToMainView();
+        }
+    }
+
+    private void moveToOnboarding() {
+        Intent intent = new Intent(this, OnboardingActivity.class);
+        startActivity(intent);
     }
 
     private void moveToMainView() {

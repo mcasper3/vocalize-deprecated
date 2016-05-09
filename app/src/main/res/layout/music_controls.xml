@@ -12,9 +12,9 @@
         android:layout_height="33dp"
         android:padding="4dp"
         android:layout_centerVertical="true"
-        android:id="@+id/repeatButton"
-        android:layout_toLeftOf="@+id/skipPreviousButton"
-        android:layout_toStartOf="@+id/skipPreviousButton"
+        android:id="@+id/repeat_button"
+        android:layout_toLeftOf="@+id/skip_previous_button"
+        android:layout_toStartOf="@+id/skip_previous_button"
         app:srcCompat="@drawable/ic_repeat_disabled"/>
 
     <ImageView
@@ -24,16 +24,16 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_centerVertical="true"
-        android:id="@+id/skipPreviousButton"
-        android:layout_toLeftOf="@+id/playPauseButton"
-        android:layout_toStartOf="@+id/playPauseButton"
+        android:id="@+id/skip_previous_button"
+        android:layout_toLeftOf="@+id/play_pause_button"
+        android:layout_toStartOf="@+id/play_pause_button"
         app:srcCompat="@drawable/ic_skip_previous"/>
 
     <ImageView
         android:layout_width="68dp"
         android:layout_height="68dp"
         android:padding="4dp"
-        android:id="@+id/playPauseButton"
+        android:id="@+id/play_pause_button"
         android:layout_centerHorizontal="true"
         app:srcCompat="@drawable/ic_play"/>
 
@@ -44,9 +44,9 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_centerVertical="true"
-        android:id="@+id/skipNextButton"
-        android:layout_toRightOf="@+id/playPauseButton"
-        android:layout_toEndOf="@+id/playPauseButton"
+        android:id="@+id/skip_next_button"
+        android:layout_toRightOf="@+id/play_pause_button"
+        android:layout_toEndOf="@+id/play_pause_button"
         app:srcCompat="@drawable/ic_skip_next"/>
 
     <ImageView
@@ -54,9 +54,9 @@
         android:layout_height="33dp"
         android:padding="4dp"
         android:layout_centerVertical="true"
-        android:id="@+id/shuffleButton"
-        android:layout_toRightOf="@+id/skipNextButton"
-        android:layout_toEndOf="@+id/skipNextButton"
+        android:id="@+id/shuffle_button"
+        android:layout_toRightOf="@+id/skip_next_button"
+        android:layout_toEndOf="@+id/skip_next_button"
         app:srcCompat="@drawable/ic_shuffle_disabled"/>
 
 </RelativeLayout>

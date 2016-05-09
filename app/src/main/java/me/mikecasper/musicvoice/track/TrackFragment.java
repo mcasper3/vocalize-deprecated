@@ -61,7 +61,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
         // Set the adapter
         Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.trackList);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(new TrackAdapter(mTracks, this));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
@@ -133,7 +133,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         View view = getView();
         if (view != null) {
             mTracks.addAll(response.getItems());
-            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.trackList);
+            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
             TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
             adapter.updateTracks(mTracks);
 

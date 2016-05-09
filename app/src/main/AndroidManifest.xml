@@ -33,6 +33,10 @@
             android:name=".nowplaying.NowPlayingActivity"
             android:label=""
             android:theme="@style/AppTheme" />
+        <activity
+            android:name=".onboarding.OnboardingActivity"
+            android:label="@string/title_activity_onboarding"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

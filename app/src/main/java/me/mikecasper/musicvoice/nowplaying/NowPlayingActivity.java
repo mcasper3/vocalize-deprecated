@@ -134,7 +134,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
 
         setUpButtons();
 
-        mSeekBar = (SeekBar) findViewById(R.id.songSeekBar);
+        mSeekBar = (SeekBar) findViewById(R.id.song_seek_bar);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -162,7 +162,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     private void updateCurrentTime(int position) {
         String time = DateUtility.formatDuration(position);
 
-        TextView currentTime = (TextView) findViewById(R.id.currentTime);
+        TextView currentTime = (TextView) findViewById(R.id.current_time);
         if (currentTime != null) {
             currentTime.setText(time);
         }
@@ -170,7 +170,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
 
     @SuppressWarnings("ConstantConditions")
     private void setUpButtons() {
-        ImageView playPauseButton = (ImageView) findViewById(R.id.playPauseButton);
+        ImageView playPauseButton = (ImageView) findViewById(R.id.play_pause_button);
 
         if (mIsPlayingMusic) {
             playPauseButton.setImageResource(R.drawable.ic_pause);
@@ -193,7 +193,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             }
         });
 
-        View skipForwardButton = findViewById(R.id.skipNextButton);
+        View skipForwardButton = findViewById(R.id.skip_next_button);
         skipForwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -201,7 +201,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             }
         });
 
-        View skipBackwardButton = findViewById(R.id.skipPreviousButton);
+        View skipBackwardButton = findViewById(R.id.skip_previous_button);
         skipBackwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -214,7 +214,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         mRepeatMode = preferences.getInt(REPEAT_MODE, MODE_DISABLED);
         mShuffleEnabled = preferences.getBoolean(SHUFFLE_ENABLED, false);
 
-        ImageView repeatButton = (ImageView) findViewById(R.id.repeatButton);
+        ImageView repeatButton = (ImageView) findViewById(R.id.repeat_button);
         repeatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -229,7 +229,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             repeatButton.setImageResource(R.drawable.ic_repeat_song);
         }
 
-        ImageView shuffleButton = (ImageView) findViewById(R.id.shuffleButton);
+        ImageView shuffleButton = (ImageView) findViewById(R.id.shuffle_button);
         shuffleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -244,7 +244,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     }
 
     private void updateShuffleButton() {
-        ImageView shuffleButton = (ImageView) findViewById(R.id.shuffleButton);
+        ImageView shuffleButton = (ImageView) findViewById(R.id.shuffle_button);
 
         if (shuffleButton != null) {
             if (mShuffleEnabled) {
@@ -263,7 +263,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     }
 
     private void updateRepeatButton() {
-        ImageView repeatButton = (ImageView) findViewById(R.id.repeatButton);
+        ImageView repeatButton = (ImageView) findViewById(R.id.repeat_button);
 
         if (repeatButton != null) {
             if (mRepeatMode == MODE_DISABLED) {
@@ -328,7 +328,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             stopSeekBarUpdate();
         }
 
-        TextView currentTime = (TextView) findViewById(R.id.currentTime);
+        TextView currentTime = (TextView) findViewById(R.id.current_time);
         if (currentTime != null) {
             currentTime.setText(R.string.initial_time);
         }
@@ -339,10 +339,10 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     private void updateView(Track track) {
         mSeekBar.setMax(track.getDuration());
 
-        ImageView albumArt = (ImageView) findViewById(R.id.albumArt);
-        TextView trackName = (TextView) findViewById(R.id.trackName);
-        TextView artistName = (TextView) findViewById(R.id.artistName);
-        TextView remainingTime = (TextView) findViewById(R.id.remainingTime);
+        ImageView albumArt = (ImageView) findViewById(R.id.album_art);
+        TextView trackName = (TextView) findViewById(R.id.track_name);
+        TextView artistName = (TextView) findViewById(R.id.artist_name);
+        TextView remainingTime = (TextView) findViewById(R.id.remaining_time);
 
         Picasso.with(this)
                 .load(track.getAlbum().getImages().get(0).getUrl())
@@ -371,7 +371,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             animatePlayButton();
         } else {
             int id = mIsPlayingMusic ? R.drawable.ic_pause : R.drawable.ic_play;
-            ImageView button = (ImageView) findViewById(R.id.playPauseButton);
+            ImageView button = (ImageView) findViewById(R.id.play_pause_button);
 
             if (button != null) {
                 button.setImageResource(id);
@@ -388,7 +388,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             drawable = (AnimatedVectorDrawable) ContextCompat.getDrawable(this, R.drawable.avd_pause_to_play);
         }
 
-        ImageView button = (ImageView) findViewById(R.id.playPauseButton);
+        ImageView button = (ImageView) findViewById(R.id.play_pause_button);
 
         if (button != null) {
             button.setImageDrawable(drawable);

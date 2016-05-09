@@ -75,8 +75,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         public ViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
-            mPlaylistArt = (ImageView) itemView.findViewById(R.id.playlistArt);
-            mPlaylistTitle = (TextView) itemView.findViewById(R.id.playlistTitle);
+            mPlaylistArt = (ImageView) itemView.findViewById(R.id.playlist_art);
+            mPlaylistTitle = (TextView) itemView.findViewById(R.id.playlist_title);
         }
     }
 }

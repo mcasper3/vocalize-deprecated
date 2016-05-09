@@ -1,4 +1,4 @@
-package me.mikecasper.musicvoice.services.musicplayer;
+package me.mikecasper.musicvoice.services.musicplayer.events;
 
 import android.content.Context;
 

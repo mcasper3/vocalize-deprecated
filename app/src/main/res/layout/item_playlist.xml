@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
-            android:id="@+id/playlistArt"
+            android:id="@+id/playlist_art"
             android:scaleType="centerCrop" />
 
         <TextView
@@ -28,7 +28,7 @@
             android:textSize="18sp"
             android:layout_marginTop="4dp"
             android:includeFontPadding="false"
-            android:id="@+id/playlistTitle" />
+            android:id="@+id/playlist_title" />
 
     </LinearLayout>
 

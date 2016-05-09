@@ -17,6 +17,7 @@ import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
@@ -51,7 +52,6 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
     @Subscribe
     public void createPlayer(CreatePlayerEvent event) {
-
         Config playerConfig = new Config(event.getContext(), event.getToken(), LogInService.CLIENT_ID);
         mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
             @Override

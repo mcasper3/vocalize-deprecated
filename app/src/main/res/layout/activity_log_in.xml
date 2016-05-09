@@ -33,6 +33,6 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         layout="@layout/view_login_button"
-        android:id="@+id/logInButton" />
+        android:id="@+id/log_in_button" />
 
 </android.support.percent.PercentRelativeLayout>

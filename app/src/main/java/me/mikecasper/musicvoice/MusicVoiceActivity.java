@@ -13,7 +13,7 @@ import me.mikecasper.musicvoice.login.LogInActivity;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.CreatePlayerEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
 
 public class MusicVoiceActivity extends AppCompatActivity {
     @Override

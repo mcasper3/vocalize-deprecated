@@ -9,7 +9,13 @@
     <color name="center_log_in_gradient">#cc222222</color>
     <color name="start_log_in_gradient">#ee222222</color>
     <color name="spotify_green">#1ED760</color>
-    <color name="light_gray">#c3c3c3</color>
-    <color name="disabled_gray">#a0a0a0</color>
+    <color name="light_gray">#C3C3C3</color>
+    <color name="disabled_gray">#A0A0A0</color>
     <color name="mini_now_playing_color">#3D7F77</color>
+    <color name="gold">#FFA400</color>
+    <color name="blue">#1355C5</color>
+    <color name="orange">#FF6A00</color>
+    <color name="dark_gold">#B87600</color>
+    <color name="dark_blue">#07327A</color>
+    <color name="dark_orange">#B84C00</color>
 </resources>

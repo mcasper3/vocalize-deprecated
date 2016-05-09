@@ -81,8 +81,8 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mTrackNameTextView = (TextView) view.findViewById(R.id.trackName);
-            mArtistAndTrackNameTextView = (TextView) view.findViewById(R.id.artistAndAlbum);
+            mTrackNameTextView = (TextView) view.findViewById(R.id.track_name);
+            mArtistAndTrackNameTextView = (TextView) view.findViewById(R.id.artist_and_album);
         }
     }
 }

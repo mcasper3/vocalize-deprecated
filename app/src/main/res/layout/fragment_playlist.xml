@@ -11,13 +11,13 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:layout_centerHorizontal="true"
-        android:id="@+id/playlistGrid" />
+        android:id="@+id/playlist_grid" />
 
     <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:id="@+id/progressBar"
+        android:id="@+id/progress_bar"
         style="?progressBarStyle" />
 
 </RelativeLayout>
