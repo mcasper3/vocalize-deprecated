@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
 import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.MusicVoiceActivity;
@@ -30,7 +31,6 @@ import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
 import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
 import me.mikecasper.musicvoice.views.DividerItemDecoration;
-import me.mikecasper.musicvoice.views.Scrollbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +66,8 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         recyclerView.setAdapter(new TrackAdapter(mTracks, this));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
-        Scrollbar scrollbar = (Scrollbar) view.findViewById(R.id.track_scrollbar);
-        scrollbar.setRecyclerView(recyclerView);
+        RecyclerFastScroller scrollbar = (RecyclerFastScroller) view.findViewById(R.id.tracks_scrollbar);
+        scrollbar.attachRecyclerView(recyclerView);
 
         return view;
     }

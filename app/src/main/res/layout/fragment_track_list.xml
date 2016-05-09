@@ -13,18 +13,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
         tools:listitem="@layout/item_track" />
 
-    <me.mikecasper.musicvoice.views.Scrollbar
-        android:id="@+id/track_scrollbar"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:paddingLeft="8dp"
+    <com.pluscubed.recyclerfastscroll.RecyclerFastScroller
         android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:id="@+id/tracks_scrollbar"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <ProgressBar
         android:layout_width="wrap_content"
