@@ -36,6 +36,10 @@ public class OnboardingActivity extends AppCompatActivity {
         mTabs = (TabLayout) findViewById(R.id.onboarding_tabs);
         mTabs.setupWithViewPager(viewPager);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(OnboardingActivity.this, DARK_COLORS[0]));
+        }
+
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -60,14 +64,8 @@ public class OnboardingActivity extends AppCompatActivity {
 
         mTabs.setOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
 
-        if (savedInstanceState == null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                getWindow().setStatusBarColor(ContextCompat.getColor(OnboardingActivity.this, DARK_COLORS[0]));
-            }
-
-            for (int i = 0; i < mTabs.getTabCount(); i++) {
-                mTabs.getTabAt(i).setIcon(R.drawable.tab_indicator);
-            }
+        for (int i = 0; i < mTabs.getTabCount(); i++) {
+            mTabs.getTabAt(i).setIcon(R.drawable.tab_indicator);
         }
 
         LinearLayout tabContainer = (LinearLayout) mTabs.getChildAt(0);
