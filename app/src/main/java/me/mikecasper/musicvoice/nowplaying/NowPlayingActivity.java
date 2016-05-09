@@ -88,7 +88,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         mEventManager = EventManagerProvider.getInstance(this);
 
         Intent intent = getIntent();
-        final Track track = intent.getParcelableExtra(TRACK);
+        Track track = intent.getParcelableExtra(TRACK);
 
         boolean shouldPlaySong = intent.getBooleanExtra(SHOULD_PLAY_TRACK, false);
 

@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -35,6 +36,7 @@ import me.mikecasper.musicvoice.login.events.RefreshTokenEvent;
 import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.models.Track;
+import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
@@ -42,6 +44,7 @@ import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
 import me.mikecasper.musicvoice.settings.SettingsFragment;
 import retrofit2.Call;
 
@@ -52,9 +55,11 @@ public class MainActivity extends MusicVoiceActivity
 
     private IEventManager mEventManager;
     private LinkedList<RefreshTokenEvent> mEvents;
+    private ProgressBar mProgressBar;
     private boolean mRefreshingToken;
     private boolean mLeftieLayout;
     private boolean mIsPlaying;
+    private Track mTrack;
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -74,6 +79,8 @@ public class MainActivity extends MusicVoiceActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        mProgressBar = (ProgressBar) findViewById(R.id.mini_song_time);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -107,6 +114,16 @@ public class MainActivity extends MusicVoiceActivity
             mLeftieLayout = sharedPreferences.getBoolean(SettingsFragment.LEFTIE_LAYOUT_SELECTED, false);
 
             View miniNowPlaying = findViewById(R.id.main_music_controls);
+
+            miniNowPlaying.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(MainActivity.this, NowPlayingActivity.class);
+                    intent.putExtra(NowPlayingActivity.TRACK, mTrack);
+                    startActivity(intent);
+                }
+            });
+
             ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
             ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
 
@@ -153,6 +170,7 @@ public class MainActivity extends MusicVoiceActivity
         View miniNowPlaying = findViewById(R.id.main_music_controls);
 
         mIsPlaying = event.isPlaying();
+        mTrack = event.getTrack();
 
         if (miniNowPlaying != null) {
             if (mIsPlaying) {
@@ -192,7 +210,14 @@ public class MainActivity extends MusicVoiceActivity
         }
     }
 
+    @Subscribe
+    public void onSongTimeUpdated(UpdateSongTimeEvent event) {
+        mProgressBar.setProgress(event.getSongTime());
+    }
+
     private void updateMiniNowPlaying(Track track, View miniNowPlaying) {
+        mProgressBar.setMax(track.getDuration());
+
         ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
         ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
         TextView trackName = (TextView) miniNowPlaying.findViewById(R.id.mini_track_name);
