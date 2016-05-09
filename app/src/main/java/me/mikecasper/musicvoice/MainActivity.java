@@ -123,6 +123,8 @@ public class MainActivity extends MusicVoiceActivity
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, NowPlayingActivity.class);
                 intent.putExtra(NowPlayingActivity.TRACK, mTrack);
+                intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, mIsPlaying);
+                intent.putExtra(NowPlayingActivity.CURRENT_TIME, mProgressBar.getProgress());
                 startActivity(intent);
             }
         });
@@ -174,26 +176,17 @@ public class MainActivity extends MusicVoiceActivity
         mIsPlaying = event.isPlaying();
         mTrack = event.getTrack();
 
-        if (miniNowPlaying != null) {
-            if (mIsPlaying) {
-                Track track = event.getTrack();
+        if (miniNowPlaying != null && mIsPlaying) {
+            if (mTrack != null) {
+                updateMiniNowPlaying();
+            }
 
-                if (track != null) {
-                    updateMiniNowPlaying(track, miniNowPlaying);
-                }
+            // display the view if it is hidden
+            if (miniNowPlaying.getVisibility() == View.GONE) {
+                Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
 
-                // display the view if it is hidden
-                if (miniNowPlaying.getVisibility() == View.GONE) {
-                    Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
-
-                    miniNowPlaying.setVisibility(View.VISIBLE);
-                    miniNowPlaying.startAnimation(slideUp);
-                }
-            } else {
-                // hide the view if it is shown
-                if (miniNowPlaying.getVisibility() == View.VISIBLE) {
-                    miniNowPlaying.setVisibility(View.GONE);
-                }
+                miniNowPlaying.setVisibility(View.VISIBLE);
+                miniNowPlaying.startAnimation(slideUp);
             }
         }
     }
@@ -203,9 +196,10 @@ public class MainActivity extends MusicVoiceActivity
         View miniNowPlaying = findViewById(R.id.main_music_controls);
 
         mIsPlaying = event.isPlayingSong();
+        mTrack = event.getTrack();
 
         if (miniNowPlaying != null) {
-            updateMiniNowPlaying(event.getTrack(), miniNowPlaying);
+            updateMiniNowPlaying();
         }
     }
 
@@ -214,8 +208,9 @@ public class MainActivity extends MusicVoiceActivity
         mProgressBar.setProgress(event.getSongTime());
     }
 
-    private void updateMiniNowPlaying(Track track, View miniNowPlaying) {
-        mProgressBar.setMax(track.getDuration());
+    private void updateMiniNowPlaying() {
+        View miniNowPlaying = findViewById(R.id.main_music_controls);
+        mProgressBar.setMax(mTrack.getDuration());
 
         ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
         ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
@@ -226,17 +221,17 @@ public class MainActivity extends MusicVoiceActivity
 
         if (mLeftieLayout) {
             leftImage.setImageResource(drawableId);
-            Picasso.with(this).load(track.getAlbum().getImages().get(0).getUrl()).into(rightImage);
+            Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(rightImage);
         } else {
-            Picasso.with(this).load(track.getAlbum().getImages().get(0).getUrl()).into(leftImage);
+            Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(leftImage);
             rightImage.setImageResource(drawableId);
         }
 
-        trackName.setText(track.getName());
+        trackName.setText(mTrack.getName());
 
         String artistNames = "";
 
-        for (Artist artist : track.getArtists()) {
+        for (Artist artist : mTrack.getArtists()) {
             artistNames += artist.getName() + ", ";
         }
 

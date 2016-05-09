@@ -53,6 +53,8 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     // Constants for intents
     public static final String TRACK = "track";
     public static final String SHOULD_PLAY_TRACK = "shouldPlayTrack";
+    public static final String IS_PLAYING_MUSIC = "isPlayingMusic";
+    public static final String CURRENT_TIME = "currentTime";
 
     // Services
     private IEventManager mEventManager;
@@ -91,6 +93,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         Track track = intent.getParcelableExtra(TRACK);
 
         boolean shouldPlaySong = intent.getBooleanExtra(SHOULD_PLAY_TRACK, false);
+        mIsPlayingMusic = intent.getBooleanExtra(IS_PLAYING_MUSIC, false);
 
         if (savedInstanceState == null) {
             if (shouldPlaySong) {
@@ -126,6 +129,9 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         if (track != null) {
             updateView(track);
         }
+
+        int currentTime = intent.getIntExtra(CURRENT_TIME, 0);
+        mSeekBar.setProgress(currentTime);
     }
 
     private void updateCurrentTime(int position) {
