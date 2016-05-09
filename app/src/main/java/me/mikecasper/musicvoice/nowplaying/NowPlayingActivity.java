@@ -218,9 +218,13 @@ public class NowPlayingActivity extends MusicVoiceActivity {
                 ImageView repeatButton = (ImageView) findViewById(R.id.repeat_button);
 
                 if (mRepeatMode == MODE_SINGLE) {
-                    // TODO save new mode in prefs
                     mRepeatMode = MODE_ENABLED;
                     repeatButton.setImageResource(R.drawable.ic_repeat);
+
+                    PreferenceManager.getDefaultSharedPreferences(NowPlayingActivity.this)
+                            .edit()
+                            .putInt(REPEAT_MODE, mRepeatMode)
+                            .apply();
                 }
             }
         });
