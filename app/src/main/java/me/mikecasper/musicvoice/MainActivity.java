@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -35,13 +36,16 @@ import me.mikecasper.musicvoice.login.events.RefreshTokenEvent;
 import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.models.Track;
+import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
 import me.mikecasper.musicvoice.settings.SettingsFragment;
 import retrofit2.Call;
 
@@ -52,9 +56,11 @@ public class MainActivity extends MusicVoiceActivity
 
     private IEventManager mEventManager;
     private LinkedList<RefreshTokenEvent> mEvents;
+    private ProgressBar mProgressBar;
     private boolean mRefreshingToken;
     private boolean mLeftieLayout;
     private boolean mIsPlaying;
+    private Track mTrack;
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -75,9 +81,13 @@ public class MainActivity extends MusicVoiceActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        mProgressBar = (ProgressBar) findViewById(R.id.mini_song_time);
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.music_home);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (savedInstanceState == null) {
             PlaylistFragment playlistFragment = new PlaylistFragment();
@@ -87,7 +97,6 @@ public class MainActivity extends MusicVoiceActivity
                     .add(R.id.main_content, playlistFragment)
                     .commit();
 
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             String imageUrl = sharedPreferences.getString(SpotifyUser.PROFILE_IMAGE, null);
             String userName = sharedPreferences.getString(SpotifyUser.NAME, null);
 
@@ -103,35 +112,47 @@ public class MainActivity extends MusicVoiceActivity
                 TextView profileName = (TextView) headerView.findViewById(R.id.user_name);
                 profileName.setText(userName);
             }
+        }
 
-            mLeftieLayout = sharedPreferences.getBoolean(SettingsFragment.LEFTIE_LAYOUT_SELECTED, false);
+        mLeftieLayout = sharedPreferences.getBoolean(SettingsFragment.LEFTIE_LAYOUT_SELECTED, false);
 
-            View miniNowPlaying = findViewById(R.id.main_music_controls);
-            ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
-            ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
+        View miniNowPlaying = findViewById(R.id.main_music_controls);
 
-            View.OnClickListener onClickListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mEventManager.postEvent(new TogglePlaybackEvent());
-
-                    mIsPlaying = !mIsPlaying;
-
-                    updatePlayButton((ImageView) v);
-                }
-            };
-
-            if (mLeftieLayout) {
-                leftImage.setImageResource(R.drawable.ic_play);
-                rightImage.setImageResource(R.drawable.default_playlist);
-
-                leftImage.setOnClickListener(onClickListener);
-            } else {
-                leftImage.setImageResource(R.drawable.default_playlist);
-                rightImage.setImageResource(R.drawable.ic_play);
-
-                rightImage.setOnClickListener(onClickListener);
+        miniNowPlaying.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, NowPlayingActivity.class);
+                intent.putExtra(NowPlayingActivity.TRACK, mTrack);
+                intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, mIsPlaying);
+                intent.putExtra(NowPlayingActivity.CURRENT_TIME, mProgressBar.getProgress());
+                startActivity(intent);
             }
+        });
+
+        ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
+        ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEventManager.postEvent(new TogglePlaybackEvent());
+
+                mIsPlaying = !mIsPlaying;
+
+                updatePlayButton((ImageView) v);
+            }
+        };
+
+        if (mLeftieLayout) {
+            leftImage.setImageResource(R.drawable.ic_play);
+            rightImage.setImageResource(R.drawable.default_playlist);
+
+            leftImage.setOnClickListener(onClickListener);
+        } else {
+            leftImage.setImageResource(R.drawable.default_playlist);
+            rightImage.setImageResource(R.drawable.ic_play);
+
+            rightImage.setOnClickListener(onClickListener);
         }
     }
 
@@ -153,30 +174,19 @@ public class MainActivity extends MusicVoiceActivity
         View miniNowPlaying = findViewById(R.id.main_music_controls);
 
         mIsPlaying = event.isPlaying();
+        mTrack = event.getTrack();
 
-        if (miniNowPlaying != null) {
-            if (mIsPlaying) {
-                Track track = event.getTrack();
+        if (miniNowPlaying != null && mIsPlaying) {
+            if (mTrack != null) {
+                updateMiniNowPlaying();
+            }
 
-                if (track != null) {
-                    updateMiniNowPlaying(track, miniNowPlaying);
-                }
+            // display the view if it is hidden
+            if (miniNowPlaying.getVisibility() == View.GONE) {
+                Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
 
-                // display the view if it is hidden
-                if (miniNowPlaying.getVisibility() == View.GONE) {
-                    Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
-
-                    miniNowPlaying.setVisibility(View.VISIBLE);
-                    miniNowPlaying.startAnimation(slideUp);
-                }
-            } else {
-                // hide the view if it is shown
-                if (miniNowPlaying.getVisibility() == View.VISIBLE) {
-                    Animation slideDown = AnimationUtils.loadAnimation(this, R.anim.slide_down);
-
-                    miniNowPlaying.setVisibility(View.GONE);
-                    miniNowPlaying.startAnimation(slideDown);
-                }
+                miniNowPlaying.setVisibility(View.VISIBLE);
+                miniNowPlaying.startAnimation(slideUp);
             }
         }
     }
@@ -186,13 +196,22 @@ public class MainActivity extends MusicVoiceActivity
         View miniNowPlaying = findViewById(R.id.main_music_controls);
 
         mIsPlaying = event.isPlayingSong();
+        mTrack = event.getTrack();
 
         if (miniNowPlaying != null) {
-            updateMiniNowPlaying(event.getTrack(), miniNowPlaying);
+            updateMiniNowPlaying();
         }
     }
 
-    private void updateMiniNowPlaying(Track track, View miniNowPlaying) {
+    @Subscribe
+    public void onSongTimeUpdated(UpdateSongTimeEvent event) {
+        mProgressBar.setProgress(event.getSongTime());
+    }
+
+    private void updateMiniNowPlaying() {
+        View miniNowPlaying = findViewById(R.id.main_music_controls);
+        mProgressBar.setMax(mTrack.getDuration());
+
         ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
         ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
         TextView trackName = (TextView) miniNowPlaying.findViewById(R.id.mini_track_name);
@@ -202,17 +221,17 @@ public class MainActivity extends MusicVoiceActivity
 
         if (mLeftieLayout) {
             leftImage.setImageResource(drawableId);
-            Picasso.with(this).load(track.getAlbum().getImages().get(0).getUrl()).into(rightImage);
+            Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(rightImage);
         } else {
-            Picasso.with(this).load(track.getAlbum().getImages().get(0).getUrl()).into(leftImage);
+            Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(leftImage);
             rightImage.setImageResource(drawableId);
         }
 
-        trackName.setText(track.getName());
+        trackName.setText(mTrack.getName());
 
         String artistNames = "";
 
-        for (Artist artist : track.getArtists()) {
+        for (Artist artist : mTrack.getArtists()) {
             artistNames += artist.getName() + ", ";
         }
 
@@ -269,6 +288,7 @@ public class MainActivity extends MusicVoiceActivity
 
         if (id == R.id.nav_log_out) {
             mEventManager.postEvent(new LogOutEvent(this));
+            mEventManager.postEvent(new DestroyPlayerEvent());
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

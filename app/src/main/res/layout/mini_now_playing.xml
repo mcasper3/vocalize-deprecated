@@ -2,62 +2,78 @@
 <android.support.percent.PercentRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="4dp"
-    android:background="@color/mini_now_playing_color"
     android:visibility="gone"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <me.mikecasper.musicvoice.views.SquareImageView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="12dp"
-        android:layout_marginStart="12dp"
-        app:layout_widthPercent="12%"
-        android:id="@+id/left_image" />
+    <android.support.percent.PercentRelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="4dp"
+        android:background="@color/mini_now_playing_color"
+        android:layout_below="@+id/mini_song_time">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/left_image"
-        android:layout_toEndOf="@+id/left_image"
-        android:layout_toLeftOf="@+id/right_image"
-        android:layout_toStartOf="@+id/right_image"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
-        android:orientation="vertical" >
+        <me.mikecasper.musicvoice.views.SquareImageView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="12dp"
+            android:layout_marginStart="12dp"
+            app:layout_widthPercent="12%"
+            android:id="@+id/left_image" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textColor="@android:color/white"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:id="@+id/mini_track_name" />
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/left_image"
+            android:layout_toEndOf="@+id/left_image"
+            android:layout_toLeftOf="@+id/right_image"
+            android:layout_toStartOf="@+id/right_image"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="vertical" >
 
-        <TextView
-            android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:id="@+id/mini_track_name" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:id="@+id/mini_artist_name" />
+
+        </LinearLayout>
+
+        <me.mikecasper.musicvoice.views.SquareImageView
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:id="@+id/mini_artist_name" />
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="12dp"
+            android:layout_marginEnd="12dp"
+            app:layout_widthPercent="12%"
+            android:id="@+id/right_image" />
 
-    </LinearLayout>
+    </android.support.percent.PercentRelativeLayout>
 
-    <me.mikecasper.musicvoice.views.SquareImageView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="12dp"
-        android:layout_marginEnd="12dp"
-        app:layout_widthPercent="12%"
-        android:id="@+id/right_image" />
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentTop="true"
+        android:id="@+id/mini_song_time"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:progressDrawable="@drawable/horizontal_progress_bar"
+        android:indeterminate="false" />
 
 </android.support.percent.PercentRelativeLayout>
