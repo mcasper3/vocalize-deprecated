@@ -25,8 +25,8 @@
         android:layout_toEndOf="@+id/left_image"
         android:layout_toLeftOf="@+id/right_image"
         android:layout_toStartOf="@+id/right_image"
-        android:layout_marginLeft="12dp"
-        android:layout_marginStart="12dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp"
         android:orientation="vertical" >
@@ -36,14 +36,16 @@
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:id="@+id/mini_track_name"
-            android:text="Track Name Here" />
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:id="@+id/mini_track_name" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/mini_artist_name"
-            android:text="Artist Name, Here" />
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:id="@+id/mini_artist_name" />
 
     </LinearLayout>
 

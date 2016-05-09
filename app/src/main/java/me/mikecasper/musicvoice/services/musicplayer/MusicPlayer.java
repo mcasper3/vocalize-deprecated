@@ -18,6 +18,7 @@ import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
@@ -28,6 +29,7 @@ import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.ToggleRepeatEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.ToggleShuffleEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
 public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationCallback {
@@ -125,6 +127,16 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
         mTracks.add(0, firstTrack);
         mSongIndex = 0;
+    }
+
+    @Subscribe
+    public void onGetPlayerStatus(GetPlayerStatusEvent event) {
+        Track track = null;
+
+        if (!mTracks.isEmpty()) {
+            track = mTracks.get(mSongIndex);
+        }
+        mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, track));
     }
 
     @Subscribe
