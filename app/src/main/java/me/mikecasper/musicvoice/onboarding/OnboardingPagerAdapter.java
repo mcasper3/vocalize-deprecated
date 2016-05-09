@@ -9,7 +9,7 @@ import me.mikecasper.musicvoice.R;
 
 public class OnboardingPagerAdapter extends FragmentPagerAdapter {
 
-    private static final int[] COLORS = new int[] { R.color.gold, R.color.blue, R.color.orange };
+    private static final int[] COLORS = new int[] { R.color.first_onboarding_view, R.color.second_onboarding_view, R.color.third_onboarding_view };
     private static final int[] TEXT_OPTIONS = new int[] { R.string.select_view_layout };
     private static final int[] IMAGES = new int[] { R.drawable.ic_phone };
 

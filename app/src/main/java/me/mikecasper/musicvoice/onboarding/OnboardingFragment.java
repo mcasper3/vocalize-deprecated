@@ -29,7 +29,7 @@ public class OnboardingFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle args = getArguments();
-        int color = args.getInt(BACKGROUND_COLOR, R.color.gold);
+        int color = args.getInt(BACKGROUND_COLOR, R.color.first_onboarding_view);
 
         RelativeLayout parent = (RelativeLayout) view.findViewById(R.id.onboarding_fragment_parent);
         parent.setBackgroundColor(ContextCompat.getColor(getContext(), color));
