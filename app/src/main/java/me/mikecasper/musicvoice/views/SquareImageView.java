@@ -25,10 +25,10 @@ public class SquareImageView extends ImageView {
         int width = getMeasuredWidth();
         int height = getMeasuredHeight();
 
-        if (height > width) {
+        //if (height > width) {
             setMeasuredDimension(width, width);
-        } else {
-            setMeasuredDimension(height, height);
-        }
+        //} else {
+        //    setMeasuredDimension(height, height);
+        //}
     }
 }

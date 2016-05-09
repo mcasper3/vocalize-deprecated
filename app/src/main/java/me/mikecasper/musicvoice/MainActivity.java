@@ -49,26 +49,26 @@ public class MainActivity extends MusicVoiceActivity
         mEvents = new LinkedList<>();
         mRefreshingToken = false;
 
-        if (savedInstanceState == null) {
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.music_home);
+
+        if (savedInstanceState == null) {
             PlaylistFragment playlistFragment = new PlaylistFragment();
 
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.mainContent, playlistFragment)
                     .commit();
-
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.addDrawerListener(toggle);
-            toggle.syncState();
-
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.setNavigationItemSelectedListener(this);
-            navigationView.setCheckedItem(R.id.music_home);
 
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             String imageUrl = sharedPreferences.getString(SpotifyUser.PROFILE_IMAGE, null);

@@ -1,37 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.percent.PercentRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="4dp"
+    android:background="@color/mini_now_playing_color"
+    android:visibility="gone"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_play" />
+    android:layout_height="wrap_content">
 
     <me.mikecasper.musicvoice.views.SquareImageView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:src="@color/colorAccent"/>
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        app:layout_widthPercent="12%"
+        android:id="@+id/leftImage" />
 
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Track Name Here"/>
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/leftImage"
+        android:layout_toEndOf="@+id/leftImage"
+        android:layout_toLeftOf="@+id/rightImage"
+        android:layout_toStartOf="@+id/rightImage"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical" >
 
-    <TextView
-        android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:id="@+id/miniTrackName"
+            android:text="Track Name Here" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/miniArtistName"
+            android:text="Artist Name, Here" />
+
+    </LinearLayout>
+
+    <me.mikecasper.musicvoice.views.SquareImageView
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Artist Name, Here"/>
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="12dp"
+        android:layout_marginEnd="12dp"
+        app:layout_widthPercent="12%"
+        android:id="@+id/rightImage" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_play" />
-
-</LinearLayout>
+</android.support.percent.PercentRelativeLayout>
