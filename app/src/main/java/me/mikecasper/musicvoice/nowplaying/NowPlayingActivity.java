@@ -6,8 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -18,11 +16,6 @@ import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
@@ -36,9 +29,11 @@ import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.StopSeekbarUpdateEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.ToggleRepeatEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.ToggleShuffleEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
 import me.mikecasper.musicvoice.util.DateUtility;
 
 public class NowPlayingActivity extends MusicVoiceActivity {
@@ -54,8 +49,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
 
     // Constants for Saving View State
     private static final String IS_PLAYING = "isPlaying";
-    private static final String PREVIOUS_SONG_TIME = "previousSongTime";
-    private static final String PREVIOUS_TIME = "previousTime";
 
     // Constants for intents
     public static final String TRACK = "track";
@@ -71,19 +64,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     private SeekBar mSeekBar;
 
     // For Updating SeekBar
-    private static final long PROGRESS_UPDATE_INTERNAL = 1000;
-    private static final long PROGRESS_UPDATE_INITIAL_INTERVAL = 100;
-    private ScheduledFuture<?> mScheduledFuture;
-    private final ScheduledExecutorService mExecutorService = Executors.newSingleThreadScheduledExecutor();
-    private final Handler mHandler = new Handler();
-    private long mPreviousTime;
-    private int mPreviousSongTime;
-    private final Runnable mUpdateProgressTask = new Runnable() {
-        @Override
-        public void run() {
-            updateProgress();
-        }
-    };
+
 
     public NowPlayingActivity() {
         // Required empty public constructor
@@ -96,8 +77,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         outState.putBoolean(IS_PLAYING, mIsPlayingMusic);
         outState.putBoolean(SHUFFLE_ENABLED, mShuffleEnabled);
         outState.putInt(REPEAT_MODE, mRepeatMode);
-        outState.putInt(PREVIOUS_SONG_TIME, mPreviousSongTime);
-        outState.putLong(PREVIOUS_TIME, mPreviousTime);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -116,21 +95,12 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         if (savedInstanceState == null) {
             if (shouldPlaySong) {
                 mIsPlayingMusic = true;
-                mPreviousTime = SystemClock.elapsedRealtime();
-                mPreviousSongTime = 0;
                 mEventManager.postEvent(new PlaySongEvent());
-                scheduleSeekBarUpdate();
             }
         } else {
             mIsPlayingMusic = savedInstanceState.getBoolean(IS_PLAYING);
-            mPreviousSongTime = savedInstanceState.getInt(PREVIOUS_SONG_TIME);
-            mPreviousTime = savedInstanceState.getLong(PREVIOUS_TIME);
             mShuffleEnabled = savedInstanceState.getBoolean(SHUFFLE_ENABLED);
             mRepeatMode = savedInstanceState.getInt(REPEAT_MODE);
-
-            if (mIsPlayingMusic) {
-                scheduleSeekBarUpdate();
-            }
         }
 
         setUpButtons();
@@ -144,14 +114,12 @@ public class NowPlayingActivity extends MusicVoiceActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                stopSeekBarUpdate();
+                mEventManager.postEvent(new StopSeekbarUpdateEvent());
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mEventManager.postEvent(new SeekToEvent(seekBar.getProgress()));
-                mPreviousSongTime = seekBar.getProgress();
-                scheduleSeekBarUpdate();
             }
         });
 
@@ -182,13 +150,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             public void onClick(View v) {
                 mEventManager.postEvent(new TogglePlaybackEvent());
                 mIsPlayingMusic = !mIsPlayingMusic;
-
-                if (mIsPlayingMusic) {
-                    mPreviousTime = SystemClock.elapsedRealtime();
-                    scheduleSeekBarUpdate();
-                } else {
-                    stopSeekBarUpdate();
-                }
 
                 updatePlayButton();
             }
@@ -321,8 +282,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopSeekBarUpdate();
-        mExecutorService.shutdown();
     }
 
     @Subscribe
@@ -332,20 +291,11 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         Intent intent = getIntent();
         intent.putExtra(TRACK, track);
 
-        mPreviousSongTime = 0;
-
         boolean wasPreviouslyPlaying = mIsPlayingMusic;
         mIsPlayingMusic = event.isPlayingSong();
 
         if (!wasPreviouslyPlaying && mIsPlayingMusic || wasPreviouslyPlaying && !mIsPlayingMusic) {
             updatePlayButton();
-        }
-
-        if (event.isPlayingSong()) {
-            mPreviousTime = SystemClock.elapsedRealtime();
-            scheduleSeekBarUpdate();
-        } else {
-            stopSeekBarUpdate();
         }
 
         TextView currentTime = (TextView) findViewById(R.id.current_time);
@@ -361,7 +311,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         if (mIsPlayingMusic) {
             mIsPlayingMusic = false;
             updatePlayButton();
-            stopSeekBarUpdate();
         }
     }
 
@@ -426,39 +375,10 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     }
 
     // Updating SeekBar
-    private void scheduleSeekBarUpdate() {
-        stopSeekBarUpdate();
-        if (!mExecutorService.isShutdown()) {
-            mScheduledFuture = mExecutorService.scheduleAtFixedRate(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            mHandler.post(mUpdateProgressTask);
-                        }
-                    }, PROGRESS_UPDATE_INITIAL_INTERVAL,
-                    PROGRESS_UPDATE_INTERNAL, TimeUnit.MILLISECONDS
-            );
-        }
-    }
-
-    private void stopSeekBarUpdate() {
-        if (mScheduledFuture != null) {
-            mScheduledFuture.cancel(false);
-        }
-    }
-
-    private void updateProgress() {
-        if (!mIsPlayingMusic) {
-            return;
-        }
-        long currentTime = SystemClock.elapsedRealtime();
-
-        long difference = currentTime - mPreviousTime;
-        mPreviousTime = currentTime;
-        mPreviousSongTime += difference;
-
+    @Subscribe
+    public void updateProgress(UpdateSongTimeEvent event) {
         if (mSeekBar != null) {
-            mSeekBar.setProgress(mPreviousSongTime);
+            mSeekBar.setProgress(event.getSongTime());
         }
     }
 }
