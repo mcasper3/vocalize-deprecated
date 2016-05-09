@@ -192,10 +192,7 @@ public class MainActivity extends MusicVoiceActivity
             } else {
                 // hide the view if it is shown
                 if (miniNowPlaying.getVisibility() == View.VISIBLE) {
-                    Animation slideDown = AnimationUtils.loadAnimation(this, R.anim.slide_down);
-
                     miniNowPlaying.setVisibility(View.GONE);
-                    miniNowPlaying.startAnimation(slideDown);
                 }
             }
         }
