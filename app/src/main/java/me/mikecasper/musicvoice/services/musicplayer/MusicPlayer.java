@@ -372,6 +372,10 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
     @Subscribe
     public void onDestroyPlayer(DestroyPlayerEvent event) {
+        if (mIsPlaying) {
+            mPlayer.pause();
+            mIsPlaying = false;
+        }
         Spotify.destroyPlayer(this);
         stopSeekBarUpdate();
         mExecutorService.shutdown();
