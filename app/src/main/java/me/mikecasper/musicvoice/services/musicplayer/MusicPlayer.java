@@ -18,6 +18,7 @@ import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
@@ -35,13 +36,13 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
     private Player mPlayer;
     private boolean mShuffleEnabled;
     private boolean mShuffleWasEnabled;
+    private boolean mIsPlaying;
     private int mRepeatMode;
     private int mSongIndex;
     private int mActualIndex;
     private int mPlaylistSize;
     private List<Track> mTracks;
     private List<Track> mOriginalTracks;
-    private boolean mIsPlaying;
     private IEventManager mEventManager;
 
     public MusicPlayer(IEventManager eventManager) {
@@ -75,7 +76,7 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         mShuffleWasEnabled = mShuffleEnabled;
         mShuffleEnabled = !mShuffleEnabled;
 
-        organizeTracks();
+        organizeTracks(false);
     }
 
     @Subscribe
@@ -95,21 +96,22 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
         mPlaylistSize = items.size();
         mActualIndex = event.getPosition();
+        mOriginalTracks.clear();
 
         for (TrackResponseItem item : items) {
             mOriginalTracks.add(item.getTrack());
         }
 
-        organizeTracks();
+        organizeTracks(true);
     }
 
-    private void organizeTracks() {
+    private void organizeTracks(boolean refreshTracks) {
         Track firstTrack;
 
-        if ((mShuffleWasEnabled && !mShuffleEnabled) || mTracks.isEmpty()) {
+        if ((mShuffleWasEnabled && !mShuffleEnabled) || refreshTracks) {
             mTracks.clear();
 
-            mTracks.addAll(mOriginalTracks.subList(mActualIndex, mOriginalTracks.size() - 1));
+            mTracks.addAll(mOriginalTracks.subList(mActualIndex, mOriginalTracks.size()));
             mTracks.addAll(mOriginalTracks.subList(0, mActualIndex));
 
             firstTrack = mTracks.remove(0);
@@ -144,24 +146,36 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
     @Subscribe
     public void onSkipForward(SkipForwardEvent event) {
         mIsPlaying = true;
+
+        if (mRepeatMode == NowPlayingActivity.MODE_SINGLE) {
+            mRepeatMode = NowPlayingActivity.MODE_ENABLED;
+        }
+
         playNextSong();
     }
 
     @Subscribe
     public void onSkipBackward(SkipBackwardEvent event) {
         mIsPlaying = true;
+
+        if (mRepeatMode == NowPlayingActivity.MODE_SINGLE) {
+            mRepeatMode = NowPlayingActivity.MODE_ENABLED;
+        }
+
         playPreviousSong();
     }
 
     private void playNextSong() {
         boolean shouldPlaySong = true;
 
-        mSongIndex = ++mSongIndex % mPlaylistSize;
-        mActualIndex = ++ mActualIndex % mPlaylistSize;
+        if (mRepeatMode != NowPlayingActivity.MODE_SINGLE) {
+            mSongIndex = ++mSongIndex % mPlaylistSize;
+            mActualIndex = ++mActualIndex % mPlaylistSize;
 
-        if (mActualIndex == 0) {
-            if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
-                shouldPlaySong = false;
+            if ((!mShuffleEnabled && mActualIndex == 0) || (mShuffleEnabled && mSongIndex == 0)) {
+                if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
+                    shouldPlaySong = false;
+                }
             }
         }
 
@@ -183,6 +197,10 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
         if (mSongIndex == -1) {
             mSongIndex = mPlaylistSize - 1;
+
+            if (mShuffleEnabled && mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
+                shouldPlaySong = false;
+            }
         }
 
         if (mActualIndex == -1) {
@@ -195,7 +213,7 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
         mPlayer.play(mTracks.get(mSongIndex).getUri());
 
-        if (shouldPlaySong) {
+        if (!shouldPlaySong) {
             mPlayer.pause();
             mIsPlaying = false;
         }
@@ -233,14 +251,13 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
     public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
         Logger.i(TAG, eventType.name());
 
-        // TODO account for playback on other devices
         switch (eventType) {
             case END_OF_CONTEXT:
-                // TODO
                 playNextSong();
                 break;
             case LOST_PERMISSION:
-                // TODO update view to reflect changes
+                mIsPlaying = false;
+                mEventManager.postEvent(new LostPermissionEvent());
                 break;
         }
     }

@@ -30,6 +30,7 @@ import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
@@ -198,6 +199,13 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             @Override
             public void onClick(View v) {
                 mEventManager.postEvent(new SkipForwardEvent());
+
+                ImageView repeatButton = (ImageView) findViewById(R.id.repeat_button);
+
+                if (mRepeatMode == MODE_SINGLE) {
+                    mRepeatMode = MODE_ENABLED;
+                    repeatButton.setImageResource(R.drawable.ic_repeat);
+                }
             }
         });
 
@@ -206,6 +214,14 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             @Override
             public void onClick(View v) {
                 mEventManager.postEvent(new SkipBackwardEvent());
+
+                ImageView repeatButton = (ImageView) findViewById(R.id.repeat_button);
+
+                if (mRepeatMode == MODE_SINGLE) {
+                    // TODO save new mode in prefs
+                    mRepeatMode = MODE_ENABLED;
+                    repeatButton.setImageResource(R.drawable.ic_repeat);
+                }
             }
         });
 
@@ -334,6 +350,15 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         }
 
         updateView(track);
+    }
+
+    @Subscribe
+    public void onLostPermission(LostPermissionEvent event) {
+        if (mIsPlayingMusic) {
+            mIsPlayingMusic = false;
+            updatePlayButton();
+            stopSeekBarUpdate();
+        }
     }
 
     private void updateView(Track track) {
