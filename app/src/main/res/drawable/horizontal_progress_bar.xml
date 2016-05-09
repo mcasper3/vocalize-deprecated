@@ -11,8 +11,8 @@
         <clip>
             <shape>
                 <gradient
-                    android:startColor="@color/spotify_green"
-                    android:centerColor="@color/spotify_green"
+                    android:startColor="@color/colorAccent"
+                    android:centerColor="@color/colorAccent"
                     android:centerY="1.0"
                     android:endColor="#5B5B5B"
                     android:angle="270"
