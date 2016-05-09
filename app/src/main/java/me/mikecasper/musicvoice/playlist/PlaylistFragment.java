@@ -69,7 +69,7 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
         playlistRecyclerView.setAdapter(new PlaylistAdapter(getContext(), mPlaylists, this));
 
         if (!mPlaylists.isEmpty()) {
-            View progressBar = view.findViewById(R.id.progressBar);
+            View progressBar = view.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.INVISIBLE);
         }
     }
@@ -105,7 +105,7 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
             playlistAdapter.setPlaylists(mPlaylists);
             playlistAdapter.notifyDataSetChanged();
 
-            View progressBar = view.findViewById(R.id.progressBar);
+            View progressBar = view.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.INVISIBLE);
         }
     }

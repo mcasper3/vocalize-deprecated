@@ -30,34 +30,37 @@
         android:gravity="center_horizontal"
         android:layout_centerHorizontal="true"
         app:layout_widthPercent="75%"
-        app:layout_marginBottomPercent="5%"
+        app:layout_marginBottomPercent="10%"
         android:layout_width="0dp"
         android:layout_height="wrap_content" />
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/info_text"
-        app:layout_marginLeftPercent="20%"
-        android:clickable="true"
+        app:layout_marginLeftPercent="15%"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:textAllCaps="false"
         android:padding="4dp"
-        android:text="@string/back"
-        android:textSize="24sp"
+        android:id="@+id/first_option"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/onboarding_option_text"/>
+        android:textColor="@android:color/white" />
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/next"
-        app:layout_marginRightPercent="20%"
+        app:layout_marginRightPercent="15%"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/info_text"
+        android:id="@+id/second_option"
         android:clickable="true"
         android:padding="4dp"
-        android:textSize="24sp"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:textAllCaps="false"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/onboarding_option_text"/>
+        android:textColor="@android:color/white"/>
 
 </android.support.percent.PercentRelativeLayout>

@@ -19,7 +19,7 @@
         tools:listitem="@layout/item_track" />
 
     <me.mikecasper.musicvoice.views.Scrollbar
-        android:id="@+id/trackScrollbar"
+        android:id="@+id/track_scrollbar"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:paddingLeft="8dp"
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:id="@+id/progressBar"
+        android:id="@+id/progress_bar"
         style="?progressBarStyle"/>
 
 </RelativeLayout>

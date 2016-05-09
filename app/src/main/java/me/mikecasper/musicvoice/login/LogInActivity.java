@@ -45,10 +45,17 @@ public class LogInActivity extends MusicVoiceActivity {
             boolean shuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
             int repeatMode = sharedPreferences.getInt(NowPlayingActivity.REPEAT_MODE, 0);
 
-            String token = sharedPreferences.getString(LogInService.SPOTIFY_TOKEN, null);
-            mEventManager.postEvent(new CreatePlayerEvent(this, token, shuffleEnabled, repeatMode));
-            //todo moveToMainView();
-            moveToOnboarding();
+            long lastLoginTime = sharedPreferences.getLong(LogInService.LAST_LOGIN_TIME, 0);
+            int expirationTime = sharedPreferences.getInt(LogInService.LOGIN_EXPIRATION_TIME, 0);
+
+            if (System.currentTimeMillis() > lastLoginTime + expirationTime) {
+                mEventManager.postEvent(new LogInEvent(this));
+            } else {
+                String token = sharedPreferences.getString(LogInService.SPOTIFY_TOKEN, null);
+                mEventManager.postEvent(new CreatePlayerEvent(this, token, shuffleEnabled, repeatMode));
+
+                moveToOnboarding();
+            }
         }
     }
 

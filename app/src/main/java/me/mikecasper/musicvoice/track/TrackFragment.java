@@ -66,7 +66,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         recyclerView.setAdapter(new TrackAdapter(mTracks, this));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
-        Scrollbar scrollbar = (Scrollbar) view.findViewById(R.id.trackScrollbar);
+        Scrollbar scrollbar = (Scrollbar) view.findViewById(R.id.track_scrollbar);
         scrollbar.setRecyclerView(recyclerView);
 
         return view;
@@ -137,7 +137,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
             adapter.updateTracks(mTracks);
 
-            View progressBar = view.findViewById(R.id.progressBar);
+            View progressBar = view.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.INVISIBLE);
         }
     }

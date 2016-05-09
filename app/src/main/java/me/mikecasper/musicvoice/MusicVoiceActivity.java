@@ -28,7 +28,8 @@ public class MusicVoiceActivity extends AppCompatActivity {
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                     sharedPreferences.edit()
                             .putLong(LogInService.LAST_LOGIN_TIME, System.currentTimeMillis())
-                            .putInt(LogInService.LOGIN_EXPIRATION_TIME, response.getExpiresIn())
+                            // Convert to ms before storing
+                            .putInt(LogInService.LOGIN_EXPIRATION_TIME, response.getExpiresIn() * 1000)
                             .putString(LogInService.SPOTIFY_TOKEN, response.getAccessToken())
                             .putBoolean(LogInActivity.IS_LOGGED_IN, true)
                             .apply();

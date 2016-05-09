@@ -30,5 +30,7 @@
     <string name="right">Right</string>
     <string name="back">Back</string>
     <string name="next">Next</string>
+    <string name="ok">OK</string>
+    <string name="skip">Skip</string>
     <!-- End Onboarding Strings -->
 </resources>

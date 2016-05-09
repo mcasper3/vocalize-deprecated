@@ -13,16 +13,15 @@
     <color name="disabled_gray">#A0A0A0</color>
     <color name="mini_now_playing_color">@color/teal_gray</color>
     <color name="first_onboarding_view">@color/teal_gray</color>
-    <color name="second_onboarding_view">@color/gold_gray</color>
+    <color name="second_onboarding_view">@color/gold</color>
     <color name="third_onboarding_view">@color/purple</color>
+    <color name="first_onboarding_view_dark">@color/dark_teal_gray</color>
+    <color name="second_onboarding_view_dark">@color/dark_gold</color>
+    <color name="third_onboarding_view_dark">@color/dark_purple</color>
     <color name="teal_gray">#3D7F77</color>
-    <color name="green">#207A1C</color>
-    <color name="gold">#FFCE00</color>
-    <color name="gold_gray">#d2b12d</color>
-    <color name="blue">#1355C5</color>
-    <color name="orange">#FF6A00</color>
+    <color name="gold">#D2B12D</color>
     <color name="purple">#60258D</color>
-    <color name="dark_gold">#B87600</color>
-    <color name="dark_blue">#07327A</color>
-    <color name="dark_orange">#B84C00</color>
+    <color name="dark_gold">#836900</color>
+    <color name="dark_purple">#340658</color>
+    <color name="dark_teal_gray">#0B4A43</color>
 </resources>
