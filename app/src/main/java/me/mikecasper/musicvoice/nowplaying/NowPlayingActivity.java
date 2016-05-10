@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.AnimatedVectorDrawable;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -23,6 +24,7 @@ import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
@@ -33,6 +35,7 @@ import me.mikecasper.musicvoice.services.musicplayer.events.StopSeekbarUpdateEve
 import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.ToggleRepeatEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.ToggleShuffleEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
 import me.mikecasper.musicvoice.util.DateUtility;
 
@@ -86,6 +89,8 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_now_playing);
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         mEventManager = EventManagerProvider.getInstance(this);
 
@@ -283,11 +288,31 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         super.onResume();
 
         mEventManager.register(this);
+        mEventManager.postEvent(new GetPlayerStatusEvent());
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Subscribe
+    public void onPlayerStatusObtained(UpdatePlayerStatusEvent event) {
+        boolean wasPlaying = mIsPlayingMusic;
+        mIsPlayingMusic = event.isPlaying();
+
+        if (wasPlaying != mIsPlayingMusic) {
+            updatePlayButton();
+        }
+
+        Track track = event.getTrack();
+
+        if (track != null) {
+            Intent intent = getIntent();
+            intent.putExtra(TRACK, track);
+
+            updateView(track);
+        }
     }
 
     @Subscribe
@@ -300,7 +325,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         boolean wasPreviouslyPlaying = mIsPlayingMusic;
         mIsPlayingMusic = event.isPlayingSong();
 
-        if (!wasPreviouslyPlaying && mIsPlayingMusic || wasPreviouslyPlaying && !mIsPlayingMusic) {
+        if (wasPreviouslyPlaying != mIsPlayingMusic) {
             updatePlayButton();
         }
 
