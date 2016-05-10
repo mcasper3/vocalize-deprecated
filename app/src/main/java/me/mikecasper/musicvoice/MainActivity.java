@@ -179,7 +179,7 @@ public class MainActivity extends MusicVoiceActivity
         mIsPlaying = event.isPlaying();
         mTrack = event.getTrack();
 
-        if (miniNowPlaying != null && mIsPlaying) {
+        if (miniNowPlaying != null && (mIsPlaying || mTrack != null)) {
             if (mTrack != null) {
                 updateMiniNowPlaying();
             }

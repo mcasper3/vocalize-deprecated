@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.v4.util.Pair;
 
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
@@ -54,9 +55,8 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
     private boolean mHasFocus;
     private int mRepeatMode;
     private int mSongIndex;
-    private int mActualIndex;
     private int mPlaylistSize;
-    private List<Track> mTracks;
+    private List<Pair<Track, Integer>> mTracks;
     private List<Track> mOriginalTracks;
     private IEventManager mEventManager;
     private AudioManager mAudioManager;
@@ -110,7 +110,7 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         mShuffleWasEnabled = mShuffleEnabled;
         mShuffleEnabled = !mShuffleEnabled;
 
-        organizeTracks(false);
+        organizeTracks(false, -1);
     }
 
     @Subscribe
@@ -123,7 +123,7 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         if (requestFocus()) {
             mHasFocus = true;
 
-            mPlayer.play(mTracks.get(0).getUri());
+            mPlayer.play(mTracks.get(0).first.getUri());
             mIsPlaying = true;
 
             mPreviousSongTime = 0;
@@ -138,27 +138,37 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         List<TrackResponseItem> items = event.getTracks();
 
         mPlaylistSize = items.size();
-        mActualIndex = event.getPosition();
         mOriginalTracks.clear();
 
         for (TrackResponseItem item : items) {
             mOriginalTracks.add(item.getTrack());
         }
 
-        organizeTracks(true);
+        organizeTracks(true, event.getPosition());
     }
 
-    private void organizeTracks(boolean refreshTracks) {
-        Track firstTrack;
+    private void organizeTracks(boolean refreshTracks, int position) {
+        Pair<Track, Integer> firstTrack;
 
         if ((mShuffleWasEnabled && !mShuffleEnabled) || refreshTracks) {
-            mTracks.clear();
-
             // TODO fix toggling shuffle to not use mActualIndex as this value is wrong
             // may need to search for current track (ew)
             // TODO maybe use a list of pairs? That could be neat Pair<Track, IndexInOriginalList>
-            mTracks.addAll(mOriginalTracks.subList(mActualIndex, mOriginalTracks.size()));
-            mTracks.addAll(mOriginalTracks.subList(0, mActualIndex));
+            int index = position;
+
+            if (!refreshTracks) {
+                index = mTracks.get(mSongIndex).second;
+            }
+
+            mTracks.clear();
+
+            for (int i = index; i < mOriginalTracks.size(); i++) {
+                mTracks.add(new Pair<>(mOriginalTracks.get(i), i));
+            }
+
+            for (int i = 0; i < index; i++) {
+                mTracks.add(new Pair<>(mOriginalTracks.get(i), i));
+            }
 
             firstTrack = mTracks.remove(0);
         } else {
@@ -178,7 +188,7 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         Track track = null;
 
         if (!mTracks.isEmpty()) {
-            track = mTracks.get(mSongIndex);
+            track = mTracks.get(mSongIndex).first;
         }
         mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, track));
     }
@@ -241,23 +251,22 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
         if (mRepeatMode != NowPlayingActivity.MODE_SINGLE) {
             mSongIndex = ++mSongIndex % mPlaylistSize;
-            mActualIndex = ++mActualIndex % mPlaylistSize;
 
-            if ((!mShuffleEnabled && mActualIndex == 0) || (mShuffleEnabled && mSongIndex == 0)) {
+            if ((!mShuffleEnabled && mTracks.get(mSongIndex).second == 0) || (mShuffleEnabled && mSongIndex == 0)) {
                 if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
                     shouldPlaySong = false;
                 }
             }
         }
 
-        mPlayer.play(mTracks.get(mSongIndex).getUri());
+        mPlayer.play(mTracks.get(mSongIndex).first.getUri());
 
         if (!shouldPlaySong) {
             mPlayer.pause();
             mIsPlaying = false;
         }
 
-        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex), shouldPlaySong));
+        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, shouldPlaySong));
         updateTask();
     }
 
@@ -265,7 +274,6 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         boolean shouldPlaySong = true;
 
         --mSongIndex;
-        --mActualIndex;
 
         if (mSongIndex == -1) {
             mSongIndex = mPlaylistSize - 1;
@@ -275,22 +283,18 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
             }
         }
 
-        if (mActualIndex == -1) {
-            mActualIndex = mPlaylistSize - 1;
-
-            if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
-                shouldPlaySong = false;
-            }
+        if (mTracks.get(mSongIndex).second == -1 && mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
+            shouldPlaySong = false;
         }
 
-        mPlayer.play(mTracks.get(mSongIndex).getUri());
+        mPlayer.play(mTracks.get(mSongIndex).first.getUri());
 
         if (!shouldPlaySong) {
             mPlayer.pause();
             mIsPlaying = false;
         }
 
-        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex), shouldPlaySong));
+        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, shouldPlaySong));
         updateTask();
     }
 
@@ -417,25 +421,28 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
                 if (!mIsPlaying) {
                     mPlayer.resume();
                     mIsPlaying = true;
-                    // TODO set volume
+                    mPreviousTime = SystemClock.elapsedRealtime();
+                    scheduleSeekBarUpdate();
+                    mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, mTracks.get(mSongIndex).first));
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 if (mIsPlaying) {
                     mPlayer.pause();
                     mIsPlaying = false;
+                    stopSeekBarUpdate();
+                    mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, mTracks.get(mSongIndex).first));
                 }
                 abandonFocus();
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 if (mIsPlaying) {
                     mPlayer.pause();
                     mIsPlaying = false;
+                    stopSeekBarUpdate();
+                    mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, mTracks.get(mSongIndex).first));
                 }
-
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                // TODO set volume
                 break;
         }
     }
