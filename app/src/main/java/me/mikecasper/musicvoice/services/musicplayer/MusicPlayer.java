@@ -1,5 +1,7 @@
 package me.mikecasper.musicvoice.services.musicplayer;
 
+import android.content.Context;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.SystemClock;
 
@@ -42,13 +44,14 @@ import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEv
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
-public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationCallback {
+public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationCallback, AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "MusicPlayer";
     private Player mPlayer;
     private boolean mShuffleEnabled;
     private boolean mShuffleWasEnabled;
     private boolean mIsPlaying;
+    private boolean mHasFocus;
     private int mRepeatMode;
     private int mSongIndex;
     private int mActualIndex;
@@ -56,6 +59,7 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
     private List<Track> mTracks;
     private List<Track> mOriginalTracks;
     private IEventManager mEventManager;
+    private AudioManager mAudioManager;
 
     // Song time stuff
     private static final long PROGRESS_UPDATE_INTERNAL = 1000;
@@ -74,10 +78,11 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         }
     };
 
-    public MusicPlayer(IEventManager eventManager) {
+    public MusicPlayer(IEventManager eventManager, Context context) {
         mEventManager = eventManager;
         mTracks = new ArrayList<>();
         mOriginalTracks = new ArrayList<>();
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Subscribe
@@ -115,13 +120,17 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
 
     @Subscribe
     public void onPlaySongEvent(PlaySongEvent event) {
-        mPlayer.play(mTracks.get(0).getUri());
-        mIsPlaying = true;
+        if (requestFocus()) {
+            mHasFocus = true;
 
-        mPreviousSongTime = 0;
+            mPlayer.play(mTracks.get(0).getUri());
+            mIsPlaying = true;
 
-        mPreviousTime = SystemClock.elapsedRealtime();
-        scheduleSeekBarUpdate();
+            mPreviousSongTime = 0;
+
+            mPreviousTime = SystemClock.elapsedRealtime();
+            scheduleSeekBarUpdate();
+        }
     }
 
     @Subscribe
@@ -145,6 +154,9 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         if ((mShuffleWasEnabled && !mShuffleEnabled) || refreshTracks) {
             mTracks.clear();
 
+            // TODO fix toggling shuffle to not use mActualIndex as this value is wrong
+            // may need to search for current track (ew)
+            // TODO maybe use a list of pairs? That could be neat Pair<Track, IndexInOriginalList>
             mTracks.addAll(mOriginalTracks.subList(mActualIndex, mOriginalTracks.size()));
             mTracks.addAll(mOriginalTracks.subList(0, mActualIndex));
 
@@ -176,13 +188,18 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         if (mIsPlaying) {
             mPlayer.pause();
             stopSeekBarUpdate();
-        } else {
-            mPlayer.resume();
-            mPreviousTime = SystemClock.elapsedRealtime();
-            scheduleSeekBarUpdate();
-        }
 
-        mIsPlaying = !mIsPlaying;
+            mIsPlaying = false;
+        } else {
+            if (mHasFocus || requestFocus()) {
+                mHasFocus = true;
+                mPlayer.resume();
+                mPreviousTime = SystemClock.elapsedRealtime();
+                scheduleSeekBarUpdate();
+
+                mIsPlaying = true;
+            }
+        }
     }
 
     @Subscribe
@@ -376,8 +393,50 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
             mPlayer.pause();
             mIsPlaying = false;
         }
+        abandonFocus();
         Spotify.destroyPlayer(this);
         stopSeekBarUpdate();
         mExecutorService.shutdown();
+    }
+
+    private boolean requestFocus() {
+        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
+                mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+    }
+
+    private boolean abandonFocus() {
+        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
+                mAudioManager.abandonAudioFocus(this);
+    }
+
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        Logger.i("Testing", "Here");
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                if (!mIsPlaying) {
+                    mPlayer.resume();
+                    mIsPlaying = true;
+                    // TODO set volume
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                if (mIsPlaying) {
+                    mPlayer.pause();
+                    mIsPlaying = false;
+                }
+                abandonFocus();
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                if (mIsPlaying) {
+                    mPlayer.pause();
+                    mIsPlaying = false;
+                }
+
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                // TODO set volume
+                break;
+        }
     }
 }
