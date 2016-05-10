@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="4dp"
-        android:background="@color/mini_now_playing_color"
+        android:background="@drawable/mini_now_playing_gradient"
         android:layout_below="@+id/mini_song_time">
 
         <me.mikecasper.musicvoice.views.SquareImageView

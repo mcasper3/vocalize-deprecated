@@ -103,7 +103,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         if (savedInstanceState == null) {
             if (shouldPlaySong) {
                 mIsPlayingMusic = true;
-                mEventManager.postEvent(new PlaySongEvent());
             }
         } else {
             mIsPlayingMusic = savedInstanceState.getBoolean(IS_PLAYING);

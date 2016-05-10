@@ -156,7 +156,6 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
                 copy.add(new TrackResponseItem(item));
             }
 
-            //mEventManager.postEvent(new PlaySongEvent(track.getUri()));
             mEventManager.postEvent(new SetPlaylistEvent(copy, position));
 
             Intent intent = new Intent(getContext(), NowPlayingActivity.class);

@@ -119,21 +119,6 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
     }
 
     @Subscribe
-    public void onPlaySongEvent(PlaySongEvent event) {
-        if (requestFocus()) {
-            mHasFocus = true;
-
-            mPlayer.play(mTracks.get(0).first.getUri());
-            mIsPlaying = true;
-
-            mPreviousSongTime = 0;
-
-            mPreviousTime = SystemClock.elapsedRealtime();
-            scheduleSeekBarUpdate();
-        }
-    }
-
-    @Subscribe
     public void onSetPlaylist(SetPlaylistEvent event) {
         List<TrackResponseItem> items = event.getTracks();
 
@@ -145,6 +130,18 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         }
 
         organizeTracks(true, event.getPosition());
+
+        if (requestFocus()) {
+            mHasFocus = true;
+
+            mPlayer.play(mTracks.get(0).first.getUri());
+            mIsPlaying = true;
+
+            mPreviousSongTime = 0;
+
+            mPreviousTime = SystemClock.elapsedRealtime();
+            scheduleSeekBarUpdate();
+        }
     }
 
     private void organizeTracks(boolean refreshTracks, int position) {
