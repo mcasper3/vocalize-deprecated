@@ -2,6 +2,8 @@ package me.mikecasper.musicvoice;
 
 import android.app.Application;
 
+import com.squareup.leakcanary.LeakCanary;
+
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
@@ -19,6 +21,7 @@ public class MusicVoiceApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        LeakCanary.install(this);
     }
 
     @Override

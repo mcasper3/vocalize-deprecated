@@ -1,9 +1,13 @@
 package me.mikecasper.musicvoice.services.musicplayer;
 
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.SystemClock;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import com.spotify.sdk.android.player.Config;
@@ -31,7 +35,6 @@ import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
@@ -45,7 +48,7 @@ import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEv
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
-public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationCallback, AudioManager.OnAudioFocusChangeListener {
+public class MusicPlayer extends Service implements ConnectionStateCallback, PlayerNotificationCallback, AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "MusicPlayer";
     private Player mPlayer;
@@ -77,6 +80,13 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
             updateProgress();
         }
     };
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        
+    }
 
     public MusicPlayer(IEventManager eventManager, Context context) {
         mEventManager = eventManager;
@@ -148,9 +158,6 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
         Pair<Track, Integer> firstTrack;
 
         if ((mShuffleWasEnabled && !mShuffleEnabled) || refreshTracks) {
-            // TODO fix toggling shuffle to not use mActualIndex as this value is wrong
-            // may need to search for current track (ew)
-            // TODO maybe use a list of pairs? That could be neat Pair<Track, IndexInOriginalList>
             int index = position;
 
             if (!refreshTracks) {
@@ -442,5 +449,11 @@ public class MusicPlayer implements ConnectionStateCallback, PlayerNotificationC
                 }
                 break;
         }
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }
