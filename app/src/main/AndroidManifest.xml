@@ -6,7 +6,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
-    <permission android:name="me.mikecasper.musicvoice.MUSIC_PLAYER" android:label="MusicPlayer" android:protectionLevel="signature" />
+    <permission
+        android:name="me.mikecasper.musicvoice.MUSIC_PLAYER"
+        android:label="MusicPlayer"
+        android:protectionLevel="signature" />
 
     <application
         android:allowBackup="false"
@@ -46,6 +49,11 @@
             android:enabled="true"
             android:exported="true"
             android:permission="me.mikecasper.musicvoice.MUSIC_PLAYER" />
+
+        <receiver
+            android:name=".services.AudioBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

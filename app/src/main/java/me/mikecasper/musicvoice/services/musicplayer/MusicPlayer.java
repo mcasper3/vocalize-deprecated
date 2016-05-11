@@ -2,8 +2,10 @@ package me.mikecasper.musicvoice.services.musicplayer;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Binder;
@@ -38,10 +40,12 @@ import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
+import me.mikecasper.musicvoice.services.AudioBroadcastReceiver;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.PauseMusicEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
@@ -80,6 +84,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private List<Track> mOriginalTracks;
     private IEventManager mEventManager;
     private AudioManager mAudioManager;
+    private BroadcastReceiver mAudioBroadcastReceiver;
+    private final IntentFilter mIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
     private NotificationCompat.Builder mNotificationBuilder;
 
     // Song time stuff
@@ -109,6 +115,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mTracks = new ArrayList<>();
         mOriginalTracks = new ArrayList<>();
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mAudioBroadcastReceiver = new AudioBroadcastReceiver();
     }
 
     @Override
@@ -187,6 +194,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     }
 
     @Subscribe
+    public void onPauseMusic(PauseMusicEvent event) {
+        pauseMusic();
+        // TODO update player status
+        // TODO maybe do update inside the pause music method?
+    }
+
+    @Subscribe
     public void onToggleShuffle(ToggleShuffleEvent event) {
         mShuffleWasEnabled = mShuffleEnabled;
         mShuffleEnabled = !mShuffleEnabled;
@@ -228,6 +242,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             scheduleSeekBarUpdate();
 
             setAsForgroundService();
+            registerReceiver(mAudioBroadcastReceiver, mIntentFilter);
         }
     }
 
@@ -281,10 +296,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         }
 
         if (mIsPlaying) {
-            mPlayer.pause();
-            stopSeekBarUpdate();
-
-            mIsPlaying = false;
+            pauseMusic();
         } else {
             if (mHasFocus || requestFocus()) {
                 mHasFocus = true;
@@ -295,6 +307,19 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 mIsPlaying = true;
             }
         }
+    }
+
+    private void playMusic() {
+
+    }
+
+    private void pauseMusic() {
+        mPlayer.pause();
+        stopSeekBarUpdate();
+
+        mIsPlaying = false;
+
+        unregisterReceiver(mAudioBroadcastReceiver);
     }
 
     @Subscribe
