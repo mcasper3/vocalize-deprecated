@@ -20,6 +20,7 @@ import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.onboarding.OnboardingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
@@ -52,7 +53,13 @@ public class LogInActivity extends MusicVoiceActivity {
                 mEventManager.postEvent(new LogInEvent(this));
             } else {
                 String token = sharedPreferences.getString(LogInService.SPOTIFY_TOKEN, null);
-                mEventManager.postEvent(new CreatePlayerEvent(this, token, shuffleEnabled, repeatMode));
+                //mEventManager.postEvent(new CreatePlayerEvent(this, token, shuffleEnabled, repeatMode));
+                Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                intent.setAction(MusicPlayer.CREATE_PLAYER);
+                intent.putExtra(LogInService.SPOTIFY_TOKEN, token);
+                intent.putExtra(NowPlayingActivity.SHUFFLE_ENABLED, shuffleEnabled);
+                intent.putExtra(NowPlayingActivity.REPEAT_MODE, repeatMode);
+                startService(intent);
 
                 moveToOnboarding();
             }

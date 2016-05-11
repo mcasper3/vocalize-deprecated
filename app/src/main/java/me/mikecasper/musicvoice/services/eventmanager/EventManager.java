@@ -13,7 +13,6 @@ import me.mikecasper.musicvoice.api.SpotifyApi;
 import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.api.services.PlaylistService;
 import me.mikecasper.musicvoice.api.services.SpotifyUserService;
-import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.util.Logger;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -31,7 +30,6 @@ public class EventManager implements IEventManager {
     private LogInService mLogInService;
     private SpotifyUserService mSpotifyUserService;
     private PlaylistService mPlaylistService;
-    private MusicPlayer mMusicPlayer;
     private Context mContext;
 
     EventManager(Context context) {
@@ -71,7 +69,6 @@ public class EventManager implements IEventManager {
         mLogInService = new LogInService();
         mSpotifyUserService = new SpotifyUserService(mBus, api);
         mPlaylistService = new PlaylistService(mBus, api);
-        mMusicPlayer = new MusicPlayer(this, context);
 
         subscribeServices();
     }
@@ -109,6 +106,5 @@ public class EventManager implements IEventManager {
         mBus.register(mLogInService);
         mBus.register(mSpotifyUserService);
         mBus.register(mPlaylistService);
-        mBus.register(mMusicPlayer);
     }
 }

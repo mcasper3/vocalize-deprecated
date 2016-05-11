@@ -13,6 +13,7 @@ import me.mikecasper.musicvoice.login.LogInActivity;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
 
 public class MusicVoiceActivity extends AppCompatActivity {
@@ -37,8 +38,15 @@ public class MusicVoiceActivity extends AppCompatActivity {
                     boolean shuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
                     int repeatMode = sharedPreferences.getInt(NowPlayingActivity.REPEAT_MODE, 0);
 
-                    IEventManager eventManager = EventManagerProvider.getInstance(this);
-                    eventManager.postEvent(new CreatePlayerEvent(this, response.getAccessToken(), shuffleEnabled, repeatMode));
+                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                    intent.setAction(MusicPlayer.CREATE_PLAYER);
+                    intent.putExtra(LogInService.SPOTIFY_TOKEN, response.getAccessToken());
+                    intent.putExtra(NowPlayingActivity.SHUFFLE_ENABLED, shuffleEnabled);
+                    intent.putExtra(NowPlayingActivity.REPEAT_MODE, repeatMode);
+                    startService(intent);
+
+                    //IEventManager eventManager = EventManagerProvider.getInstance(this);
+                    //eventManager.postEvent(new CreatePlayerEvent(this, response.getAccessToken(), shuffleEnabled, repeatMode));
                     break;
                 case ERROR:
                     // TODO back to log in screen

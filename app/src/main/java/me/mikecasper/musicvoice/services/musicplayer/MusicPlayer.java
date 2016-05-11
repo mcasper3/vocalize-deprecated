@@ -1,14 +1,18 @@
 package me.mikecasper.musicvoice.services.musicplayer;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.util.Pair;
+import android.support.v7.app.NotificationCompat;
 
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
@@ -26,13 +30,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import me.mikecasper.musicvoice.MainActivity;
+import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
@@ -51,6 +56,16 @@ import me.mikecasper.musicvoice.util.Logger;
 public class MusicPlayer extends Service implements ConnectionStateCallback, PlayerNotificationCallback, AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "MusicPlayer";
+    private static final int NOTIFICATION_ID = 1;
+
+    // Intent Actions
+    public static final String CREATE_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.CREATE_PLAYER";
+    public static final String PAUSE_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.PAUSE_PLAYER";
+    public static final String RESUME_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.RESUME_PLAYER";
+    public static final String SKIP_FORWARD_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.SKIP_FORWARD_PLAYER";
+    public static final String SKIP_BACKWARD_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.SKIP_BACKWARD_PLAYER";
+    public static final String DESTROY_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.DESTROY_PLAYER";
+
     private Player mPlayer;
     private boolean mShuffleEnabled;
     private boolean mShuffleWasEnabled;
@@ -63,6 +78,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private List<Track> mOriginalTracks;
     private IEventManager mEventManager;
     private AudioManager mAudioManager;
+    private NotificationCompat.Builder mNotificationBuilder;
 
     // Song time stuff
     private static final long PROGRESS_UPDATE_INTERNAL = 1000;
@@ -85,19 +101,53 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     public void onCreate() {
         super.onCreate();
 
-        
-    }
+        mEventManager = EventManagerProvider.getInstance(this);
+        mEventManager.register(this);
 
-    public MusicPlayer(IEventManager eventManager, Context context) {
-        mEventManager = eventManager;
         mTracks = new ArrayList<>();
         mOriginalTracks = new ArrayList<>();
-        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
 
-    @Subscribe
-    public void createPlayer(CreatePlayerEvent event) {
-        Config playerConfig = new Config(event.getContext(), event.getToken(), LogInService.CLIENT_ID);
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
+        handleIntent(intent);
+
+        return super.onStartCommand(intent, flags, startId);
+        //return START_STICKY; TODO not sure about this
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+
+        String action = intent.getAction();
+
+        switch (action) {
+            case CREATE_PLAYER:
+                initPlayer(intent);
+                break;
+            case RESUME_PLAYER:
+                break;
+            case PAUSE_PLAYER:
+                break;
+            case SKIP_FORWARD_PLAYER:
+                break;
+            case SKIP_BACKWARD_PLAYER:
+                break;
+            case DESTROY_PLAYER:
+                onDestroy();
+                break;
+        }
+    }
+
+    private void initPlayer(Intent intent) {
+        String token = intent.getStringExtra(LogInService.SPOTIFY_TOKEN);
+
+        Config playerConfig = new Config(this, token, LogInService.CLIENT_ID);
         mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
             @Override
             public void onInitialized(Player player) {
@@ -111,8 +161,24 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             }
         });
 
-        mRepeatMode = event.getRepeatMode();
-        mShuffleEnabled = event.isShuffleEnabled();
+        mRepeatMode = intent.getIntExtra(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_DISABLED);
+        mShuffleEnabled = intent.getBooleanExtra(NowPlayingActivity.SHUFFLE_ENABLED, false);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mEventManager.unregister(this);
+        if (mIsPlaying) {
+            mPlayer.pause();
+            mIsPlaying = false;
+        }
+        abandonFocus();
+        Spotify.destroyPlayer(this);
+        stopSeekBarUpdate();
+        stopForeground(true);
+        mExecutorService.shutdown();
     }
 
     @Subscribe
@@ -151,6 +217,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
             mPreviousTime = SystemClock.elapsedRealtime();
             scheduleSeekBarUpdate();
+
+            setAsForgroundService();
         }
     }
 
@@ -395,18 +463,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mEventManager.postEvent(new UpdateSongTimeEvent(mPreviousSongTime));
     }
 
-    @Subscribe
-    public void onDestroyPlayer(DestroyPlayerEvent event) {
-        if (mIsPlaying) {
-            mPlayer.pause();
-            mIsPlaying = false;
-        }
-        abandonFocus();
-        Spotify.destroyPlayer(this);
-        stopSeekBarUpdate();
-        mExecutorService.shutdown();
-    }
-
     private boolean requestFocus() {
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
                 mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
@@ -451,9 +507,41 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         }
     }
 
+    private void setAsForgroundService() {
+        Intent intent = new Intent(getApplicationContext(), NowPlayingActivity.class);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(intent);
+
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        mNotificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
+                .setSmallIcon(R.drawable.default_profile)//TODO headphones)
+                .setContentTitle("Song Name")
+                .setContentText("Artist Names")
+                .setContentIntent(pendingIntent)
+                .setOngoing(true);
+
+        android.support.v7.app.NotificationCompat.MediaStyle style = new android.support.v7.app.NotificationCompat.MediaStyle();
+
+        mNotificationBuilder.setStyle(style);
+
+        startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
+    }
+
+    private final IBinder mBinder = new MusicPlayerBinder();
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
+    }
+
+    public class MusicPlayerBinder extends Binder {
+        MusicPlayer getService() {
+            return MusicPlayer.this;
+        }
     }
 }

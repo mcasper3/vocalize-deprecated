@@ -1,12 +1,12 @@
 package me.mikecasper.musicvoice;
 
 import android.app.Application;
+import android.content.Intent;
 
 import com.squareup.leakcanary.LeakCanary;
 
-import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
-import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
+import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
+import me.mikecasper.musicvoice.util.Logger;
 
 public class MusicVoiceApplication extends Application {
 
@@ -26,8 +26,10 @@ public class MusicVoiceApplication extends Application {
 
     @Override
     public void onTerminate() {
-        IEventManager eventManager = EventManagerProvider.getInstance(this);
-        eventManager.postEvent(new DestroyPlayerEvent());
+        Logger.e("FDDS:LJ", "FJDKSLJF");
+        Intent intent = new Intent(this, MusicPlayer.class);
+        intent.setAction(MusicPlayer.DESTROY_PLAYER);
+        stopService(intent);
 
         super.onTerminate();
     }
