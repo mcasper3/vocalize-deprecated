@@ -11,7 +11,6 @@
     <color name="spotify_green">#1ED760</color>
     <color name="light_gray">#C3C3C3</color>
     <color name="disabled_gray">#A0A0A0</color>
-    <color name="mini_now_playing_color">@color/dark_teal_gray</color>
     <color name="first_onboarding_view">@color/teal_gray</color>
     <color name="second_onboarding_view">@color/gold</color>
     <color name="third_onboarding_view">@color/purple</color>
