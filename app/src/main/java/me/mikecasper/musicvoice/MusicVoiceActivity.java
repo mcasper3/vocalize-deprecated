@@ -10,11 +10,7 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.login.LogInActivity;
-import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
-import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
-import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
-import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
 
 public class MusicVoiceActivity extends AppCompatActivity {
     @Override
@@ -35,18 +31,10 @@ public class MusicVoiceActivity extends AppCompatActivity {
                             .putBoolean(LogInActivity.IS_LOGGED_IN, true)
                             .apply();
 
-                    boolean shuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
-                    int repeatMode = sharedPreferences.getInt(NowPlayingActivity.REPEAT_MODE, 0);
-
                     Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
                     intent.setAction(MusicPlayer.CREATE_PLAYER);
-                    intent.putExtra(LogInService.SPOTIFY_TOKEN, response.getAccessToken());
-                    intent.putExtra(NowPlayingActivity.SHUFFLE_ENABLED, shuffleEnabled);
-                    intent.putExtra(NowPlayingActivity.REPEAT_MODE, repeatMode);
                     startService(intent);
 
-                    //IEventManager eventManager = EventManagerProvider.getInstance(this);
-                    //eventManager.postEvent(new CreatePlayerEvent(this, response.getAccessToken(), shuffleEnabled, repeatMode));
                     break;
                 case ERROR:
                     // TODO back to log in screen
