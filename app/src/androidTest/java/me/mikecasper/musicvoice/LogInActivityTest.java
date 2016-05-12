@@ -1,41 +1,45 @@
 package me.mikecasper.musicvoice;
 
-import android.os.Parcel;
-import android.support.test.espresso.core.deps.guava.eventbus.Subscribe;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.intent.rule.IntentsTestRule;
+import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.intent.Intents.intended;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.toPackage;
+import static android.support.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 
-import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
-import me.mikecasper.musicvoice.models.Image;
+import me.mikecasper.musicvoice.login.LogInActivity;
 
 @RunWith(AndroidJUnit4.class)
 public class LogInActivityTest {
 
-    private Image mImage;
-
     @Rule
-    public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
+    public IntentsTestRule<LogInActivity> mActivityTestRule = new IntentsTestRule<>(LogInActivity.class);
 
-    @Before
-    public void createImage() {
-        mImage = new Image(10, 12, "url");
+    @After
+    public void tearDown() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(InstrumentationRegistry.getContext());
+        sharedPreferences.edit().clear().apply();
     }
 
     @Test
-    public void image_ParcelableWriteRead() {
-
-
+    public void loginButtonIsVisible() {
+        onView(withId(R.id.log_in_button)).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
+        onView(withId(R.id.log_in_button)).check(matches(isCompletelyDisplayed()));
     }
 
 }
