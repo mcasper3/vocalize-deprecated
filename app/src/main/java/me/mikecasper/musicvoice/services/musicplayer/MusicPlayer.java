@@ -15,6 +15,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.app.NotificationCompat;
 
@@ -87,6 +88,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private BroadcastReceiver mAudioBroadcastReceiver;
     private final IntentFilter mIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
     private NotificationCompat.Builder mNotificationBuilder;
+    private MediaSessionCompat mMediaSession;
 
     // Song time stuff
     private static final long PROGRESS_UPDATE_INTERNAL = 1000;
@@ -116,6 +118,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mOriginalTracks = new ArrayList<>();
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mAudioBroadcastReceiver = new AudioBroadcastReceiver();
+        mMediaSession = new MediaSessionCompat(getApplicationContext(), TAG);
+
+        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
     }
 
     @Override
@@ -124,8 +129,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         handleIntent(intent);
 
-        return super.onStartCommand(intent, flags, startId);
-        //return START_STICKY; TODO not sure about this
+        return START_STICKY;
     }
 
     private void handleIntent(Intent intent) {
