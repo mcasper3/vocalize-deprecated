@@ -7,6 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Handler;
@@ -14,8 +18,9 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.app.NotificationCompat;
 
@@ -26,6 +31,8 @@ import com.spotify.sdk.android.player.PlayerNotificationCallback;
 import com.spotify.sdk.android.player.PlayerState;
 import com.spotify.sdk.android.player.Spotify;
 import com.squareup.otto.Subscribe;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +46,7 @@ import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.api.services.LogInService;
+import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.services.AudioBroadcastReceiver;
@@ -64,6 +72,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     private static final String TAG = "MusicPlayer";
     private static final int NOTIFICATION_ID = 1;
+    private static final int REQUEST_CODE = 37;
 
     // Intent Actions
     public static final String CREATE_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.CREATE_PLAYER";
@@ -88,7 +97,15 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private BroadcastReceiver mAudioBroadcastReceiver;
     private final IntentFilter mIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
     private NotificationCompat.Builder mNotificationBuilder;
-    private MediaSessionCompat mMediaSession;
+
+    // Intents for notification
+    private PendingIntent mPlayIntent;
+    private PendingIntent mPauseIntent;
+    private PendingIntent mSkipForwardIntent;
+    private PendingIntent mSkipBackwardIntent;
+
+    // Target for notification icons
+    private Target mTarget;
 
     // Song time stuff
     private static final long PROGRESS_UPDATE_INTERNAL = 1000;
@@ -118,9 +135,41 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mOriginalTracks = new ArrayList<>();
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mAudioBroadcastReceiver = new AudioBroadcastReceiver();
-        mMediaSession = new MediaSessionCompat(getApplicationContext(), TAG);
 
-        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mTarget = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                updateIcon(bitmap);
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+                // do nothing
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                // do nothing
+            }
+        };
+
+        createIntents();
+    }
+
+    private void createIntents() {
+        Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+
+        intent.setAction(RESUME_PLAYER);
+        mPlayIntent = PendingIntent.getService(getApplicationContext(), REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        intent.setAction(PAUSE_PLAYER);
+        mPauseIntent = PendingIntent.getService(getApplicationContext(), REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        intent.setAction(SKIP_FORWARD_PLAYER);
+        mSkipForwardIntent = PendingIntent.getService(getApplicationContext(), REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        intent.setAction(SKIP_BACKWARD_PLAYER);
+        mSkipBackwardIntent = PendingIntent.getService(getApplicationContext(), REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     @Override
@@ -139,17 +188,23 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         String action = intent.getAction();
 
+        Logger.e("HandleIntent", "Handling this intent, yo");
+
         switch (action) {
             case CREATE_PLAYER:
                 initPlayer();
                 break;
             case RESUME_PLAYER:
+                playMusic(true);
                 break;
             case PAUSE_PLAYER:
+                pauseMusic();
                 break;
             case SKIP_FORWARD_PLAYER:
+                onSkipForward(null);
                 break;
             case SKIP_BACKWARD_PLAYER:
+                onSkipBackward(null);
                 break;
             case CLOSE_PLAYER:
                 onDestroy();
@@ -200,8 +255,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     @Subscribe
     public void onPauseMusic(PauseMusicEvent event) {
         pauseMusic();
-        // TODO update player status
-        // TODO maybe do update inside the pause music method?
     }
 
     @Subscribe
@@ -229,25 +282,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         }
 
         organizeTracks(true, event.getPosition());
+        mSongIndex = 0;
 
-        if (requestFocus()) {
-            mHasFocus = true;
-
-            if (mPlayer == null) {
-                initPlayer();
-            }
-
-            mPlayer.play(mTracks.get(0).first.getUri());
-            mIsPlaying = true;
-
-            mPreviousSongTime = 0;
-
-            mPreviousTime = SystemClock.elapsedRealtime();
-            scheduleSeekBarUpdate();
-
-            setAsForgroundService();
-            registerReceiver(mAudioBroadcastReceiver, mIntentFilter);
+        if (mPlayer == null) {
+            initPlayer();
         }
+
+        playMusic(false);
     }
 
     private void organizeTracks(boolean refreshTracks, int position) {
@@ -302,19 +343,29 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         if (mIsPlaying) {
             pauseMusic();
         } else {
-            if (mHasFocus || requestFocus()) {
-                mHasFocus = true;
-                mPlayer.resume();
-                mPreviousTime = SystemClock.elapsedRealtime();
-                scheduleSeekBarUpdate();
-
-                mIsPlaying = true;
-            }
+            playMusic(true);
         }
     }
 
-    private void playMusic() {
+    private void playMusic(boolean shouldResume) {
+        if (mHasFocus || requestFocus()) {
+            mHasFocus = true;
+            mIsPlaying = true;
+            setAsForegroundService();
+            registerReceiver(mAudioBroadcastReceiver, mIntentFilter);
 
+            if (shouldResume) {
+                mPlayer.resume();
+            } else {
+                mPreviousSongTime = 0;
+                mPlayer.play(mTracks.get(mSongIndex).first.getUri());
+            }
+
+            mPreviousTime = SystemClock.elapsedRealtime();
+            scheduleSeekBarUpdate();
+
+            mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, mIsPlaying));
+        }
     }
 
     private void pauseMusic() {
@@ -323,7 +374,11 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         mIsPlaying = false;
 
+        updateNotification();
         unregisterReceiver(mAudioBroadcastReceiver);
+        stopForeground(false);
+
+        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, mIsPlaying));
     }
 
     @Subscribe
@@ -385,15 +440,11 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             }
         }
 
-        mPlayer.play(mTracks.get(mSongIndex).first.getUri());
+        playMusic(false);
 
         if (!shouldPlaySong) {
-            mPlayer.pause();
-            mIsPlaying = false;
+            pauseMusic();
         }
-
-        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, shouldPlaySong));
-        updateTask();
     }
 
     private void playPreviousSong() {
@@ -413,25 +464,10 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             shouldPlaySong = false;
         }
 
-        mPlayer.play(mTracks.get(mSongIndex).first.getUri());
+        playMusic(false);
 
         if (!shouldPlaySong) {
-            mPlayer.pause();
-            mIsPlaying = false;
-        }
-
-        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, shouldPlaySong));
-        updateTask();
-    }
-
-    private void updateTask() {
-        mPreviousSongTime = 0;
-
-        if (mIsPlaying) {
-            mPreviousTime = SystemClock.elapsedRealtime();
-            scheduleSeekBarUpdate();
-        } else {
-            stopSeekBarUpdate();
+            pauseMusic();
         }
     }
 
@@ -529,7 +565,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     @Override
     public void onAudioFocusChange(int focusChange) {
-        Logger.i("Testing", "Here");
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 if (!mIsPlaying) {
@@ -561,28 +596,89 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         }
     }
 
-    private void setAsForgroundService() {
+    private void setAsForegroundService() {
         Intent intent = new Intent(getApplicationContext(), NowPlayingActivity.class);
-
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(intent);
 
         PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.default_playlist);
+
+        if (drawable instanceof BitmapDrawable) {
+            Logger.e("TAG", "bitmap drawable");
+        }
+
+        Bitmap defaultPlaylist = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(defaultPlaylist);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        Track currentTrack = mTracks.get(mSongIndex).first;
+
+        String artistNames = "";
+
+        for (Artist artist : currentTrack.getArtists()) {
+            artistNames += artist.getName() + ", ";
+        }
+
+        artistNames = artistNames.substring(0, artistNames.length() - 2);
+
         mNotificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
-                .setSmallIcon(R.drawable.ic_play)//TODO headphones)
-                .setContentTitle("Song Name")
-                .setContentText("Artist Names")
+                .setSmallIcon(R.drawable.ic_headphones)
+                .setContentTitle(currentTrack.getName())
+                .setContentText(artistNames)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
-                .setOngoing(true);
+                .setLargeIcon(defaultPlaylist)
+                .setWhen(0)
+                .setShowWhen(false)
+                .addAction(R.drawable.ic_skip_previous, "Skip Previous", mSkipBackwardIntent);
+
+        if (mIsPlaying) {
+            mNotificationBuilder.addAction(R.drawable.ic_pause_small, "Pause", mPauseIntent);
+        } else {
+            mNotificationBuilder.addAction(R.drawable.ic_play_small, "Play", mPlayIntent);
+        }
+
+        mNotificationBuilder.addAction(R.drawable.ic_skip_next, "Skip Next", mSkipForwardIntent);
 
         android.support.v7.app.NotificationCompat.MediaStyle style = new android.support.v7.app.NotificationCompat.MediaStyle();
+
+        style.setShowActionsInCompactView(0, 1, 2);
+
+        Intent cancelIntent = new Intent(getApplicationContext(), MusicPlayer.class);
+        cancelIntent.setAction(CLOSE_PLAYER);
+
+        style.setCancelButtonIntent(PendingIntent.getService(getApplicationContext(), REQUEST_CODE, cancelIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+        style.setShowCancelButton(true);
 
         mNotificationBuilder.setStyle(style);
 
         startForeground(NOTIFICATION_ID, mNotificationBuilder.build());
+
+        Picasso.with(getApplicationContext())
+                .load(currentTrack.getAlbum().getImages().get(0).getUrl())
+                .into(mTarget);
+    }
+
+    private void updateNotification() {
+        mNotificationBuilder.mActions.remove(1);
+
+        NotificationCompat.Action action = new NotificationCompat.Action.Builder(R.drawable.ic_play_small, "Play", mPlayIntent).build();
+
+        mNotificationBuilder.mActions.add(1, action);
+        NotificationManagerCompat managerCompat = NotificationManagerCompat.from(getApplicationContext());
+        managerCompat.notify(NOTIFICATION_ID, mNotificationBuilder.build());
+    }
+
+    private void updateIcon(Bitmap bitmap) {
+        mNotificationBuilder.setLargeIcon(bitmap);
+
+        NotificationManagerCompat managerCompat = NotificationManagerCompat.from(getApplicationContext());
+        managerCompat.notify(NOTIFICATION_ID, mNotificationBuilder.build());
     }
 
     private final IBinder mBinder = new MusicPlayerBinder();

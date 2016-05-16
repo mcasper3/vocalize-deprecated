@@ -26,7 +26,6 @@ import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
@@ -158,8 +157,8 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mEventManager.postEvent(new TogglePlaybackEvent());
                 mIsPlayingMusic = !mIsPlayingMusic;
+                mEventManager.postEvent(new TogglePlaybackEvent());
 
                 updatePlayButton();
             }
@@ -328,12 +327,16 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             updatePlayButton();
         }
 
-        TextView currentTime = (TextView) findViewById(R.id.current_time);
-        if (currentTime != null) {
-            currentTime.setText(R.string.initial_time);
-        }
+        TextView trackName = (TextView) findViewById(R.id.track_name);
+        if (trackName != null && !trackName.getText().toString().equals(track.getName())) {
 
-        updateView(track);
+            TextView currentTime = (TextView) findViewById(R.id.current_time);
+            if (currentTime != null) {
+                currentTime.setText(R.string.initial_time);
+            }
+
+            updateView(track);
+        }
     }
 
     @Subscribe
