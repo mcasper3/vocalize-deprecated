@@ -49,21 +49,12 @@
             android:name=".services.musicplayer.MusicPlayer"
             android:enabled="true"
             android:exported="false"
-            android:permission="me.mikecasper.musicvoice.MUSIC_PLAYER" >
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </service>
+            android:permission="me.mikecasper.musicvoice.MUSIC_PLAYER" />
 
         <receiver
             android:name=".services.AudioBroadcastReceiver"
             android:enabled="true"
-            android:exported="true"></receiver>
-        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
+            android:exported="true" />
     </application>
 
 </manifest>

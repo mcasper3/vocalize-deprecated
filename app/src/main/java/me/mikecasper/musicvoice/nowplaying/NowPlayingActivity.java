@@ -19,6 +19,7 @@ import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
 import me.mikecasper.musicvoice.MusicVoiceActivity;
+import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
@@ -291,6 +292,8 @@ public class NowPlayingActivity extends MusicVoiceActivity {
 
     @Override
     protected void onDestroy() {
+        ((MusicVoiceApplication) getApplication()).getRefWatcher().watch(this);
+
         super.onDestroy();
     }
 
