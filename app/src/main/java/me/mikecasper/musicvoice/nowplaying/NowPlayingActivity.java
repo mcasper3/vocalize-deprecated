@@ -255,6 +255,18 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         if (mShuffleEnabled) {
             shuffleButton.setImageResource(R.drawable.ic_shuffle);
         }
+
+        View queueButton = findViewById(R.id.queue_button);
+        queueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startQueueFragment();
+            }
+        });
+    }
+
+    private void startQueueFragment() {
+
     }
 
     private void updateShuffleButton() {

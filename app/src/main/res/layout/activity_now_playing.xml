@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".nowplaying.NowPlayingActivity">
 
     <ImageView
@@ -27,5 +28,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         layout="@layout/music_controls" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_queue"
+        android:id="@+id/queue_button"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:clickable="true"
+        android:layout_marginTop="8dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
