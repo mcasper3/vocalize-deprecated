@@ -669,7 +669,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 .setContentText(artistNames)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
-                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.teal_gray))
+                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.darkGray))
                 .setLargeIcon(defaultPlaylist)
                 .setAutoCancel(true)
                 .setWhen(0)
