@@ -6,9 +6,15 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <permission
+        android:name="me.mikecasper.musicvoice.MUSIC_PLAYER"
+        android:label="MusicPlayer"
+        android:protectionLevel="signature" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
+        android:name=".MusicVoiceApplication"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -38,6 +44,17 @@
             android:name=".onboarding.OnboardingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
+
+        <service
+            android:name=".services.musicplayer.MusicPlayer"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="me.mikecasper.musicvoice.MUSIC_PLAYER" />
+
+        <receiver
+            android:name=".services.AudioBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>

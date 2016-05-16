@@ -3,14 +3,16 @@ package me.mikecasper.musicvoice;
 import android.app.Application;
 
 import com.squareup.leakcanary.LeakCanary;
-
-import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
-import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
+import com.squareup.leakcanary.RefWatcher;
 
 public class MusicVoiceApplication extends Application {
 
     public static final LogLevel LOG_LEVEL = LogLevel.DEBUG;
+    private RefWatcher mRefWatcher;
+
+    public RefWatcher getRefWatcher() {
+        return mRefWatcher;
+    }
 
     public enum LogLevel {
         FULL,
@@ -21,14 +23,6 @@ public class MusicVoiceApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LeakCanary.install(this);
-    }
-
-    @Override
-    public void onTerminate() {
-        IEventManager eventManager = EventManagerProvider.getInstance(this);
-        eventManager.postEvent(new DestroyPlayerEvent());
-
-        super.onTerminate();
+        mRefWatcher = LeakCanary.install(this);
     }
 }

@@ -13,14 +13,13 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.services.LogInService;
-import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.onboarding.OnboardingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.events.CreatePlayerEvent;
+import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.util.Logger;
 
 public class LogInActivity extends MusicVoiceActivity {
@@ -42,17 +41,15 @@ public class LogInActivity extends MusicVoiceActivity {
         mEventManager = EventManagerProvider.getInstance(this);
 
         if (isLoggedIn) {
-            boolean shuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
-            int repeatMode = sharedPreferences.getInt(NowPlayingActivity.REPEAT_MODE, 0);
-
             long lastLoginTime = sharedPreferences.getLong(LogInService.LAST_LOGIN_TIME, 0);
             int expirationTime = sharedPreferences.getInt(LogInService.LOGIN_EXPIRATION_TIME, 0);
 
             if (System.currentTimeMillis() > lastLoginTime + expirationTime) {
                 mEventManager.postEvent(new LogInEvent(this));
             } else {
-                String token = sharedPreferences.getString(LogInService.SPOTIFY_TOKEN, null);
-                mEventManager.postEvent(new CreatePlayerEvent(this, token, shuffleEnabled, repeatMode));
+                Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                intent.setAction(MusicPlayer.CREATE_PLAYER);
+                startService(intent);
 
                 moveToOnboarding();
             }

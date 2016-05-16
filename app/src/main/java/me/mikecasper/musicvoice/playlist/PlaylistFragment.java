@@ -9,12 +9,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.squareup.leakcanary.RefWatcher;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import me.mikecasper.musicvoice.MusicVoiceActivity;
+import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
 import me.mikecasper.musicvoice.models.Playlist;
@@ -126,5 +128,13 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
                     .addToBackStack(null)
                     .commit();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        RefWatcher watcher = ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher();
+        watcher.watch(this);
+
+        super.onDestroy();
     }
 }

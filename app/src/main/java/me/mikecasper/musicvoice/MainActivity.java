@@ -43,6 +43,7 @@ import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
@@ -138,9 +139,8 @@ public class MainActivity extends MusicVoiceActivity
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mEventManager.postEvent(new TogglePlaybackEvent());
-
                 mIsPlaying = !mIsPlaying;
+                mEventManager.postEvent(new TogglePlaybackEvent());
 
                 updatePlayButton((ImageView) v);
             }
@@ -202,6 +202,14 @@ public class MainActivity extends MusicVoiceActivity
         mTrack = event.getTrack();
 
         if (miniNowPlaying != null) {
+            updateMiniNowPlaying();
+        }
+    }
+
+    @Subscribe
+    public void onLostPermission(LostPermissionEvent event) {
+        if (mIsPlaying) {
+            mIsPlaying = false;
             updateMiniNowPlaying();
         }
     }
@@ -349,5 +357,12 @@ public class MainActivity extends MusicVoiceActivity
 
         imageView.setImageDrawable(drawable);
         drawable.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        ((MusicVoiceApplication) getApplication()).getRefWatcher().watch(this);
+
+        super.onDestroy();
     }
 }

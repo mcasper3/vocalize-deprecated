@@ -16,6 +16,7 @@ import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
 import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.MusicVoiceActivity;
+import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.TrackResponse;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
@@ -165,5 +166,12 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
+
+        super.onDestroy();
     }
 }
