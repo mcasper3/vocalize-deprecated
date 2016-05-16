@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#000000</color>
     <color name="colorPrimaryOld">#212121</color>
-    <color name="colorPrimaryDark">@color/center_log_in_gradient</color>
+    <color name="colorPrimaryDark">#212121</color>
     <color name="colorAccent">#00BFA5</color>
     <color name="colorAccentTransparent">#3300BFA5</color>
     <color name="darkGray">#424242</color>

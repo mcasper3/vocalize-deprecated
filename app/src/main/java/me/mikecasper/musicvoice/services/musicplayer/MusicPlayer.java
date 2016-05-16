@@ -367,6 +367,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         mHandler.removeCallbacks(mShowNotification);
         stopForeground(true);
+        mIsForeground = false;
 
         if (!mTracks.isEmpty()) {
             track = mTracks.get(mSongIndex).first;
@@ -429,7 +430,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         if (mIsForeground) {
             stopForeground(false);
-            mIsForeground = false;
         }
 
         mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, mIsPlaying));
