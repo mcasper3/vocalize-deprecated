@@ -160,6 +160,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             mEventManager.postEvent(new SetPlaylistEvent(copy, position));
 
             Intent intent = new Intent(getContext(), NowPlayingActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra(NowPlayingActivity.TRACK, track);
             intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
             intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);

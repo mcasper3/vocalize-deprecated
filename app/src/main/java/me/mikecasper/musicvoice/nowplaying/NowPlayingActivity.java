@@ -3,7 +3,9 @@ package me.mikecasper.musicvoice.nowplaying;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.MusicVoiceApplication;
@@ -67,9 +70,25 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     private boolean mShuffleEnabled;
     private int mRepeatMode;
     private SeekBar mSeekBar;
+    private ImageView mAlbumArt;
 
-    // For Updating SeekBar
+    // Target for better image loading
+    private final Target mTarget = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            mAlbumArt.setImageBitmap(bitmap);
+        }
 
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            mAlbumArt.setImageDrawable(errorDrawable);
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+            // do nothing
+        }
+    };
 
     public NowPlayingActivity() {
         // Required empty public constructor
@@ -111,6 +130,8 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         }
 
         setUpButtons();
+
+        mAlbumArt = (ImageView) findViewById(R.id.album_art);
 
         mSeekBar = (SeekBar) findViewById(R.id.song_seek_bar);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -353,7 +374,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     private void updateView(Track track) {
         mSeekBar.setMax(track.getDuration());
 
-        ImageView albumArt = (ImageView) findViewById(R.id.album_art);
         TextView trackName = (TextView) findViewById(R.id.track_name);
         TextView artistName = (TextView) findViewById(R.id.artist_name);
         TextView remainingTime = (TextView) findViewById(R.id.remaining_time);
@@ -361,7 +381,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         Picasso.with(this)
                 .load(track.getAlbum().getImages().get(0).getUrl())
                 .error(R.drawable.default_playlist)
-                .into(albumArt);
+                .into(mTarget);
 
         if (trackName != null && artistName != null && remainingTime != null) {
             trackName.setText(track.getName());

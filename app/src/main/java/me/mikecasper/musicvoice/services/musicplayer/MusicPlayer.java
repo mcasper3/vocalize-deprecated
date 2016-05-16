@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Binder;
@@ -19,7 +18,6 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.app.NotificationCompat;
@@ -42,7 +40,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.api.services.LogInService;
@@ -128,6 +125,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     public void onCreate() {
         super.onCreate();
 
+        Logger.e(TAG, "In on create");
+
         mEventManager = EventManagerProvider.getInstance(this);
         mEventManager.register(this);
 
@@ -154,6 +153,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         };
 
         createIntents();
+
+        initPlayer();
     }
 
     private void createIntents() {
@@ -178,7 +179,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         handleIntent(intent);
 
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     private void handleIntent(Intent intent) {
@@ -186,13 +187,12 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             return;
         }
 
-        String action = intent.getAction();
+        Logger.d(TAG, "Received an intent with action " + intent.getAction());
 
-        Logger.e("HandleIntent", "Handling this intent, yo");
+        String action = intent.getAction();
 
         switch (action) {
             case CREATE_PLAYER:
-                initPlayer();
                 break;
             case RESUME_PLAYER:
                 playMusic(true);
@@ -207,7 +207,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 onSkipBackward(null);
                 break;
             case CLOSE_PLAYER:
-                onDestroy();
+                stopSelf();
                 break;
         }
     }
@@ -238,6 +238,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     public void onDestroy() {
         super.onDestroy();
 
+        Logger.d(TAG, "In onDestroy");
+
         mEventManager.unregister(this);
         if (mIsPlaying) {
             mEventManager.postEvent(new UpdatePlayerStatusEvent(false, mTracks.get(mSongIndex).first));
@@ -254,6 +256,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     @Subscribe
     public void onPauseMusic(PauseMusicEvent event) {
+        Logger.d(TAG, "On pause music");
+
         pauseMusic();
     }
 
@@ -336,6 +340,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     @Subscribe
     public void onTogglePlayback(TogglePlaybackEvent event) {
+        Logger.d(TAG, "Toggle playback");
+
         if (mPlayer == null) {
             initPlayer();
         }
@@ -348,6 +354,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     }
 
     private void playMusic(boolean shouldResume) {
+        Logger.d(TAG, "Playing music");
+
         if (mHasFocus || requestFocus()) {
             mHasFocus = true;
             mIsPlaying = true;
@@ -369,6 +377,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     }
 
     private void pauseMusic() {
+        Logger.d(TAG, "Pausing music");
+
         mPlayer.pause();
         stopSeekBarUpdate();
 
@@ -568,48 +578,29 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 if (!mIsPlaying) {
-                    mPlayer.resume();
-                    mIsPlaying = true;
-                    mPreviousTime = SystemClock.elapsedRealtime();
-                    scheduleSeekBarUpdate();
-                    mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, mTracks.get(mSongIndex).first));
+                    playMusic(true);
                 }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
-                if (mIsPlaying) {
-                    mPlayer.pause();
-                    mIsPlaying = false;
-                    stopSeekBarUpdate();
-                    mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, mTracks.get(mSongIndex).first));
-                }
                 abandonFocus();
-                break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 if (mIsPlaying) {
-                    mPlayer.pause();
-                    mIsPlaying = false;
-                    stopSeekBarUpdate();
-                    mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, mTracks.get(mSongIndex).first));
+                    pauseMusic();
                 }
                 break;
         }
     }
 
     private void setAsForegroundService() {
-        Intent intent = new Intent(getApplicationContext(), NowPlayingActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(intent);
+        Logger.d(TAG, "Setting as foreground service");
 
-        PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(getApplicationContext(), NowPlayingActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.drawable.default_playlist);
-
-        if (drawable instanceof BitmapDrawable) {
-            Logger.e("TAG", "bitmap drawable");
-        }
-
         Bitmap defaultPlaylist = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(defaultPlaylist);
@@ -633,6 +624,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
                 .setLargeIcon(defaultPlaylist)
+                .setAutoCancel(true)
                 .setWhen(0)
                 .setShowWhen(false)
                 .addAction(R.drawable.ic_skip_previous, "Skip Previous", mSkipBackwardIntent);
@@ -665,11 +657,21 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     }
 
     private void updateNotification() {
+        Logger.d(TAG, "Updating notification");
+
         mNotificationBuilder.mActions.remove(1);
 
         NotificationCompat.Action action = new NotificationCompat.Action.Builder(R.drawable.ic_play_small, "Play", mPlayIntent).build();
 
         mNotificationBuilder.mActions.add(1, action);
+
+        Intent delIntent = new Intent(getApplicationContext(), MusicPlayer.class);
+        delIntent.setAction(CLOSE_PLAYER);
+
+        PendingIntent deleteIntent = PendingIntent.getService(getApplicationContext(), REQUEST_CODE, delIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        mNotificationBuilder.setDeleteIntent(deleteIntent);
+
         NotificationManagerCompat managerCompat = NotificationManagerCompat.from(getApplicationContext());
         managerCompat.notify(NOTIFICATION_ID, mNotificationBuilder.build());
     }
