@@ -28,6 +28,8 @@ import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
+import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
@@ -298,6 +300,7 @@ public class NowPlayingActivity extends MusicVoiceActivity {
 
     @Override
     public void onPause() {
+        mEventManager.postEvent(new DisplayNotificationEvent());
         mEventManager.unregister(this);
 
         super.onPause();
@@ -308,6 +311,13 @@ public class NowPlayingActivity extends MusicVoiceActivity {
         super.onResume();
 
         mEventManager.register(this);
+
+        if (!MusicPlayer.isAlive()) {
+            Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+            intent.setAction(MusicPlayer.CREATE_PLAYER);
+            startService(intent);
+        }
+
         mEventManager.postEvent(new GetPlayerStatusEvent());
     }
 
@@ -334,6 +344,8 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             intent.putExtra(TRACK, track);
 
             updateView(track);
+        } else {
+            super.onBackPressed();
         }
     }
 

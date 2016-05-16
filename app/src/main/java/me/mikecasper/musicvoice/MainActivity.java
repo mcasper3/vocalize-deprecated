@@ -41,7 +41,9 @@ import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
@@ -76,7 +78,7 @@ public class MainActivity extends MusicVoiceActivity
         mEvents = new LinkedList<>();
         mRefreshingToken = false;
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -161,6 +163,7 @@ public class MainActivity extends MusicVoiceActivity
 
     @Override
     protected void onPause() {
+        mEventManager.postEvent(new DisplayNotificationEvent());
         mEventManager.unregister(this);
         super.onPause();
     }
@@ -169,6 +172,13 @@ public class MainActivity extends MusicVoiceActivity
     protected void onResume() {
         super.onResume();
         mEventManager.register(this);
+
+        if (!MusicPlayer.isAlive()) {
+            Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+            intent.setAction(MusicPlayer.CREATE_PLAYER);
+            startService(intent);
+        }
+
         mEventManager.postEvent(new GetPlayerStatusEvent());
     }
 
@@ -191,6 +201,8 @@ public class MainActivity extends MusicVoiceActivity
                 miniNowPlaying.setVisibility(View.VISIBLE);
                 miniNowPlaying.startAnimation(slideUp);
             }
+        } else if (miniNowPlaying != null) {
+            miniNowPlaying.setVisibility(View.GONE);
         }
     }
 

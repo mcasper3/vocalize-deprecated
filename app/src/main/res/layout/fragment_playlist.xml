@@ -5,11 +5,18 @@
     android:layout_height="match_parent"
     tools:context="me.mikecasper.musicvoice.playlist.PlaylistFragment" >
 
+    <android.support.v7.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar"
+        android:background="@color/colorPrimary" />
+
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
+        android:layout_below="@+id/toolbar"
         android:layout_centerHorizontal="true"
         android:id="@+id/playlist_grid" />
 

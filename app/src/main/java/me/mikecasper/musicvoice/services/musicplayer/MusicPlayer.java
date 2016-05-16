@@ -49,6 +49,7 @@ import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.services.AudioBroadcastReceiver;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.PauseMusicEvent;
@@ -67,6 +68,12 @@ import me.mikecasper.musicvoice.util.Logger;
 
 public class MusicPlayer extends Service implements ConnectionStateCallback, PlayerNotificationCallback, AudioManager.OnAudioFocusChangeListener {
 
+    private static boolean sIsAlive;
+
+    public static boolean isAlive() {
+        return sIsAlive;
+    }
+
     private static final String TAG = "MusicPlayer";
     private static final int NOTIFICATION_ID = 1;
     private static final int REQUEST_CODE = 37;
@@ -84,6 +91,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private boolean mShuffleWasEnabled;
     private boolean mIsPlaying;
     private boolean mHasFocus;
+    private boolean mIsForeground;
     private int mRepeatMode;
     private int mSongIndex;
     private int mPlaylistSize;
@@ -105,7 +113,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private Target mTarget;
 
     // Song time stuff
-    private static final long PROGRESS_UPDATE_INTERNAL = 1000;
+    private static final long PROGRESS_UPDATE_INTERVAL = 1000;
     private static final long PROGRESS_UPDATE_INITIAL_INTERVAL = 100;
 
     private ScheduledFuture<?> mScheduledFuture;
@@ -121,11 +129,21 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         }
     };
 
+    private static final int NOTIFICATION_DELAY = 250;
+    private final Runnable mShowNotification = new Runnable() {
+        @Override
+        public void run() {
+            setAsForegroundService();
+        }
+    };
+
     @Override
     public void onCreate() {
         super.onCreate();
 
-        Logger.e(TAG, "In on create");
+        Logger.d(TAG, "In on create");
+
+        sIsAlive = true;
 
         mEventManager = EventManagerProvider.getInstance(this);
         mEventManager.register(this);
@@ -155,6 +173,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         createIntents();
 
         initPlayer();
+
+        mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, null));
     }
 
     private void createIntents() {
@@ -240,17 +260,25 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         Logger.d(TAG, "In onDestroy");
 
+        sIsAlive = false;
+
         mEventManager.unregister(this);
+
         if (mIsPlaying) {
             mEventManager.postEvent(new UpdatePlayerStatusEvent(false, mTracks.get(mSongIndex).first));
             mPlayer.pause();
             mIsPlaying = false;
         }
+
         abandonFocus();
         Spotify.destroyPlayer(this);
         mPlayer = null;
         stopSeekBarUpdate();
-        stopForeground(true);
+
+        if (mIsForeground) {
+            mIsForeground = false;
+            stopForeground(true);
+        }
         mExecutorService.shutdown();
     }
 
@@ -329,12 +357,21 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     }
 
     @Subscribe
+    public void onDisplayNotification(DisplayNotificationEvent event) {
+        mHandler.postDelayed(mShowNotification, NOTIFICATION_DELAY);
+    }
+
+    @Subscribe
     public void onGetPlayerStatus(GetPlayerStatusEvent event) {
         Track track = null;
+
+        mHandler.removeCallbacks(mShowNotification);
+        stopForeground(true);
 
         if (!mTracks.isEmpty()) {
             track = mTracks.get(mSongIndex).first;
         }
+
         mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, track));
     }
 
@@ -359,8 +396,11 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         if (mHasFocus || requestFocus()) {
             mHasFocus = true;
             mIsPlaying = true;
-            setAsForegroundService();
             registerReceiver(mAudioBroadcastReceiver, mIntentFilter);
+
+            if (mIsForeground) {
+                setAsForegroundService();
+            }
 
             if (shouldResume) {
                 mPlayer.resume();
@@ -386,7 +426,11 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         updateNotification();
         unregisterReceiver(mAudioBroadcastReceiver);
-        stopForeground(false);
+
+        if (mIsForeground) {
+            stopForeground(false);
+            mIsForeground = false;
+        }
 
         mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, mIsPlaying));
     }
@@ -539,7 +583,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                             mHandler.post(mUpdateProgressTask);
                         }
                     }, PROGRESS_UPDATE_INITIAL_INTERVAL,
-                    PROGRESS_UPDATE_INTERNAL, TimeUnit.MILLISECONDS
+                    PROGRESS_UPDATE_INTERVAL, TimeUnit.MILLISECONDS
             );
         }
     }
@@ -593,6 +637,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     }
 
     private void setAsForegroundService() {
+        mIsForeground = true;
+
         Logger.d(TAG, "Setting as foreground service");
 
         Intent intent = new Intent(getApplicationContext(), NowPlayingActivity.class);
@@ -623,6 +669,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 .setContentText(artistNames)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
+                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.teal_gray))
                 .setLargeIcon(defaultPlaylist)
                 .setAutoCancel(true)
                 .setWhen(0)

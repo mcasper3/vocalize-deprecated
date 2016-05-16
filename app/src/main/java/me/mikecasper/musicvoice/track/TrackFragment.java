@@ -3,6 +3,7 @@ package me.mikecasper.musicvoice.track;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -69,6 +70,38 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
         RecyclerFastScroller scrollbar = (RecyclerFastScroller) view.findViewById(R.id.tracks_scrollbar);
         scrollbar.attachRecyclerView(recyclerView);
+
+        View shufflePlay = view.findViewById(R.id.shuffle_play_button);
+        shufflePlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mTracks != null) {
+                    PreferenceManager.getDefaultSharedPreferences(getContext())
+                            .edit()
+                            .putInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_ENABLED)
+                            .apply();
+
+                    int position = (int) (Math.random() * mTracks.size());
+                    Track track = mTracks.get(position).getTrack();
+
+                    List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
+
+                    for (TrackResponseItem item : mTracks) {
+                        copy.add(new TrackResponseItem(item));
+                    }
+
+                    mEventManager.postEvent(new SetPlaylistEvent(copy, position));
+
+                    Intent intent = new Intent(getContext(), NowPlayingActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra(NowPlayingActivity.TRACK, track);
+                    intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
+                    intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
+                    intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
+                    startActivity(intent);
+                }
+            }
+        });
 
         return view;
     }
