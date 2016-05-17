@@ -77,6 +77,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private static final String TAG = "MusicPlayer";
     private static final int NOTIFICATION_ID = 1;
     private static final int REQUEST_CODE = 37;
+    private static final int QUEUE_SIZE = 50;
 
     // Intent Actions
     public static final String CREATE_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.CREATE_PLAYER";

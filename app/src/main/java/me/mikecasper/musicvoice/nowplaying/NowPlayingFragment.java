@@ -338,7 +338,7 @@ public class NowPlayingFragment extends Fragment {
     }
 
     @Subscribe
-    public void onPlayerStatusObtained(UpdatePlayerStatusEvent event) {
+    public void onPlayerStatusUpdated(UpdatePlayerStatusEvent event) {
         boolean wasPlaying = mIsPlayingMusic;
         mIsPlayingMusic = event.isPlaying();
 

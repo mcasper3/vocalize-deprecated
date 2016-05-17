@@ -36,7 +36,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         mPlaylistName = playlistName;
     }
 
-    public void updateTracks(List<Track> queue, List<Track> priorityQueue) {
+    public void updateQueues(List<Track> queue, List<Track> priorityQueue) {
         mQueue = queue;
         mPriorityQueue = priorityQueue;
         notifyDataSetChanged();
@@ -197,12 +197,12 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         nowPlayingViewHolder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO do something with this to go back to other fragment
+                // TODO do something with this to go back to other fragment (check instanceof)
                 mListener.onItemClick(nowPlayingViewHolder);
             }
         });
     }
-    
+
     @Override
     public int getItemCount() {
         int size = 2;

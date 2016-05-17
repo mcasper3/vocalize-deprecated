@@ -40,6 +40,8 @@ import java.util.List;
 public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
 
     private static final String TAG = "TrackFragment";
+    private static final String TRACKS = "tracks";
+
     private List<TrackResponseItem> mTracks;
     private IEventManager mEventManager;
     private Playlist mPlaylist;
@@ -51,7 +53,6 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         super.onCreate(savedInstanceState);
 
         mEventManager = EventManagerProvider.getInstance(getContext());
-        mTracks = new ArrayList<>();
     }
 
     @Override
@@ -59,7 +60,12 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_track_list, container, false);
 
-        getTracks();
+        if (savedInstanceState == null) {
+            mTracks = new ArrayList<>();
+            getTracks();
+        } else {
+            mTracks = savedInstanceState.getParcelableArrayList(TRACKS);
+        }
 
         // Set the adapter
         Context context = view.getContext();
@@ -112,6 +118,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(PlaylistFragment.SELECTED_PLAYLIST, mPlaylist);
+        outState.putParcelableArrayList(TRACKS, (ArrayList<TrackResponseItem>) mTracks);
     }
 
     private void getTracks() {
@@ -141,7 +148,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             View progressBar = view.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.INVISIBLE);
 
-            final View shufflePlay = view.findViewById(R.id.shuffle_play_button);
+            View shufflePlay = view.findViewById(R.id.shuffle_play_button);
             shufflePlay.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
