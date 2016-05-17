@@ -23,6 +23,7 @@ import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetQueuesEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongFromQueueEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.QueuesObtainedEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
 import me.mikecasper.musicvoice.util.Logger;
@@ -150,9 +151,11 @@ public class QueueFragment extends Fragment implements RecyclerViewItemClickList
     @Override
     public void onItemClick(RecyclerView.ViewHolder viewHolder) {
         if (viewHolder instanceof QueueAdapter.NowPlayingViewHolder) {
-            // TODO now playing
+            getActivity().onBackPressed();
         } else {
             // TODO queue item
+            QueueAdapter.QueueItemViewHolder queueItemViewHolder = (QueueAdapter.QueueItemViewHolder) viewHolder;
+            mEventManager.postEvent(new PlaySongFromQueueEvent(queueItemViewHolder.mTrackIndex));
         }
     }
 }

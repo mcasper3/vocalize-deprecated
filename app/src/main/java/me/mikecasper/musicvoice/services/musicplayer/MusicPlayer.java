@@ -41,6 +41,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.api.services.LogInService;
@@ -54,6 +55,7 @@ import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationE
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetQueuesEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongFromQueueEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.QueuesObtainedEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.PauseMusicEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
@@ -99,8 +101,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private int mRepeatMode;
     private int mSongIndex;
     private int mPlaylistSize;
-    private int mQueueIndex;
-    private int mNextSongToQueueIndex;
     private List<Integer> mNewTrackOrder;
     private Deque<Integer> mQueue;
     private Deque<Integer> mPriorityQueue;
@@ -357,11 +357,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         }
 
         for (int i = 0; i < size; i++) {
-            //if (repeatEnabled) {
-                mQueue.add(mNewTrackOrder.get((mSongIndex + i) % mPlaylistSize));
-            //} else {
-                //mQueue.add(mNewTrackOrder.get(mSongIndex + i));
-            //}
+            mQueue.add(mNewTrackOrder.get((mSongIndex + i) % mPlaylistSize));
         }
     }
 
@@ -644,10 +640,15 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         onGetQueues(null);
     }
 
-    /*@Subscribe
+    @Subscribe
     public void playSongFromQueue(PlaySongFromQueueEvent event) {
         // TODO when playing song from queue, add position in queue to songIndex and mod mPlaylistSize
-    }*/
+        mSongIndex = (mSongIndex + event.getQueueIndex()) % mPlaylistSize;
+
+        playMusic(false);
+        createQueue();
+        onGetQueues(null);
+    }
 
     // ConnectionStateCallback Methods
     @Override
@@ -664,7 +665,12 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     public void onLoginFailed(Throwable throwable) {
         Logger.e(TAG, "Login failed", throwable);
 
-        // TODO need to log in again
+        if (mIsPlaying) {
+            pauseMusic();
+        }
+
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
     }
 
     @Override

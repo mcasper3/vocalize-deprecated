@@ -149,6 +149,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         }
 
         queueItemViewHolder.mTrack = track;
+        queueItemViewHolder.mTrackIndex = position;
 
         queueItemViewHolder.mTrackName.setText(track.getName());
 
@@ -233,6 +234,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
     public class QueueItemViewHolder extends ViewHolder {
 
         public Track mTrack;
+        public int mTrackIndex;
         public final View mView;
         public final TextView mTrackName;
         public final TextView mArtistName;
