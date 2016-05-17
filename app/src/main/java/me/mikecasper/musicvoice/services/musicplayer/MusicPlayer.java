@@ -99,6 +99,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private int mRepeatMode;
     private int mSongIndex;
     private int mPlaylistSize;
+    private int mQueueIndex;
+    private int mNextSongToQueueIndex;
     private List<Integer> mNewTrackOrder;
     private Deque<Integer> mQueue;
     private Deque<Integer> mPriorityQueue;
@@ -182,7 +184,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         initPlayer();
 
-        mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, null));
+        mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, null, mPreviousSongTime));
     }
 
     private void createIntents() {
@@ -275,12 +277,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         if (mIsPlaying) {
             int position = mNewTrackOrder.get(mSongIndex);
             Track track = mOriginalTracks.get(position);
-            mEventManager.postEvent(new UpdatePlayerStatusEvent(false, track));
+            mEventManager.postEvent(new UpdatePlayerStatusEvent(false, track, mPreviousSongTime));
             mPlayer.pause();
             mIsPlaying = false;
         }
 
         abandonFocus();
+        mHasFocus = false;
         Spotify.destroyPlayer(this);
         mPlayer = null;
         stopSeekBarUpdate();
@@ -470,7 +473,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             track = mOriginalTracks.get(position);
         }
 
-        mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, track));
+        mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, track, mPreviousSongTime));
     }
 
     @Subscribe
@@ -660,6 +663,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     @Override
     public void onLoginFailed(Throwable throwable) {
         Logger.e(TAG, "Login failed", throwable);
+
+        // TODO need to log in again
     }
 
     @Override
@@ -749,6 +754,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 abandonFocus();
+                mHasFocus = false;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 if (mIsPlaying) {
@@ -824,6 +830,10 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         Picasso.with(getApplicationContext())
                 .load(currentTrack.getAlbum().getImages().get(0).getUrl())
                 .into(mTarget);
+
+        if (!mIsPlaying) {
+            stopForeground(false);
+        }
     }
 
     private void updateNotification() {

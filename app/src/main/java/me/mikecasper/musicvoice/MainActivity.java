@@ -195,6 +195,8 @@ public class MainActivity extends MusicVoiceActivity
                 updateMiniNowPlaying();
             }
 
+            mProgressBar.setProgress(event.getCurrentSongPosition());
+
             // display the view if it is hidden
             if (miniNowPlaying.getVisibility() == View.GONE) {
                 Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);

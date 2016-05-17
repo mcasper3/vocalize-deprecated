@@ -361,6 +361,10 @@ public class NowPlayingFragment extends Fragment {
             args.putParcelable(NowPlayingActivity.TRACK, track);
 
             updateView(track);
+
+            if (mSeekBar != null) {
+                mSeekBar.setProgress(event.getCurrentSongPosition());
+            }
         } else {
             getActivity().onBackPressed();
         }

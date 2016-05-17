@@ -57,6 +57,10 @@ public class NowPlayingActivity extends MusicVoiceActivity {
             Intent intent = getIntent();
             Bundle args = intent.getExtras();
 
+            if (args == null) {
+                args = new Bundle();
+            }
+
             fragment.setArguments(args);
 
             // start first activity
