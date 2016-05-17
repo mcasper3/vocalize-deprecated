@@ -425,10 +425,10 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         mIsPlaying = false;
 
-        updateNotification();
         unregisterReceiver(mAudioBroadcastReceiver);
 
         if (mIsForeground) {
+            updateNotification();
             stopForeground(false);
         }
 
@@ -501,6 +501,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         }
     }
 
+    // TODO when playing song from queue, add position in queue to songIndex and mod mPlaylistSize
+
     private void playPreviousSong() {
         boolean shouldPlaySong = true;
 
@@ -560,8 +562,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 playNextSong();
                 break;
             case LOST_PERMISSION:
-                stopSeekBarUpdate();
-                mIsPlaying = false;
+                if (mIsPlaying) {
+                    pauseMusic();
+                }
                 mEventManager.postEvent(new LostPermissionEvent());
                 break;
         }

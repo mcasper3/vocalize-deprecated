@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="OnboardingViewPager">
-        <attr name="swipable" format="boolean" />
+        <attr name="swipeable" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="SquareImageView">
+        <attr name="useWidth" format="boolean" />
     </declare-styleable>
 </resources>

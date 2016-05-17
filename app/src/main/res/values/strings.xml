@@ -23,6 +23,9 @@
     <!-- NowPlaying Strings -->
     <string name="initial_time">0:00</string>
     <string name="shuffle">Shuffle</string>
+    <string name="playing_from">Playing from: %s</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="next_from">Next from: %s</string>
     <!-- End NowPlaying Strings -->
 
     <!-- Onboarding Strings -->

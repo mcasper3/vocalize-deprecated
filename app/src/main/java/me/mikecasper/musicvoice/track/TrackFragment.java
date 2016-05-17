@@ -71,38 +71,6 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         RecyclerFastScroller scrollbar = (RecyclerFastScroller) view.findViewById(R.id.tracks_scrollbar);
         scrollbar.attachRecyclerView(recyclerView);
 
-        View shufflePlay = view.findViewById(R.id.shuffle_play_button);
-        shufflePlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mTracks != null) {
-                    PreferenceManager.getDefaultSharedPreferences(getContext())
-                            .edit()
-                            .putInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_ENABLED)
-                            .apply();
-
-                    int position = (int) (Math.random() * mTracks.size());
-                    Track track = mTracks.get(position).getTrack();
-
-                    List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
-
-                    for (TrackResponseItem item : mTracks) {
-                        copy.add(new TrackResponseItem(item));
-                    }
-
-                    mEventManager.postEvent(new SetPlaylistEvent(copy, position));
-
-                    Intent intent = new Intent(getContext(), NowPlayingActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra(NowPlayingActivity.TRACK, track);
-                    intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
-                    intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
-                    intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
-                    startActivity(intent);
-                }
-            }
-        });
-
         return view;
     }
 
@@ -162,17 +130,55 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
     @Subscribe
     public void onTracksObtained(TrackResponse response) {
-        Logger.i(TAG, "Tracks obtained");
+        mTracks.addAll(response.getItems());
 
         View view = getView();
-        if (view != null) {
-            mTracks.addAll(response.getItems());
+        if (response.getNext() == null && view != null) {
             RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
             TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
             adapter.updateTracks(mTracks);
 
             View progressBar = view.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.INVISIBLE);
+
+            final View shufflePlay = view.findViewById(R.id.shuffle_play_button);
+            shufflePlay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    shufflePlay();
+                }
+            });
+
+            Logger.d(TAG, "Tracks obtained");
+        }
+    }
+
+    private void shufflePlay() {
+        if (mTracks != null) {
+            PreferenceManager.getDefaultSharedPreferences(getContext())
+                    .edit()
+                    .putInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_ENABLED)
+                    .apply();
+
+            int position = (int) (Math.random() * mTracks.size());
+            Track track = mTracks.get(position).getTrack();
+
+            List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
+
+            for (TrackResponseItem item : mTracks) {
+                copy.add(new TrackResponseItem(item));
+            }
+
+            mEventManager.postEvent(new SetPlaylistEvent(copy, position));
+
+            Intent intent = new Intent(getContext(), NowPlayingActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra(NowPlayingActivity.TRACK, track);
+            intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
+            intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
+            intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
+            intent.putExtra(NowPlayingActivity.PLAYLIST_NAME, mPlaylist.getName());
+            startActivity(intent);
         }
     }
 
@@ -198,6 +204,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
             intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
             intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
             intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
+            intent.putExtra(NowPlayingActivity.PLAYLIST_NAME, mPlaylist.getName());
             startActivity(intent);
         }
     }

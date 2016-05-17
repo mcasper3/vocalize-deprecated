@@ -9,12 +9,12 @@ import android.view.MotionEvent;
 import me.mikecasper.musicvoice.R;
 
 public class OnboardingViewPager extends ViewPager {
-    private boolean mSwipable;
+    private boolean mSwipeable;
 
     public OnboardingViewPager(Context context) {
         super(context);
 
-        mSwipable = true;
+        mSwipeable = true;
     }
 
     public OnboardingViewPager(Context context, AttributeSet attrs) {
@@ -23,7 +23,7 @@ public class OnboardingViewPager extends ViewPager {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.OnboardingViewPager);
 
         try {
-            mSwipable = typedArray.getBoolean(R.styleable.OnboardingViewPager_swipable, true);
+            mSwipeable = typedArray.getBoolean(R.styleable.OnboardingViewPager_swipeable, true);
         } finally {
             typedArray.recycle();
         }
@@ -31,11 +31,11 @@ public class OnboardingViewPager extends ViewPager {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return mSwipable && super.onInterceptTouchEvent(ev);
+        return mSwipeable && super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        return mSwipable && super.onTouchEvent(ev);
+        return mSwipeable && super.onTouchEvent(ev);
     }
 }

@@ -131,6 +131,7 @@ public class MainActivity extends MusicVoiceActivity
                 intent.putExtra(NowPlayingActivity.TRACK, mTrack);
                 intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, mIsPlaying);
                 intent.putExtra(NowPlayingActivity.CURRENT_TIME, mProgressBar.getProgress());
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }
         });
