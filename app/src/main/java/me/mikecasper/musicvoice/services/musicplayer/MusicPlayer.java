@@ -34,8 +34,10 @@ import com.squareup.picasso.Target;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -98,10 +100,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private boolean mIsPlaying;
     private boolean mHasFocus;
     private boolean mIsForeground;
+    private boolean mPlayingFromPriorityQueue;
     private int mRepeatMode;
     private int mSongIndex;
     private int mPlaylistSize;
+    private int mPreviousSongIndex;
     private List<Integer> mNewTrackOrder;
+    private Stack<Integer> mTrackHistory;
     private Deque<Integer> mQueue;
     private Deque<Integer> mPriorityQueue;
     private List<Track> mOriginalTracks;
@@ -156,7 +161,10 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mEventManager = EventManagerProvider.getInstance(this);
         mEventManager.register(this);
 
+        mPreviousSongIndex = 0;
+
         mNewTrackOrder = new ArrayList<>();
+        mTrackHistory = new Stack<>();
         mQueue = new LinkedList<>();
         mPriorityQueue = new LinkedList<>();
         mOriginalTracks = new ArrayList<>();
@@ -275,7 +283,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mEventManager.unregister(this);
 
         if (mIsPlaying) {
-            int position = mNewTrackOrder.get(mSongIndex);
+            int position = mQueue.peekFirst();
             Track track = mOriginalTracks.get(position);
             mEventManager.postEvent(new UpdatePlayerStatusEvent(false, track, mPreviousSongTime));
             mPlayer.pause();
@@ -331,6 +339,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         int position = event.getPosition();
         organizeTracks(true, position);
         mSongIndex = 0;
+        mPreviousSongIndex = mPlaylistSize - 1;
 
         if (mPlayer == null) {
             initPlayer();
@@ -365,34 +374,47 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         boolean repeatEnabled = mRepeatMode == NowPlayingActivity.MODE_ENABLED;
 
         if (addToFront) {
-            if (mQueue.size() > QUEUE_SIZE) {
-                mQueue.removeLast();
-            }
+            //if (mQueue.size() > QUEUE_SIZE) {
+            //    mQueue.removeLast();
+            //}
 
-            mQueue.addFirst(mNewTrackOrder.get(mSongIndex));
-        } else {
-            mQueue.removeFirst();
-
-            int position;
-
-            if (mShuffleEnabled) {
-                position = mSongIndex;
+            if (!mTrackHistory.isEmpty()) {
+                int previousSong = mTrackHistory.pop();
+                mQueue.addFirst(previousSong);
             } else {
-                position = mNewTrackOrder.get(mSongIndex);
-            }
+                mQueue.addFirst(mNewTrackOrder.get(mPreviousSongIndex));
+                mPreviousSongIndex--;
 
-            int nextPosition = position + QUEUE_SIZE - 1;
-            if (repeatEnabled && nextPosition > mPlaylistSize - 1) {
-                if (mShuffleEnabled) {
-                    mQueue.addLast(mNewTrackOrder.get(nextPosition % mPlaylistSize));
-                } else {
-                    mQueue.addLast(nextPosition % mPlaylistSize);
+                if (mPreviousSongIndex == -1) {
+                    mPreviousSongIndex = mPlaylistSize - 1;
                 }
-            } else if (nextPosition <= mPlaylistSize - 1) {
+            }
+        } else {
+            int lastPlayed = mQueue.removeFirst();
+            mTrackHistory.push(lastPlayed);
+
+            if (mQueue.size() < QUEUE_SIZE) {
+                int position;
+
                 if (mShuffleEnabled) {
-                    mQueue.addLast(mNewTrackOrder.get(nextPosition));
+                    position = mSongIndex;
                 } else {
-                    mQueue.addLast(nextPosition);
+                    position = mNewTrackOrder.get(mSongIndex);
+                }
+
+                int nextPosition = position + QUEUE_SIZE - 1;
+                if (repeatEnabled && nextPosition > mPlaylistSize - 1) {
+                    if (mShuffleEnabled) {
+                        mQueue.addLast(mNewTrackOrder.get(nextPosition % mPlaylistSize));
+                    } else {
+                        mQueue.addLast(nextPosition % mPlaylistSize);
+                    }
+                } else if (nextPosition <= mPlaylistSize - 1) {
+                    if (mShuffleEnabled) {
+                        mQueue.addLast(mNewTrackOrder.get(nextPosition));
+                    } else {
+                        mQueue.addLast(nextPosition);
+                    }
                 }
             }
         }
@@ -400,12 +422,29 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     @Subscribe
     public void onGetQueues(GetQueuesEvent event) {
-        List<Track> queue = new ArrayList<>(mQueue.size());
+        int queueSize = mQueue.size();
+
+        int size = Math.min(QUEUE_SIZE, queueSize);
+        size = Math.min(size, mPlaylistSize + queueSize);
+
+        List<Track> queue = new ArrayList<>(size);
         List<Track> priorityQueue = new ArrayList<>(mPriorityQueue.size());
 
-        for (int i : mQueue) {
-            Track track = mOriginalTracks.get(i);
+        boolean foundLastSong = false;
+
+        Iterator<Integer> iterator = mQueue.iterator();
+        for (int i = 0; i < size; i++) {
+            int current = iterator.next();
+            Track track = mOriginalTracks.get(current);
             queue.add(track);
+
+            if ((mShuffleEnabled && current == mNewTrackOrder.get(mPlaylistSize - 1)) || current == mPlaylistSize - 1) {
+                if (foundLastSong) {
+                    break;
+                } else {
+                    foundLastSong = true;
+                }
+            }
         }
 
         for (int i : mPriorityQueue) {
@@ -465,7 +504,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mIsForeground = false;
 
         if (!mNewTrackOrder.isEmpty()) {
-            int position = mNewTrackOrder.get(mSongIndex);
+            int position = mQueue.peekFirst();
             track = mOriginalTracks.get(position);
         }
 
@@ -499,7 +538,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 setAsForegroundService();
             }
 
-            int position = mNewTrackOrder.get(mSongIndex);
+            int position = mQueue.peekFirst();
             Track track = mOriginalTracks.get(position);
 
             if (shouldResume) {
@@ -531,7 +570,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             stopForeground(false);
         }
 
-        int position = mNewTrackOrder.get(mSongIndex);
+        int position = mQueue.peekFirst();
         Track track = mOriginalTracks.get(position);
         mEventManager.postEvent(new SongChangeEvent(track, mIsPlaying));
     }
@@ -586,17 +625,26 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         boolean shouldPlaySong = true;
 
         if (mRepeatMode != NowPlayingActivity.MODE_SINGLE) {
-            mSongIndex = ++mSongIndex % mPlaylistSize;
+            if (mPlayingFromPriorityQueue) {
+                mPriorityQueue.remove();
+            }
 
-            if ((!mShuffleEnabled && mNewTrackOrder.get(mSongIndex) == 0) || (mShuffleEnabled && mSongIndex == 0)) {
-                if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
-                    shouldPlaySong = false;
-                    createQueue();
+            if (!mPriorityQueue.isEmpty()) {
+                mPlayingFromPriorityQueue = true;
+            } else {
+                mPlayingFromPriorityQueue = false;
+                mSongIndex = ++mSongIndex % mPlaylistSize;
+
+                if ((!mShuffleEnabled && mNewTrackOrder.get(mSongIndex) == 0) || (mShuffleEnabled && mSongIndex == 0)) {
+                    if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
+                        shouldPlaySong = false;
+                        createQueue();
+                    } else {
+                        addToQueue(false);
+                    }
                 } else {
                     addToQueue(false);
                 }
-            } else {
-                addToQueue(false);
             }
         }
 
@@ -642,8 +690,14 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     @Subscribe
     public void playSongFromQueue(PlaySongFromQueueEvent event) {
-        // TODO when playing song from queue, add position in queue to songIndex and mod mPlaylistSize
-        mSongIndex = (mSongIndex + event.getQueueIndex()) % mPlaylistSize;
+        int queueDifference = event.getQueueIndex();
+        mSongIndex = (mSongIndex + queueDifference) % mPlaylistSize;
+
+        int current;
+        for (int i = 0; i < queueDifference; i++) {
+            current = mQueue.removeFirst();
+            mTrackHistory.push(current);
+        }
 
         playMusic(false);
         createQueue();
@@ -787,7 +841,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
 
-        int position = mNewTrackOrder.get(mSongIndex);
+        int position = mQueue.peekFirst();
         Track currentTrack = mOriginalTracks.get(position);
 
         String artistNames = "";

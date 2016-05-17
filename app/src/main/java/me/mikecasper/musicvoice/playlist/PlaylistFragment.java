@@ -132,6 +132,9 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
 
     @Override
     public void onDestroy() {
+        mPlaylists = null;
+        mEventManager = null;
+
         RefWatcher watcher = ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher();
         watcher.watch(this);
 

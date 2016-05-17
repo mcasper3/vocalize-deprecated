@@ -22,6 +22,7 @@ import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
@@ -490,5 +491,17 @@ public class NowPlayingFragment extends Fragment {
         if (mSeekBar != null) {
             mSeekBar.setProgress(event.getSongTime());
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        mEventManager = null;
+        mCurrentTime = null;
+        mSeekBar = null;
+        mAlbumArt = null;
+
+        ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
+
+        super.onDestroy();
     }
 }

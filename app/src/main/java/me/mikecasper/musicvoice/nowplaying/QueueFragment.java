@@ -66,6 +66,10 @@ public class QueueFragment extends Fragment implements RecyclerViewItemClickList
 
     @Override
     public void onDestroy() {
+        mEventManager = null;
+        mQueue = null;
+        mPriorityQueue = null;
+
         ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
 
         super.onDestroy();

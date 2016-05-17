@@ -216,6 +216,10 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
     @Override
     public void onDestroy() {
+        mEventManager = null;
+        mTracks = null;
+        mPlaylist = null;
+
         ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
 
         super.onDestroy();
