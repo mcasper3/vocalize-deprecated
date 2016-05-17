@@ -19,7 +19,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.Pair;
 import android.support.v7.app.NotificationCompat;
 
 import com.spotify.sdk.android.player.Config;
@@ -34,6 +33,8 @@ import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -51,7 +52,9 @@ import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.GetQueuesEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.QueuesObtainedEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.PauseMusicEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
@@ -77,7 +80,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private static final String TAG = "MusicPlayer";
     private static final int NOTIFICATION_ID = 1;
     private static final int REQUEST_CODE = 37;
-    private static final int QUEUE_SIZE = 50;
+    private static final int QUEUE_SIZE = 51;
 
     // Intent Actions
     public static final String CREATE_PLAYER = "me.mikecasper.musicvoice.MusicPlayer.CREATE_PLAYER";
@@ -96,7 +99,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private int mRepeatMode;
     private int mSongIndex;
     private int mPlaylistSize;
-    private List<Pair<Track, Integer>> mTracks;
+    private List<Integer> mNewTrackOrder;
+    private Deque<Integer> mQueue;
+    private Deque<Integer> mPriorityQueue;
     private List<Track> mOriginalTracks;
     private IEventManager mEventManager;
     private AudioManager mAudioManager;
@@ -149,7 +154,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mEventManager = EventManagerProvider.getInstance(this);
         mEventManager.register(this);
 
-        mTracks = new ArrayList<>();
+        mNewTrackOrder = new ArrayList<>();
+        mQueue = new LinkedList<>();
+        mPriorityQueue = new LinkedList<>();
         mOriginalTracks = new ArrayList<>();
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mAudioBroadcastReceiver = new AudioBroadcastReceiver();
@@ -266,7 +273,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mEventManager.unregister(this);
 
         if (mIsPlaying) {
-            mEventManager.postEvent(new UpdatePlayerStatusEvent(false, mTracks.get(mSongIndex).first));
+            int position = mNewTrackOrder.get(mSongIndex);
+            Track track = mOriginalTracks.get(position);
+            mEventManager.postEvent(new UpdatePlayerStatusEvent(false, track));
             mPlayer.pause();
             mIsPlaying = false;
         }
@@ -301,6 +310,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     @Subscribe
     public void onToggleRepeat(ToggleRepeatEvent event) {
         mRepeatMode = ++mRepeatMode % 3;
+
+        createQueue();
     }
 
     @Subscribe
@@ -314,7 +325,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             mOriginalTracks.add(item.getTrack());
         }
 
-        organizeTracks(true, event.getPosition());
+        int position = event.getPosition();
+        organizeTracks(true, position);
         mSongIndex = 0;
 
         if (mPlayer == null) {
@@ -324,37 +336,120 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         playMusic(false);
     }
 
+    private void createQueue() {
+        int size;
+
+        if (mQueue.size() > 0) {
+            mQueue.clear();
+        }
+
+        boolean repeatEnabled = mRepeatMode == NowPlayingActivity.MODE_ENABLED;
+
+        if (!repeatEnabled) {
+            int position = mNewTrackOrder.get(mSongIndex);
+
+            size = Math.min(QUEUE_SIZE, mPlaylistSize - position);
+        } else {
+            size = QUEUE_SIZE;
+        }
+
+        for (int i = 0; i < size; i++) {
+            //if (repeatEnabled) {
+                mQueue.add(mNewTrackOrder.get((mSongIndex + i) % mPlaylistSize));
+            //} else {
+                //mQueue.add(mNewTrackOrder.get(mSongIndex + i));
+            //}
+        }
+    }
+
+    private void addToQueue(boolean addToFront) {
+        boolean repeatEnabled = mRepeatMode == NowPlayingActivity.MODE_ENABLED;
+
+        if (addToFront) {
+            if (mQueue.size() > QUEUE_SIZE) {
+                mQueue.removeLast();
+            }
+
+            mQueue.addFirst(mNewTrackOrder.get(mSongIndex));
+        } else {
+            mQueue.removeFirst();
+
+            int position;
+
+            if (mShuffleEnabled) {
+                position = mSongIndex;
+            } else {
+                position = mNewTrackOrder.get(mSongIndex);
+            }
+
+            int nextPosition = position + QUEUE_SIZE - 1;
+            if (repeatEnabled && nextPosition > mPlaylistSize - 1) {
+                if (mShuffleEnabled) {
+                    mQueue.addLast(mNewTrackOrder.get(nextPosition % mPlaylistSize));
+                } else {
+                    mQueue.addLast(nextPosition % mPlaylistSize);
+                }
+            } else if (nextPosition <= mPlaylistSize - 1) {
+                if (mShuffleEnabled) {
+                    mQueue.addLast(mNewTrackOrder.get(nextPosition));
+                } else {
+                    mQueue.addLast(nextPosition);
+                }
+            }
+        }
+    }
+
+    @Subscribe
+    public void onGetQueues(GetQueuesEvent event) {
+        List<Track> queue = new ArrayList<>(mQueue.size());
+        List<Track> priorityQueue = new ArrayList<>(mPriorityQueue.size());
+
+        for (int i : mQueue) {
+            Track track = mOriginalTracks.get(i);
+            queue.add(track);
+        }
+
+        for (int i : mPriorityQueue) {
+            Track track = mOriginalTracks.get(i);
+            priorityQueue.add(track);
+        }
+
+        mEventManager.postEvent(new QueuesObtainedEvent(queue, priorityQueue));
+    }
+
     private void organizeTracks(boolean refreshTracks, int position) {
-        Pair<Track, Integer> firstTrack;
+        int firstTrack;
 
         if ((mShuffleWasEnabled && !mShuffleEnabled) || refreshTracks) {
             int index = position;
 
             if (!refreshTracks) {
-                index = mTracks.get(mSongIndex).second;
+                index = mNewTrackOrder.get(mSongIndex);
             }
 
-            mTracks.clear();
+            mNewTrackOrder.clear();
 
             for (int i = index; i < mOriginalTracks.size(); i++) {
-                mTracks.add(new Pair<>(mOriginalTracks.get(i), i));
+                mNewTrackOrder.add(i);
             }
 
             for (int i = 0; i < index; i++) {
-                mTracks.add(new Pair<>(mOriginalTracks.get(i), i));
+                mNewTrackOrder.add(i);
             }
 
-            firstTrack = mTracks.remove(0);
+            firstTrack = mNewTrackOrder.remove(0);
         } else {
-            firstTrack = mTracks.remove(mSongIndex);
+            firstTrack = mNewTrackOrder.remove(mSongIndex);
         }
 
         if (mShuffleEnabled) {
-            Collections.shuffle(mTracks);
+            Collections.shuffle(mNewTrackOrder);
         }
 
-        mTracks.add(0, firstTrack);
+        mNewTrackOrder.add(0, firstTrack);
         mSongIndex = 0;
+
+        createQueue();
     }
 
     @Subscribe
@@ -370,8 +465,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         stopForeground(true);
         mIsForeground = false;
 
-        if (!mTracks.isEmpty()) {
-            track = mTracks.get(mSongIndex).first;
+        if (!mNewTrackOrder.isEmpty()) {
+            int position = mNewTrackOrder.get(mSongIndex);
+            track = mOriginalTracks.get(position);
         }
 
         mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, track));
@@ -404,17 +500,20 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                 setAsForegroundService();
             }
 
+            int position = mNewTrackOrder.get(mSongIndex);
+            Track track = mOriginalTracks.get(position);
+
             if (shouldResume) {
                 mPlayer.resume();
             } else {
                 mPreviousSongTime = 0;
-                mPlayer.play(mTracks.get(mSongIndex).first.getUri());
+                mPlayer.play(track.getUri());
             }
 
             mPreviousTime = SystemClock.elapsedRealtime();
             scheduleSeekBarUpdate();
 
-            mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, mIsPlaying));
+            mEventManager.postEvent(new SongChangeEvent(track, mIsPlaying));
         }
     }
 
@@ -433,7 +532,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             stopForeground(false);
         }
 
-        mEventManager.postEvent(new SongChangeEvent(mTracks.get(mSongIndex).first, mIsPlaying));
+        int position = mNewTrackOrder.get(mSongIndex);
+        Track track = mOriginalTracks.get(position);
+        mEventManager.postEvent(new SongChangeEvent(track, mIsPlaying));
     }
 
     @Subscribe
@@ -488,10 +589,15 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         if (mRepeatMode != NowPlayingActivity.MODE_SINGLE) {
             mSongIndex = ++mSongIndex % mPlaylistSize;
 
-            if ((!mShuffleEnabled && mTracks.get(mSongIndex).second == 0) || (mShuffleEnabled && mSongIndex == 0)) {
+            if ((!mShuffleEnabled && mNewTrackOrder.get(mSongIndex) == 0) || (mShuffleEnabled && mSongIndex == 0)) {
                 if (mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
                     shouldPlaySong = false;
+                    createQueue();
+                } else {
+                    addToQueue(false);
                 }
+            } else {
+                addToQueue(false);
             }
         }
 
@@ -500,9 +606,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         if (!shouldPlaySong) {
             pauseMusic();
         }
-    }
 
-    // TODO when playing song from queue, add position in queue to songIndex and mod mPlaylistSize
+        onGetQueues(null);
+    }
 
     private void playPreviousSong() {
         boolean shouldPlaySong = true;
@@ -513,11 +619,16 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             mSongIndex = mPlaylistSize - 1;
 
             if (mShuffleEnabled && mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
+                mSongIndex = 0;
                 shouldPlaySong = false;
+            } else {
+                addToQueue(true);
             }
+        } else {
+            addToQueue(true);
         }
 
-        if (mTracks.get(mSongIndex).second == -1 && mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
+        if (!mShuffleEnabled && mNewTrackOrder.get(mSongIndex) == mPlaylistSize - 1 && mRepeatMode != NowPlayingActivity.MODE_ENABLED) {
             shouldPlaySong = false;
         }
 
@@ -526,7 +637,14 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         if (!shouldPlaySong) {
             pauseMusic();
         }
+
+        onGetQueues(null);
     }
+
+    /*@Subscribe
+    public void playSongFromQueue(PlaySongFromQueueEvent event) {
+        // TODO when playing song from queue, add position in queue to songIndex and mod mPlaylistSize
+    }*/
 
     // ConnectionStateCallback Methods
     @Override
@@ -657,7 +775,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
 
-        Track currentTrack = mTracks.get(mSongIndex).first;
+        int position = mNewTrackOrder.get(mSongIndex);
+        Track currentTrack = mOriginalTracks.get(position);
 
         String artistNames = "";
 

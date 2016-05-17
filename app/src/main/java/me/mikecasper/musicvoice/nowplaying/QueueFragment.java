@@ -1,7 +1,5 @@
 package me.mikecasper.musicvoice.nowplaying;
 
-
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -12,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
 
@@ -24,7 +23,7 @@ import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetQueuesEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.OnQueuesObtainedEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.QueuesObtainedEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
 import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
@@ -61,6 +60,7 @@ public class QueueFragment extends Fragment implements RecyclerViewItemClickList
         super.onResume();
 
         mEventManager.register(this);
+        getQueues();
     }
 
     @Override
@@ -73,9 +73,8 @@ public class QueueFragment extends Fragment implements RecyclerViewItemClickList
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_track_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_queue, container, false);
 
-        getQueues();
         mQueue = new ArrayList<>();
         mPriorityQueue = new ArrayList<>();
 
@@ -92,14 +91,32 @@ public class QueueFragment extends Fragment implements RecyclerViewItemClickList
                     .apply();
         }
 
+        TextView playlistNameTextView = (TextView) view.findViewById(R.id.playlist_name);
+        playlistNameTextView.setSelected(true);
+        playlistNameTextView.setSingleLine(true);
+        playlistNameTextView.setText(getString(R.string.playing_from, playlistName));
+
         // Set the adapter
-        Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.queue_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(new QueueAdapter(mQueue, mPriorityQueue, playlistName, this));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
+        View nowPlayingButton = view.findViewById(R.id.now_playing_button);
+        nowPlayingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
     }
 
     private void getQueues() {
@@ -116,13 +133,13 @@ public class QueueFragment extends Fragment implements RecyclerViewItemClickList
     }
 
     @Subscribe
-    public void onQueuesObtained(OnQueuesObtainedEvent event) {
+    public void onQueuesObtained(QueuesObtainedEvent event) {
         mQueue = event.getQueue();
         mPriorityQueue = event.getPriorityQueue();
 
         View view = getView();
         if (view != null) {
-            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
+            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.queue_list);
             QueueAdapter adapter = (QueueAdapter) recyclerView.getAdapter();
             adapter.updateQueues(mQueue, mPriorityQueue);
 

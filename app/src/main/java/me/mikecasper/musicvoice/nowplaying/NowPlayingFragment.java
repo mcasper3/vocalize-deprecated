@@ -267,7 +267,15 @@ public class NowPlayingFragment extends Fragment {
     }
 
     private void startQueueFragment() {
-        // TODO
+        Fragment fragment = new QueueFragment();
+        Bundle args = getArguments();
+        fragment.setArguments(args);
+
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.now_playing_content, fragment)
+                .addToBackStack(null) // TODO remove?
+                .commit();
     }
 
     private void checkRepeatMode() {

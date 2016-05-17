@@ -46,7 +46,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
     public int getItemViewType(int position) {
         int type;
 
-        boolean includePriorityQueue = mPriorityQueue != null && mPriorityQueue.size() > 0;
+        boolean includePriorityQueue = mPriorityQueue.size() > 0;
 
         if (position == 0) {
             type = TITLE_TYPE;
@@ -91,7 +91,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        boolean includePriorityQueue = mPriorityQueue != null && mPriorityQueue.size() > 0;
+        boolean includePriorityQueue = mPriorityQueue.size() > 0;
 
         if (position == 0) {
             Context context = holder.mView.getContext();
@@ -126,7 +126,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
                 }
             } else {
                 // position - 2 is the position in the queue since at position 3, we will want to get the second item in the queue
-                bindQueueItem(holder, false, position - 3);
+                bindQueueItem(holder, false, position - 2);
             }
         }
     }
@@ -207,12 +207,14 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
     public int getItemCount() {
         int size = 2;
 
-        if (mQueue.size() > 1) {
-            size = mQueue.size() + 2;
+        int queueSize = mQueue.size();
+        if (queueSize > 1) {
+            size = queueSize + 2;
         }
 
-        if (mPriorityQueue != null && mPriorityQueue.size() > 0) {
-            size += mPriorityQueue.size() + 1;
+        int priorityQueueSize = mPriorityQueue.size();
+        if (priorityQueueSize > 0) {
+            size += priorityQueueSize + 1;
         }
 
         return size;

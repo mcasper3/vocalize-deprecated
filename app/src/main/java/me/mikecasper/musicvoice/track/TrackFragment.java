@@ -1,6 +1,5 @@
 package me.mikecasper.musicvoice.track;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -68,9 +67,8 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         }
 
         // Set the adapter
-        Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(new TrackAdapter(mTracks, this));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
