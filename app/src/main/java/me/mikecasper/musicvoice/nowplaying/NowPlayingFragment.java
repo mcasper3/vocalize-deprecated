@@ -275,7 +275,6 @@ public class NowPlayingFragment extends Fragment {
         getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.now_playing_content, fragment)
-                .addToBackStack(null) // TODO remove?
                 .commit();
     }
 

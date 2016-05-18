@@ -2,10 +2,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:paddingLeft="8dp"
-    android:paddingStart="8dp"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp"
     android:paddingRight="16dp"
     android:paddingEnd="16dp"
     android:clickable="true"
@@ -13,18 +9,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <CheckBox
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:id="@+id/queue_check_box"
-        android:layout_gravity="center_vertical"/>
+        android:layout_gravity="center_vertical"
+        android:clickable="false"
+        android:id="@+id/queue_check_box_wrapper"
+        android:padding="16dp">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/queue_check_box" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
         android:layout_gravity="center_vertical"
         android:orientation="vertical">
 

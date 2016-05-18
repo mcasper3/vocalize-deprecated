@@ -182,10 +182,15 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         });
 
         queueItemViewHolder.mCheckBox.setChecked(false);
-        queueItemViewHolder.mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        queueItemViewHolder.mCheckBox.setClickable(false);
+
+        queueItemViewHolder.mCheckBoxWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Context context = buttonView.getContext();
+            public void onClick(View v) {
+                boolean isChecked = !queueItemViewHolder.mCheckBox.isChecked();
+                queueItemViewHolder.mCheckBox.setChecked(isChecked);
+
+                Context context = v.getContext();
 
                 IEventManager eventManager = EventManagerProvider.getInstance(context);
                 eventManager.postEvent(new CheckBoxSelectedEvent(info, isChecked));
@@ -264,6 +269,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         public final TextView mTrackName;
         public final TextView mArtistName;
         public final CheckBox mCheckBox;
+        public final View mCheckBoxWrapper;
 
         public QueueItemViewHolder(View view) {
             super(view);
@@ -272,6 +278,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
             mTrackName = (TextView) view.findViewById(R.id.queue_track_name);
             mArtistName = (TextView) view.findViewById(R.id.queue_artist_name);
             mCheckBox = (CheckBox) view.findViewById(R.id.queue_check_box);
+            mCheckBoxWrapper = view.findViewById(R.id.queue_check_box_wrapper);
         }
     }
 
