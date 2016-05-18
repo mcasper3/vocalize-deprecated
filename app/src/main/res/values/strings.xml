@@ -40,4 +40,9 @@
     <string name="ok">OK</string>
     <string name="skip">Skip</string>
     <!-- End Onboarding Strings -->
+    
+    <!-- Speech Recognizer Strings -->
+    <string name="grammar_file_header">#JSGF V1.0;\r\n\r\ngrammar com.musicvoice.%1$s;\r\n\r\n&lt;%2$s&gt; = </string>
+    <string name="grammar_file_ending">\r\npublic &lt;%1$s&gt; = &lt;%2$s&gt;;</string>
+    <!-- End Speech Recognizer Strings -->
 </resources>

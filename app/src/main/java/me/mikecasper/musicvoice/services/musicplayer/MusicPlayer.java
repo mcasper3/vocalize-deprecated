@@ -57,24 +57,9 @@ import me.mikecasper.musicvoice.nowplaying.models.QueueItemInformation;
 import me.mikecasper.musicvoice.services.AudioBroadcastReceiver;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.GetQueuesEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.PlaySongFromQueueEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.QueuesObtainedEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.PauseMusicEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.StopSeekbarUpdateEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.ToggleRepeatEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.ToggleShuffleEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.*;
+import me.mikecasper.musicvoice.services.voicerecognition.IVoiceRecognizer;
+import me.mikecasper.musicvoice.services.voicerecognition.PocketSphinxVoiceRecognizer;
 import me.mikecasper.musicvoice.util.Logger;
 
 public class MusicPlayer extends Service implements ConnectionStateCallback, PlayerNotificationCallback, AudioManager.OnAudioFocusChangeListener {
@@ -123,6 +108,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private final IntentFilter mIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
     private NotificationCompat.Builder mNotificationBuilder;
 
+    // Voice recognition
+    private IVoiceRecognizer mVoiceRecognizer;
+
     // Intents for notification
     private PendingIntent mPlayIntent;
     private PendingIntent mPauseIntent;
@@ -167,6 +155,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         mEventManager = EventManagerProvider.getInstance(this);
         mEventManager.register(this);
+
+        //mVoiceRecognizer = new PocketSphinxVoiceRecognizer(this);
+        //mEventManager.register(mVoiceRecognizer);
 
         mPreviousSongIndex = 0;
         mNextSongIndex = QUEUE_SIZE;
