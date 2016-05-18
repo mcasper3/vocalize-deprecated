@@ -121,6 +121,11 @@ public class QueueFragment extends Fragment {
         Track track = args.getParcelable(NowPlayingActivity.TRACK);
         mIsPlaying = args.getBoolean(NowPlayingActivity.IS_PLAYING_MUSIC, false);
 
+        if (mIsPlaying) {
+            ImageView pausePlayImage = (ImageView) view.findViewById(R.id.queue_play_pause_image);
+            pausePlayImage.setImageResource(R.drawable.ic_pause);
+        }
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         if (playlistName == null) {

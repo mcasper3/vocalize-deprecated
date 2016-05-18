@@ -132,7 +132,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private Target mTarget;
 
     // Song time stuff
-    private static final long PROGRESS_UPDATE_INTERVAL = 1000;
+    private static final long PROGRESS_UPDATE_INTERVAL = 100;
     private static final long PROGRESS_UPDATE_INITIAL_INTERVAL = 100;
 
     private ScheduledFuture<?> mScheduledFuture;
