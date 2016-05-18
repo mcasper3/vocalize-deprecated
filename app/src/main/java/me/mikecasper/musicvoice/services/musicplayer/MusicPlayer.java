@@ -908,7 +908,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         Logger.i(TAG, eventType.name());
 
         switch (eventType) {
-            //case END_OF_CONTEXT:
             case TRACK_CHANGED:
                 if (mRecentlyPlayedMusic) {
                     mRecentlyPlayedMusic = false;
