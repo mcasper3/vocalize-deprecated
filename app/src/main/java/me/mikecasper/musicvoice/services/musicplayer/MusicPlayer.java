@@ -825,7 +825,11 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         int queueDifference = event.getQueueIndex();
 
         if (event.isPriorityQueue()) {
-            for (int i = 0; i < queueDifference + 1; i++) {
+            if (mPlayingFromPriorityQueue) {
+                queueDifference++;
+            }
+            
+            for (int i = 0; i < queueDifference; i++) {
                 mPriorityQueue.removeFirst();
             }
 
