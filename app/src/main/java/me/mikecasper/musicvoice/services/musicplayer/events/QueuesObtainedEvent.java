@@ -5,10 +5,12 @@ import java.util.List;
 import me.mikecasper.musicvoice.models.Track;
 
 public class QueuesObtainedEvent {
+    private Track mNowPlaying;
     private List<Track> mQueue;
     private List<Track> mPriorityQueue;
 
-    public QueuesObtainedEvent(List<Track> queue, List<Track> priorityQueue) {
+    public QueuesObtainedEvent(Track nowPlaying, List<Track> queue, List<Track> priorityQueue) {
+        this.mNowPlaying = nowPlaying;
         this.mQueue = queue;
         this.mPriorityQueue = priorityQueue;
     }
@@ -19,5 +21,9 @@ public class QueuesObtainedEvent {
 
     public List<Track> getPriorityQueue() {
         return mPriorityQueue;
+    }
+
+    public Track getNowPlaying() {
+        return mNowPlaying;
     }
 }

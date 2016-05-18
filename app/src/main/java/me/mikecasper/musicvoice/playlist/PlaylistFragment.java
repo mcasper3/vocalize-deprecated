@@ -25,11 +25,11 @@ import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.track.TrackFragment;
 import me.mikecasper.musicvoice.util.Logger;
-import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
 import me.mikecasper.musicvoice.util.Utility;
 import me.mikecasper.musicvoice.views.VerticalSpaceItemDecoration;
 
-public class PlaylistFragment extends Fragment implements RecyclerViewItemClickListener {
+public class PlaylistFragment extends Fragment {
 
     public static final String SELECTED_PLAYLIST = "selectedPlaylist";
 
@@ -68,7 +68,7 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
         playlistRecyclerView.setHasFixedSize(true);
         playlistRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         playlistRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(Utility.convertDpToPixel(10, getContext())));
-        playlistRecyclerView.setAdapter(new PlaylistAdapter(getContext(), mPlaylists, this));
+        playlistRecyclerView.setAdapter(new PlaylistAdapter(getContext(), mPlaylists));
 
         if (!mPlaylists.isEmpty()) {
             View progressBar = view.findViewById(R.id.progress_bar);
@@ -112,8 +112,10 @@ public class PlaylistFragment extends Fragment implements RecyclerViewItemClickL
         }
     }
 
-    @Override
-    public void onItemClick(RecyclerView.ViewHolder viewHolder) {
+    @Subscribe
+    public void onItemClick(RecyclerViewItemClickedEvent event) {
+        RecyclerView.ViewHolder viewHolder = event.getViewHolder();
+
         if (viewHolder instanceof PlaylistAdapter.ViewHolder) {
             PlaylistAdapter.ViewHolder selectedPlaylist = (PlaylistAdapter.ViewHolder) viewHolder;
             Playlist playlist = selectedPlaylist.mPlaylist;

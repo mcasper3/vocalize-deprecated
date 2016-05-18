@@ -14,18 +14,18 @@ import java.util.List;
 
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.models.Playlist;
-import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
-    private RecyclerViewItemClickListener mListener;
     private List<Playlist> mPlaylists;
     private Context mContext;
 
-    public PlaylistAdapter(Context context, List<Playlist> playlists, RecyclerViewItemClickListener listener) {
+    public PlaylistAdapter(Context context, List<Playlist> playlists) {
         mPlaylists = playlists;
         mContext = context;
-        mListener = listener;
     }
 
     public void setPlaylists(List<Playlist> playlists) {
@@ -56,7 +56,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.onItemClick(holder);
+                Context context = v.getContext();
+
+                IEventManager eventManager = EventManagerProvider.getInstance(context);
+                eventManager.postEvent(new RecyclerViewItemClickedEvent(holder));
             }
         });
     }

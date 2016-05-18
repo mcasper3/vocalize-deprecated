@@ -26,6 +26,9 @@
     <string name="playing_from">Playing from: %s</string>
     <string name="now_playing">Now Playing</string>
     <string name="next_from">Next from: %s</string>
+    <string name="queued">Queued</string>
+    <string name="remove">Remove</string>
+    <string name="add_to_queue">Add to Queue</string>
     <!-- End NowPlaying Strings -->
 
     <!-- Onboarding Strings -->

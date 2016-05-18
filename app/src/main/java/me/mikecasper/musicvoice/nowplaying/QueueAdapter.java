@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,7 +17,11 @@ import java.util.List;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
-import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
+import me.mikecasper.musicvoice.nowplaying.events.CheckBoxSelectedEvent;
+import me.mikecasper.musicvoice.nowplaying.models.QueueItemInformation;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 
 public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> {
 
@@ -24,21 +29,22 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
     private static final int NOW_PLAYING_TYPE = 1;
     private static final int QUEUE_ITEM_TYPE = 2;
 
-    private RecyclerViewItemClickListener mListener;
     private List<Track> mQueue;
     private List<Track> mPriorityQueue;
+    private Track mNowPlaying;
     private String mPlaylistName;
 
-    public QueueAdapter(List<Track> queue, List<Track> priorityQueue, String playlistName, RecyclerViewItemClickListener listener) {
-        mListener = listener;
+    public QueueAdapter(Track nowPlaying, List<Track> queue, List<Track> priorityQueue, String playlistName) {
         mQueue = queue;
         mPriorityQueue = priorityQueue;
         mPlaylistName = playlistName;
+        mNowPlaying = nowPlaying;
     }
 
-    public void updateQueues(List<Track> queue, List<Track> priorityQueue) {
+    public void updateQueues(List<Track> queue, List<Track> priorityQueue, Track nowPlaying) {
         mQueue = queue;
         mPriorityQueue = priorityQueue;
+        mNowPlaying = nowPlaying;
         notifyDataSetChanged();
     }
 
@@ -106,7 +112,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
             String title;
 
             if (includePriorityQueue) {
-                title = context.getString(R.string.now_playing);
+                title = context.getString(R.string.queued);
             } else {
                 title = context.getString(R.string.next_from, mPlaylistName);
             }
@@ -126,7 +132,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
                 }
             } else {
                 // position - 2 is the position in the queue since at position 3, we will want to get the second item in the queue
-                bindQueueItem(holder, false, position - 2);
+                bindQueueItem(holder, false, position - 3);
             }
         }
     }
@@ -137,19 +143,21 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         titleViewHolder.mTitle.setText(title);
     }
 
-    private void bindQueueItem(ViewHolder viewHolder, boolean isPriorityQueue, int position) {
+    private void bindQueueItem(ViewHolder viewHolder, boolean isPriorityQueue, int queuePosition) {
         final QueueItemViewHolder queueItemViewHolder = (QueueItemViewHolder) viewHolder;
 
         Track track;
 
         if (isPriorityQueue) {
-            track = mPriorityQueue.get(position);
+            track = mPriorityQueue.get(queuePosition);
         } else {
-            track = mQueue.get(position);
+            track = mQueue.get(queuePosition);
         }
 
-        queueItemViewHolder.mTrack = track;
-        queueItemViewHolder.mTrackIndex = position;
+        final QueueItemInformation info = new QueueItemInformation(queuePosition, isPriorityQueue);
+
+        queueItemViewHolder.mTrackIndex = queuePosition;
+        queueItemViewHolder.mIsPriorityQueue = isPriorityQueue;
 
         queueItemViewHolder.mTrackName.setText(track.getName());
 
@@ -166,7 +174,21 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         queueItemViewHolder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.onItemClick(queueItemViewHolder);
+                Context context = v.getContext();
+
+                IEventManager eventManager = EventManagerProvider.getInstance(context);
+                eventManager.postEvent(new RecyclerViewItemClickedEvent(queueItemViewHolder));
+            }
+        });
+
+        queueItemViewHolder.mCheckBox.setChecked(false);
+        queueItemViewHolder.mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Context context = buttonView.getContext();
+
+                IEventManager eventManager = EventManagerProvider.getInstance(context);
+                eventManager.postEvent(new CheckBoxSelectedEvent(info, isChecked));
             }
         });
     }
@@ -174,14 +196,11 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
     private void bindNowPlaying(ViewHolder viewHolder) {
         final NowPlayingViewHolder nowPlayingViewHolder = (NowPlayingViewHolder) viewHolder;
 
-        Track track = mQueue.get(0);
-        nowPlayingViewHolder.mTrack = track;
-
-        nowPlayingViewHolder.mTrackName.setText(track.getName());
+        nowPlayingViewHolder.mTrackName.setText(mNowPlaying.getName());
 
         String artistNames = "";
 
-        for (Artist artist : track.getArtists()) {
+        for (Artist artist : mNowPlaying.getArtists()) {
             artistNames += artist.getName() + ", ";
         }
 
@@ -191,26 +210,32 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
 
         Context context = nowPlayingViewHolder.mAlbumArt.getContext();
         Picasso.with(context)
-                .load(track.getAlbum().getImages().get(0).getUrl())
+                .load(mNowPlaying.getAlbum().getImages().get(0).getUrl())
                 .fit()
                 .into(nowPlayingViewHolder.mAlbumArt);
 
         nowPlayingViewHolder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO do something with this to go back to other fragment (check instanceof)
-                mListener.onItemClick(nowPlayingViewHolder);
+                Context context = v.getContext();
+
+                IEventManager eventManager = EventManagerProvider.getInstance(context);
+                eventManager.postEvent(new RecyclerViewItemClickedEvent(nowPlayingViewHolder));
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        int size = 2;
+        int size = 0;
+
+        if (mNowPlaying != null) {
+            size += 2;
+        }
 
         int queueSize = mQueue.size();
-        if (queueSize > 1) {
-            size = queueSize + 2;
+        if (queueSize > 0) {
+            size += queueSize + 1;
         }
 
         int priorityQueueSize = mPriorityQueue.size();
@@ -233,8 +258,8 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
 
     public class QueueItemViewHolder extends ViewHolder {
 
-        public Track mTrack;
         public int mTrackIndex;
+        public boolean mIsPriorityQueue;
         public final View mView;
         public final TextView mTrackName;
         public final TextView mArtistName;
@@ -252,7 +277,6 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
 
     public class NowPlayingViewHolder extends ViewHolder {
 
-        public Track mTrack;
         public final View mView;
         public final ImageView mAlbumArt;
         public final TextView mArtistName;

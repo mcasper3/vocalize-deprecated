@@ -211,14 +211,10 @@ public class MainActivity extends MusicVoiceActivity
 
     @Subscribe
     public void onSongChange(SongChangeEvent event) {
-        View miniNowPlaying = findViewById(R.id.main_music_controls);
-
         mIsPlaying = event.isPlayingSong();
         mTrack = event.getTrack();
 
-        if (miniNowPlaying != null) {
-            updateMiniNowPlaying();
-        }
+        updateMiniNowPlaying();
     }
 
     @Subscribe
@@ -238,31 +234,33 @@ public class MainActivity extends MusicVoiceActivity
         View miniNowPlaying = findViewById(R.id.main_music_controls);
         mProgressBar.setMax(mTrack.getDuration());
 
-        ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
-        ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
-        TextView trackName = (TextView) miniNowPlaying.findViewById(R.id.mini_track_name);
-        TextView artistName = (TextView) miniNowPlaying.findViewById(R.id.mini_artist_name);
+        if (miniNowPlaying != null) {
+            ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
+            ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
+            TextView trackName = (TextView) miniNowPlaying.findViewById(R.id.mini_track_name);
+            TextView artistName = (TextView) miniNowPlaying.findViewById(R.id.mini_artist_name);
 
-        int drawableId = mIsPlaying ? R.drawable.ic_pause : R.drawable.ic_play;
+            int drawableId = mIsPlaying ? R.drawable.ic_pause : R.drawable.ic_play;
 
-        if (mLeftieLayout) {
-            leftImage.setImageResource(drawableId);
-            Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(rightImage);
-        } else {
-            Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(leftImage);
-            rightImage.setImageResource(drawableId);
+            if (mLeftieLayout) {
+                leftImage.setImageResource(drawableId);
+                Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(rightImage);
+            } else {
+                Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(leftImage);
+                rightImage.setImageResource(drawableId);
+            }
+
+            trackName.setText(mTrack.getName());
+
+            String artistNames = "";
+
+            for (Artist artist : mTrack.getArtists()) {
+                artistNames += artist.getName() + ", ";
+            }
+
+            artistNames = artistNames.substring(0, artistNames.length() - 2);
+            artistName.setText(artistNames);
         }
-
-        trackName.setText(mTrack.getName());
-
-        String artistNames = "";
-
-        for (Artist artist : mTrack.getArtists()) {
-            artistNames += artist.getName() + ", ";
-        }
-
-        artistNames = artistNames.substring(0, artistNames.length() - 2);
-        artistName.setText(artistNames);
     }
 
     @Subscribe
@@ -376,6 +374,11 @@ public class MainActivity extends MusicVoiceActivity
 
     @Override
     protected void onDestroy() {
+        mEventManager = null;
+        mTrack = null;
+        mProgressBar = null;
+        mEvents = null;
+
         ((MusicVoiceApplication) getApplication()).getRefWatcher().watch(this);
 
         super.onDestroy();

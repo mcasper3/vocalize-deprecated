@@ -76,6 +76,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/queue_list"
+        android:layout_above="@+id/queue_song_time"
         android:layout_below="@+id/top_content" />
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:id="@+id/queue_song_time"
+        android:layout_above="@+id/bottomSection"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:progressDrawable="@drawable/horizontal_progress_bar"
+        android:indeterminate="false" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
+        android:padding="8dp"
+        android:background="@drawable/mini_now_playing_gradient"
+        android:orientation="horizontal"
+        android:id="@+id/bottomSection">
+
+        <include
+            android:id="@+id/queue_music_controls"
+            layout="@layout/queue_music_controls" />
+
+        <include
+            android:id="@+id/queue_alternate_controls"
+            android:visibility="gone"
+            layout="@layout/queue_alternate_controls" />
+
+    </LinearLayout>
 
 </RelativeLayout>

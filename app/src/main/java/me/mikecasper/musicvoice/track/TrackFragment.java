@@ -1,5 +1,6 @@
 package me.mikecasper.musicvoice.track;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,14 +30,15 @@ import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
+import me.mikecasper.musicvoice.track.events.TracksObtainedEvent;
 import me.mikecasper.musicvoice.util.Logger;
-import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
 import me.mikecasper.musicvoice.views.DividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
+public class TrackFragment extends Fragment {
 
     private static final String TAG = "TrackFragment";
     private static final String TRACKS = "tracks";
@@ -69,7 +71,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         // Set the adapter
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new TrackAdapter(mTracks, this));
+        recyclerView.setAdapter(new TrackAdapter(mTracks));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
         RecyclerFastScroller scrollbar = (RecyclerFastScroller) view.findViewById(R.id.tracks_scrollbar);
@@ -134,27 +136,35 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
     }
 
     @Subscribe
-    public void onTracksObtained(TrackResponse response) {
-        mTracks.addAll(response.getItems());
+    public void onTracksObtained(TracksObtainedEvent event) {
+        if (event.getPlaylistId().equals(mPlaylist.getId())) {
+            TrackResponse response = event.getTrackResponse();
 
-        View view = getView();
-        if (response.getNext() == null && view != null) {
-            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
-            TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
-            adapter.updateTracks(mTracks);
+            mTracks.addAll(response.getItems());
 
-            View progressBar = view.findViewById(R.id.progress_bar);
-            progressBar.setVisibility(View.INVISIBLE);
+            if (response.getNext() == null) {
+                View view = getView();
+                if (view != null) {
+                    RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
+                    TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
+                    adapter.updateTracks(mTracks);
 
-            View shufflePlay = view.findViewById(R.id.shuffle_play_button);
-            shufflePlay.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    shufflePlay();
+                    View progressBar = view.findViewById(R.id.progress_bar);
+                    progressBar.setVisibility(View.INVISIBLE);
+
+                    View shufflePlay = view.findViewById(R.id.shuffle_play_button);
+                    shufflePlay.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            shufflePlay();
+                        }
+                    });
+
+                    Logger.d(TAG, "Tracks obtained");
                 }
-            });
-
-            Logger.d(TAG, "Tracks obtained");
+            } else {
+                mEventManager.postEvent(new GetPlaylistTracksEvent(event.getUserId(), event.getPlaylistId(), response.getOffset() + response.getItems().size()));
+            }
         }
     }
 
@@ -162,55 +172,53 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         if (mTracks != null) {
             PreferenceManager.getDefaultSharedPreferences(getContext())
                     .edit()
-                    .putInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_ENABLED)
+                    .putBoolean(NowPlayingActivity.SHUFFLE_ENABLED, true)
                     .apply();
 
             int position = (int) (Math.random() * mTracks.size());
             Track track = mTracks.get(position).getTrack();
 
-            List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
-
-            for (TrackResponseItem item : mTracks) {
-                copy.add(new TrackResponseItem(item));
-            }
-
-            mEventManager.postEvent(new SetPlaylistEvent(copy, position));
-
-            Intent intent = new Intent(getContext(), NowPlayingActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            intent.putExtra(NowPlayingActivity.TRACK, track);
-            intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
-            intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
-            intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
-            intent.putExtra(NowPlayingActivity.PLAYLIST_NAME, mPlaylist.getName());
-            startActivity(intent);
+            moveToNowPlayingIfNeeded(position, track);
         }
     }
 
-    @Override
-    public void onItemClick(RecyclerView.ViewHolder viewHolder) {
+    @Subscribe
+    public void onItemClick(RecyclerViewItemClickedEvent event) {
+        RecyclerView.ViewHolder viewHolder = event.getViewHolder();
+
         if (viewHolder instanceof TrackAdapter.ViewHolder) {
             TrackAdapter.ViewHolder selectedTrack = (TrackAdapter.ViewHolder) viewHolder;
             Track track = selectedTrack.mTrack;
 
             int position = viewHolder.getAdapterPosition();
 
-            List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
+            moveToNowPlayingIfNeeded(position, track);
+        }
+    }
 
-            for (TrackResponseItem item : mTracks) {
-                copy.add(new TrackResponseItem(item));
+    private void moveToNowPlayingIfNeeded(int position, Track track) {
+        List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
+
+        for (TrackResponseItem item : mTracks) {
+            copy.add(new TrackResponseItem(item));
+        }
+
+        mEventManager.postEvent(new SetPlaylistEvent(copy, position));
+
+        Activity activity = getActivity();
+
+        if (activity != null) {
+            View miniNowPlaying = activity.findViewById(R.id.main_music_controls);
+            if (miniNowPlaying == null || miniNowPlaying.getVisibility() != View.VISIBLE) {
+                Intent intent = new Intent(getContext(), NowPlayingActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra(NowPlayingActivity.TRACK, track);
+                intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
+                intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
+                intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
+                intent.putExtra(NowPlayingActivity.PLAYLIST_NAME, mPlaylist.getName());
+                startActivity(intent);
             }
-
-            mEventManager.postEvent(new SetPlaylistEvent(copy, position));
-
-            Intent intent = new Intent(getContext(), NowPlayingActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            intent.putExtra(NowPlayingActivity.TRACK, track);
-            intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
-            intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
-            intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
-            intent.putExtra(NowPlayingActivity.PLAYLIST_NAME, mPlaylist.getName());
-            startActivity(intent);
         }
     }
 

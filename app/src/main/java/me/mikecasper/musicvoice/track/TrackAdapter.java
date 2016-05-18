@@ -12,17 +12,17 @@ import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.models.Album;
 import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
-import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
 
 import java.util.List;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> {
 
-    private RecyclerViewItemClickListener mListener;
     private List<TrackResponseItem> mTracks;
 
-    public TrackAdapter(List<TrackResponseItem> tracks, RecyclerViewItemClickListener listener) {
-        mListener = listener;
+    public TrackAdapter(List<TrackResponseItem> tracks) {
         mTracks = tracks;
     }
 
@@ -62,7 +62,10 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.onItemClick(holder);
+                Context context = v.getContext();
+
+                IEventManager eventManager = EventManagerProvider.getInstance(context);
+                eventManager.postEvent(new RecyclerViewItemClickedEvent(holder));
             }
         });
     }
