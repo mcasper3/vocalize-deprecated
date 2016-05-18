@@ -193,6 +193,7 @@ public class QueueFragment extends Fragment {
             public void onClick(View v) {
                 mEventManager.postEvent(new RemoveTracksFromQueueEvent(mTracksSelected));
                 mTracksSelected.clear();
+                updateBottomSection(true);
             }
         });
 
@@ -202,6 +203,7 @@ public class QueueFragment extends Fragment {
             public void onClick(View v) {
                 mEventManager.postEvent(new AddTracksToPriorityQueueEvent(mTracksSelected));
                 mTracksSelected.clear();
+                updateBottomSection(true);
             }
         });
     }

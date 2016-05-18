@@ -572,7 +572,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
             if (mPlayingFromPriorityQueue) {
                 position = mPriorityQueue.peekFirst();
-                mTrackHistory.push(mQueue.removeFirst());
             } else {
                 position = mQueue.peekFirst();
             }
@@ -663,6 +662,10 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         boolean shouldPlaySong = true;
 
         if (mRepeatMode != NowPlayingActivity.MODE_SINGLE) {
+            if (mPlayingFromPriorityQueue) {
+                mPriorityQueue.removeFirst();
+            }
+
             if (mPriorityQueue.isEmpty()) {
                 mPlayingFromPriorityQueue = false;
                 mSongIndex = ++mSongIndex % mPlaylistSize;
@@ -678,6 +681,10 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                     addToQueue(false);
                 }
             } else {
+                if (!mPlayingFromPriorityQueue) {
+                    mTrackHistory.push(mQueue.removeFirst());
+                }
+
                 mPlayingFromPriorityQueue = true;
             }
         }
@@ -827,14 +834,24 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         if (event.isPriorityQueue()) {
             if (mPlayingFromPriorityQueue) {
                 queueDifference++;
+            } else {
+                mTrackHistory.push(mQueue.removeFirst());
             }
-            
+
+            mPlayingFromPriorityQueue = true;
+
             for (int i = 0; i < queueDifference; i++) {
                 mPriorityQueue.removeFirst();
             }
 
-            playNextSong();
+            playMusic(false);
+            onGetQueues(null);
+            //playNextSong();
         } else {
+            if (!mPlayingFromPriorityQueue) {
+                queueDifference++;
+            }
+
             mSongIndex = (mSongIndex + queueDifference) % mPlaylistSize;
 
             int current;
