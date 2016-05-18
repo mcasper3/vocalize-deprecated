@@ -106,6 +106,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private boolean mIsForeground;
     private boolean mWasPlaying;
     private boolean mPlayingFromPriorityQueue;
+    private boolean mRecentlyPlayedMusic;
     private int mRepeatMode;
     private int mSongIndex;
     private int mPlaylistSize;
@@ -578,6 +579,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
             Track track = mOriginalTracks.get(position);
 
+            mRecentlyPlayedMusic = true;
+
             if (shouldResume) {
                 mPlayer.resume();
             } else {
@@ -905,8 +908,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         Logger.i(TAG, eventType.name());
 
         switch (eventType) {
-            case END_OF_CONTEXT:
-                playNextSong();
+            //case END_OF_CONTEXT:
+            case TRACK_CHANGED:
+                if (mRecentlyPlayedMusic) {
+                    mRecentlyPlayedMusic = false;
+                } else {
+                    playNextSong();
+                }
                 break;
             case LOST_PERMISSION:
                 if (mIsPlaying) {
