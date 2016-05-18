@@ -156,8 +156,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mEventManager = EventManagerProvider.getInstance(this);
         mEventManager.register(this);
 
-        //mVoiceRecognizer = new PocketSphinxVoiceRecognizer(this);
-        //mEventManager.register(mVoiceRecognizer);
+        mVoiceRecognizer = new PocketSphinxVoiceRecognizer(this);
 
         mPreviousSongIndex = 0;
         mNextSongIndex = QUEUE_SIZE;
@@ -294,6 +293,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             mIsPlaying = false;
         }
 
+        mVoiceRecognizer.stopListening();
         abandonFocus();
         mHasFocus = false;
         Spotify.destroyPlayer(this);
@@ -305,6 +305,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             stopForeground(true);
         }
         mExecutorService.shutdown();
+    }
+
+    @Subscribe
+    public void onPlayMusic(PlayMusicEvent event) {
+        Logger.d(TAG, "On play music");
+
+        playMusic(true);
     }
 
     @Subscribe
@@ -339,6 +346,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         for (TrackResponseItem item : items) {
             mOriginalTracks.add(item.getTrack());
         }
+
+        mVoiceRecognizer.startListening();
 
         int position = event.getPosition();
         organizeTracks(true, position);

@@ -20,6 +20,7 @@ import me.mikecasper.musicvoice.onboarding.OnboardingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
+import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
 public class LogInActivity extends MusicVoiceActivity {
@@ -54,6 +55,13 @@ public class LogInActivity extends MusicVoiceActivity {
                 moveToOnboarding();
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mEventManager.postEvent(new GetPlayerStatusEvent());
     }
 
     public void onLogIn(View view) {

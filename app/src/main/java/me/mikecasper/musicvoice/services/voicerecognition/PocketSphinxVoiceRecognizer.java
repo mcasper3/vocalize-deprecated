@@ -21,6 +21,10 @@ import me.mikecasper.musicvoice.models.Playlist;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.PauseMusicEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.PlayMusicEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
 import static edu.cmu.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
@@ -39,10 +43,10 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
     private static final String PLAYLIST_SEARCH = "playlists";
 
     // Basic commands
-    private static final String SKIP = "skip song";
-    private static final String PREVIOUS = "previous song";
+    private static final String SKIP = "skip to next song";
+    private static final String PREVIOUS = "play previous song";
     private static final String PAUSE = "pause music";
-    private static final String RESUME = "resume music";
+    private static final String RESUME = "resume playback";
 
     private static final float KEYWORD_THRESHOLD = 1f;
 
@@ -59,6 +63,8 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
     public PocketSphinxVoiceRecognizer(Context context) {
         mEventManager = EventManagerProvider.getInstance(context);
         mContext = context;
+
+        setUpRecognizer();
     }
 
     private void setUpRecognizer() {
@@ -70,15 +76,21 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
         mTask.execute(mContext);
     }
 
+    public void startListening() {
+        mRecognizer.startListening(MAIN_SEARCH);
+    }
+
+    public void stopListening() {
+        mRecognizer.stop();
+    }
+
     @Override
     public void onBeginningOfSpeech() {
-        Logger.d(TAG, "In on beginning of speech");
+
     }
 
     @Override
     public void onEndOfSpeech() {
-        Logger.d(TAG, "In on end of speech");
-
         if (!mRecognizer.getSearchName().equals(MAIN_SEARCH)) {
             switchSearch(MAIN_SEARCH);
         }
@@ -94,34 +106,31 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
         Logger.d(TAG, text);
 
         if (text.equals(KEYPHRASE)) {
-            //switchSearch(COMMAND_SEARCH);
-            switchSearch(TRACK_SEARCH);
+            switchSearch(COMMAND_SEARCH);
         }
     }
 
     @Override
     public void onResult(Hypothesis hypothesis) {
-        Logger.d(TAG, "In on result");
-
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
 
-            // TODO account for dynamic grammar somehow
-
-            Logger.d(TAG, text);
-
             switch (text) {
                 case SKIP:
-                    Logger.e(TAG, "SKIPPING");
+                    Logger.d(TAG, "Skipping song");
+                    mEventManager.postEvent(new SkipForwardEvent());
                     break;
                 case PREVIOUS:
-                    Logger.e(TAG, "PREVIOUSING");
+                    Logger.d(TAG, "Skipping backward");
+                    mEventManager.postEvent(new SkipBackwardEvent());
                     break;
                 case PAUSE:
-                    Logger.e(TAG, "PAUSING");
+                    Logger.d(TAG, "Pausing Music");
+                    mEventManager.postEvent(new PauseMusicEvent());
                     break;
                 case RESUME:
-                    Logger.e(TAG, "RESUMING");
+                    Logger.d(TAG, "Resuming Music");
+                    mEventManager.postEvent(new PlayMusicEvent());
                     break;
             }
         }
@@ -152,6 +161,7 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
         }
     }
 
+/*
     @Subscribe
     public void onPlaylistsObtained(PlaylistResponse response) {
         setUpRecognizer();
@@ -175,6 +185,7 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
             }
         }
     }
+    */
 
     public void addTrackGrammarFile(List<Track> tracks) {
         List<String> names = new ArrayList<>(tracks.size());
@@ -289,9 +300,8 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
 
             if (speechRecognizer != null) {
                 mRecognizer = speechRecognizer;
-                mRecognizer.startListening(MAIN_SEARCH);
 
-                if (mShouldAddPlaylistGrammarFile) {
+                /*if (mShouldAddPlaylistGrammarFile) {
                     //mRecognizer.addGrammarSearch(PLAYLIST_SEARCH, mPlaylistFile);
                     mPlaylistFile = null;
                     mShouldAddPlaylistGrammarFile = false;
@@ -301,7 +311,7 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
                     mRecognizer.addGrammarSearch(TRACK_SEARCH, mTrackFile);
                     mTrackFile = null;
                     mShouldAddTrackGrammarFile = false;
-                }
+                }*/
             }
         }
     }
