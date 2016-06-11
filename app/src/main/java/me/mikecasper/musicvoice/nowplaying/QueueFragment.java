@@ -257,7 +257,7 @@ public class QueueFragment extends Fragment {
         RecyclerView.ViewHolder viewHolder = event.getViewHolder();
 
         if (viewHolder instanceof QueueAdapter.NowPlayingViewHolder) {
-            getActivity().onBackPressed();
+            getFragmentManager().popBackStack();
         } else if (viewHolder instanceof QueueAdapter.QueueItemViewHolder) {
             QueueAdapter.QueueItemViewHolder queueItemViewHolder = (QueueAdapter.QueueItemViewHolder) viewHolder;
             mEventManager.postEvent(new PlaySongFromQueueEvent(queueItemViewHolder.mTrackIndex, queueItemViewHolder.mIsPriorityQueue));

@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -57,6 +58,11 @@ public class NowPlayingFragment extends Fragment {
     private SeekBar mSeekBar;
     private TextView mCurrentTime;
     private ImageView mAlbumArt;
+
+    // For swiping
+    private float mInitialXValue;
+    private float mSecondXValue;
+    private static final int MIN_DISTANCE = 200;
 
     // Target for better image loading
     private final Target mTarget = new Target() {
@@ -109,7 +115,7 @@ public class NowPlayingFragment extends Fragment {
         mEventManager = EventManagerProvider.getInstance(getContext());
 
         Bundle args = getArguments();
-        Track track = args.getParcelable(NowPlayingActivity.TRACK);
+        final Track track = args.getParcelable(NowPlayingActivity.TRACK);
 
         boolean shouldPlaySong = args.getBoolean(NowPlayingActivity.SHOULD_PLAY_TRACK, false);
         mIsPlayingMusic = args.getBoolean(NowPlayingActivity.IS_PLAYING_MUSIC, false);
@@ -145,6 +151,28 @@ public class NowPlayingFragment extends Fragment {
         setUpButtons();
 
         mAlbumArt = (ImageView) view.findViewById(R.id.album_art);
+        mAlbumArt.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        mInitialXValue = event.getX();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        mSecondXValue = event.getX();
+                        float deltaX = mSecondXValue - mInitialXValue;
+                        if (deltaX > MIN_DISTANCE) {
+                            mEventManager.postEvent(new SkipBackwardEvent());
+                        } else if (deltaX < -MIN_DISTANCE) {
+                            mEventManager.postEvent(new SkipForwardEvent());
+                        }
+                        break;
+                }
+
+                return true;
+            }
+        });
 
         mCurrentTime = (TextView) view.findViewById(R.id.current_time);
         mSeekBar = (SeekBar) view.findViewById(R.id.song_seek_bar);
@@ -275,6 +303,7 @@ public class NowPlayingFragment extends Fragment {
         getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.now_playing_content, fragment)
+                .addToBackStack(null)
                 .commit();
     }
 

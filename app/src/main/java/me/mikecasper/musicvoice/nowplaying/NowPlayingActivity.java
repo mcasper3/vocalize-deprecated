@@ -102,7 +102,14 @@ public class NowPlayingActivity extends MusicVoiceActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        finish();
+    }
+
+    @Override
     protected void onDestroy() {
+        mEventManager = null;
+
         ((MusicVoiceApplication) getApplication()).getRefWatcher().watch(this);
 
         super.onDestroy();

@@ -13,7 +13,6 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.services.LogInService;
-import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.onboarding.OnboardingActivity;
@@ -26,6 +25,7 @@ import me.mikecasper.musicvoice.util.Logger;
 public class LogInActivity extends MusicVoiceActivity {
 
     public static final String IS_LOGGED_IN = "isLoggedIn";
+    public static final String FIRST_LOGIN = "firstLogin";
 
     private static final String TAG = "LogInActivity";
     private IEventManager mEventManager;
@@ -35,11 +35,21 @@ public class LogInActivity extends MusicVoiceActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
+        mEventManager = EventManagerProvider.getInstance(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // TODO look into this:
+        // ViewCompat.setElevation(view, 4dp);
+
+        mEventManager.postEvent(new GetPlayerStatusEvent());
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         boolean isLoggedIn = sharedPreferences.getBoolean(IS_LOGGED_IN, false);
-
-        mEventManager = EventManagerProvider.getInstance(this);
 
         if (isLoggedIn) {
             long lastLoginTime = sharedPreferences.getLong(LogInService.LAST_LOGIN_TIME, 0);
@@ -52,16 +62,9 @@ public class LogInActivity extends MusicVoiceActivity {
                 intent.setAction(MusicPlayer.CREATE_PLAYER);
                 startService(intent);
 
-                moveToOnboarding();
+                moveToMainView();
             }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        mEventManager.postEvent(new GetPlayerStatusEvent());
     }
 
     public void onLogIn(View view) {
@@ -90,9 +93,14 @@ public class LogInActivity extends MusicVoiceActivity {
     }
 
     private void determineNextView() {
-        // TODO account for user's first time in app
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean firstLogin = sharedPreferences.getBoolean(FIRST_LOGIN, false);
 
-        if (true) {
+        if (firstLogin) {
+            sharedPreferences.edit()
+                    .putBoolean(FIRST_LOGIN, true)
+                    .apply();
+
             moveToOnboarding();
         } else {
             moveToMainView();
@@ -105,9 +113,14 @@ public class LogInActivity extends MusicVoiceActivity {
     }
 
     private void moveToMainView() {
-        mEventManager.postEvent(new GetUserEvent());
-
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        mEventManager = null;
+
+        super.onDestroy();
     }
 }

@@ -59,6 +59,12 @@ public class MusicVoiceActivity extends AppCompatActivity {
             IEventManager eventManager = EventManagerProvider.getInstance(this);
             if (System.currentTimeMillis() > lastLoginTime + expirationTime) {
                 eventManager.postEvent(new LogInEvent(this));
+            } else {
+                if (!MusicPlayer.isAlive()) {
+                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                    intent.setAction(MusicPlayer.CREATE_PLAYER);
+                    startService(intent);
+                }
             }
         }
     }

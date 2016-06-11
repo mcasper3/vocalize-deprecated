@@ -94,7 +94,6 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:gravity="center_horizontal"
-        android:padding="8dp"
         android:background="@drawable/mini_now_playing_gradient"
         android:orientation="horizontal"
         android:id="@+id/bottomSection">

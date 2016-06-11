@@ -110,6 +110,12 @@ public class TrackFragment extends Fragment {
 
         if (savedInstanceState != null) {
             mPlaylist = savedInstanceState.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
+
+            View view = getView();
+            if (view != null) {
+                View progressBar = view.findViewById(R.id.progress_bar);
+                progressBar.setVisibility(View.INVISIBLE);
+            }
         }
     }
 

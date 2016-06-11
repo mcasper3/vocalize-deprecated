@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
@@ -44,7 +45,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.api.responses.TrackResponseItem;
 import me.mikecasper.musicvoice.api.services.LogInService;
@@ -188,8 +188,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         createIntents();
 
-        initPlayer();
-
         mEventManager.postEvent(new UpdatePlayerStatusEvent(mIsPlaying, null, mPreviousSongTime));
     }
 
@@ -229,6 +227,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         switch (action) {
             case CREATE_PLAYER:
+                initPlayer();
                 break;
             case RESUME_PLAYER:
                 playMusic(true);
@@ -253,6 +252,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         String token = sharedPreferences.getString(LogInService.SPOTIFY_TOKEN, null);
 
         Config playerConfig = new Config(this, token, LogInService.CLIENT_ID);
+        playerConfig.useCache(false);
+
         mPlayer = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
             @Override
             public void onInitialized(Player player) {
@@ -268,6 +269,11 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         mRepeatMode = sharedPreferences.getInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_DISABLED);
         mShuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
+    }
+
+    @Subscribe
+    public void onDestroyPlayer(DestroyPlayerEvent event) {
+        stopSelf();
     }
 
     @Override
@@ -393,10 +399,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         boolean repeatEnabled = mRepeatMode == NowPlayingActivity.MODE_ENABLED;
 
         if (addToFront) {
-            //if (mQueue.size() > QUEUE_SIZE) {
-            //    mQueue.removeLast();
-            //}
-
             if (!mTrackHistory.isEmpty()) {
                 int previousSong = mTrackHistory.pop();
                 mQueue.addFirst(previousSong);
@@ -444,7 +446,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         int queueSize = mQueue.size();
 
         int size = Math.min(QUEUE_SIZE, queueSize - 1);
-        //size = Math.min(size, mPlaylistSize + queueSize);
 
         List<Track> queue = new ArrayList<>(size);
         List<Track> priorityQueue = new ArrayList<>(mPriorityQueue.size());
@@ -579,11 +580,10 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
             Track track = mOriginalTracks.get(position);
 
-            mRecentlyPlayedMusic = true;
-
             if (shouldResume) {
                 mPlayer.resume();
             } else {
+                mRecentlyPlayedMusic = true;
                 mPreviousSongTime = 0;
                 mPlayer.play(track.getUri());
             }
@@ -849,7 +849,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
             playMusic(false);
             onGetQueues(null);
-            //playNextSong();
         } else {
             if (!mPlayingFromPriorityQueue) {
                 queueDifference++;
@@ -889,13 +888,17 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             pauseMusic();
         }
 
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
+        stopSelf();
     }
 
     @Override
     public void onTemporaryError() {
         Logger.d(TAG, "Temporary error");
+
+        if (mIsPlaying) {
+            pauseMusic();
+            Toast.makeText(MusicPlayer.this, R.string.temporary_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -926,7 +929,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     @Override
     public void onPlaybackError(ErrorType errorType, String s) {
-
+        Logger.e(TAG, "Playback error: " + errorType.name() + "; s");
     }
 
     // Time stuff

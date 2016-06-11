@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/header_background_image" />
+    <item android:drawable="@drawable/less_shadow" />
+    <!--
     <item>
         <shape android:shape="rectangle">
             <solid android:color="@color/colorAccentTransparent" />
         </shape>
     </item>
+    -->
 </layer-list>

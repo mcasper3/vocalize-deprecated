@@ -29,6 +29,7 @@
     <string name="queued">Queued</string>
     <string name="remove">Remove</string>
     <string name="add_to_queue">Add to Queue</string>
+    <string name="temporary_error">Poor network conditions detected</string>
     <!-- End NowPlaying Strings -->
 
     <!-- Onboarding Strings -->
@@ -40,7 +41,7 @@
     <string name="ok">OK</string>
     <string name="skip">Skip</string>
     <!-- End Onboarding Strings -->
-    
+
     <!-- Speech Recognizer Strings -->
     <string name="grammar_file_header">#JSGF V1.0;\r\n\r\ngrammar com.musicvoice.%1$s;\r\n\r\n&lt;%2$s&gt; = </string>
     <string name="grammar_file_ending">\r\npublic &lt;%1$s&gt; = &lt;%2$s&gt;;</string>

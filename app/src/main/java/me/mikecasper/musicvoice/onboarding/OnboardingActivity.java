@@ -129,8 +129,6 @@ public class OnboardingActivity extends AppCompatActivity {
     }
 
     private void moveToMainActivity() {
-        mEventManager.postEvent(new GetUserEvent());
-
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
