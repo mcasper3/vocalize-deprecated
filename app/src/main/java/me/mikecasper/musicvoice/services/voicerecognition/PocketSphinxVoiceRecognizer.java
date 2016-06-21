@@ -38,7 +38,7 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
     private static final String PAUSE = "pause music";
     private static final String RESUME = "resume playback";
 
-    private static final float KEYWORD_THRESHOLD = 1f;
+    private static final float KEYWORD_THRESHOLD = 1e-20f;
 
     private IEventManager mEventManager;
     private SpeechRecognizer mRecognizer;

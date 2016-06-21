@@ -45,8 +45,14 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         Playlist playlist = mPlaylists.get(position);
         holder.mPlaylist = playlist;
 
+        String imageUrl = "empty.url";
+
+        if (playlist.getImages().size() > 0) {
+            imageUrl = playlist.getImages().get(0).getUrl();
+        }
+
         Picasso.with(mContext)
-                .load(playlist.getImages().get(0).getUrl())
+                .load(imageUrl)
                 .placeholder(R.drawable.default_playlist)
                 .fit()
                 .into(holder.mPlaylistArt);

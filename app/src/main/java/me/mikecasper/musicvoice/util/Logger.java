@@ -3,6 +3,8 @@ package me.mikecasper.musicvoice.util;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.util.Scanner;
+
 import me.mikecasper.musicvoice.MusicVoiceApplication;
 
 public final class Logger {
