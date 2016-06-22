@@ -49,7 +49,7 @@ public class PlaylistService {
 
             @Override
             public void onFailure(Call<PlaylistResponse> call, Throwable t) {
-                Logger.d(TAG, "PlaylistResponse call failed");
+                Logger.e(TAG, "PlaylistResponse call failed", t);
             }
         });
     }
@@ -76,7 +76,7 @@ public class PlaylistService {
 
             @Override
             public void onFailure(Call<TrackResponse> call, Throwable t) {
-                Logger.d(TAG, "TrackResponse call failed");
+                Logger.e(TAG, "TrackResponse call failed", t);
             }
         });
     }
