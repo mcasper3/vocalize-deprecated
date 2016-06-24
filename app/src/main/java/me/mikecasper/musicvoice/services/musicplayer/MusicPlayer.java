@@ -268,7 +268,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         });
 
         mRepeatMode = sharedPreferences.getInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_DISABLED);
-        mShuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
     }
 
     @Subscribe
@@ -360,6 +359,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mSongIndex = 0;
         mPreviousSongIndex = mPlaylistSize - 1;
         mPlayingFromPriorityQueue = false;
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mShuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
 
         if (mPlayer == null) {
             initPlayer();
