@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.MainActivity;
+import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.onboarding.events.ScrollLeftEvent;
@@ -128,9 +129,18 @@ public class OnboardingActivity extends AppCompatActivity {
     }
 
     private void moveToMainActivity() {
-        mEventManager.postEvent(new GetUserEvent());
-
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        mEventManager = null;
+        mViewPager = null;
+        mTabs = null;
+
+        ((MusicVoiceApplication) getApplication()).getRefWatcher().watch(this);
+
+        super.onDestroy();
     }
 }

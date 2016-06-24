@@ -3,6 +3,8 @@ package me.mikecasper.musicvoice.util;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.util.Scanner;
+
 import me.mikecasper.musicvoice.MusicVoiceApplication;
 
 public final class Logger {
@@ -10,23 +12,23 @@ public final class Logger {
 
     public static void e(String tag, String message, @NonNull Throwable throwable) {
         if (MusicVoiceApplication.LOG_LEVEL != MusicVoiceApplication.LogLevel.BASIC) {
-            Log.e(tag, message, throwable);
+            Log.e("MV_" + tag, message, throwable);
         }
     }
 
     public static void e(String tag, String message) {
         if (MusicVoiceApplication.LOG_LEVEL != MusicVoiceApplication.LogLevel.BASIC) {
-            Log.e(tag, message);
+            Log.e("MV_" + tag, message);
         }
     }
 
     public static void i(String tag, String message) {
-        Log.i(tag, message);
+        Log.i("MV_" + tag, message);
     }
 
     public static void d(String tag, String message) {
         if (MusicVoiceApplication.LOG_LEVEL != MusicVoiceApplication.LogLevel.BASIC) {
-            Log.d(tag, message);
+            Log.d("MV_" + tag, message);
         }
     }
 }

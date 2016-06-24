@@ -14,18 +14,18 @@ import java.util.List;
 
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.models.Playlist;
-import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
 
-    private RecyclerViewItemClickListener mListener;
     private List<Playlist> mPlaylists;
     private Context mContext;
 
-    public PlaylistAdapter(Context context, List<Playlist> playlists, RecyclerViewItemClickListener listener) {
+    public PlaylistAdapter(Context context, List<Playlist> playlists) {
         mPlaylists = playlists;
         mContext = context;
-        mListener = listener;
     }
 
     public void setPlaylists(List<Playlist> playlists) {
@@ -45,8 +45,14 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         Playlist playlist = mPlaylists.get(position);
         holder.mPlaylist = playlist;
 
+        String imageUrl = "empty.url";
+
+        if (playlist.getImages().size() > 0) {
+            imageUrl = playlist.getImages().get(0).getUrl();
+        }
+
         Picasso.with(mContext)
-                .load(playlist.getImages().get(0).getUrl())
+                .load(imageUrl)
                 .placeholder(R.drawable.default_playlist)
                 .fit()
                 .into(holder.mPlaylistArt);
@@ -56,7 +62,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.onItemClick(holder);
+                Context context = v.getContext();
+
+                IEventManager eventManager = EventManagerProvider.getInstance(context);
+                eventManager.postEvent(new RecyclerViewItemClickedEvent(holder));
             }
         });
     }

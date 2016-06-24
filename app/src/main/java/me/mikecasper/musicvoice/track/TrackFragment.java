@@ -1,6 +1,6 @@
 package me.mikecasper.musicvoice.track;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,16 +30,19 @@ import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
+import me.mikecasper.musicvoice.track.events.TracksObtainedEvent;
 import me.mikecasper.musicvoice.util.Logger;
-import me.mikecasper.musicvoice.util.RecyclerViewItemClickListener;
+import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
 import me.mikecasper.musicvoice.views.DividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TrackFragment extends Fragment implements RecyclerViewItemClickListener {
+public class TrackFragment extends Fragment {
 
     private static final String TAG = "TrackFragment";
+    private static final String TRACKS = "tracks";
+
     private List<TrackResponseItem> mTracks;
     private IEventManager mEventManager;
     private Playlist mPlaylist;
@@ -51,7 +54,6 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         super.onCreate(savedInstanceState);
 
         mEventManager = EventManagerProvider.getInstance(getContext());
-        mTracks = new ArrayList<>();
     }
 
     @Override
@@ -59,49 +61,21 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_track_list, container, false);
 
-        getTracks();
+        if (savedInstanceState == null) {
+            mTracks = new ArrayList<>();
+            getTracks();
+        } else {
+            mTracks = savedInstanceState.getParcelableArrayList(TRACKS);
+        }
 
         // Set the adapter
-        Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(new TrackAdapter(mTracks, this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(new TrackAdapter(mTracks));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
 
         RecyclerFastScroller scrollbar = (RecyclerFastScroller) view.findViewById(R.id.tracks_scrollbar);
         scrollbar.attachRecyclerView(recyclerView);
-
-        View shufflePlay = view.findViewById(R.id.shuffle_play_button);
-        shufflePlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mTracks != null) {
-                    PreferenceManager.getDefaultSharedPreferences(getContext())
-                            .edit()
-                            .putInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_ENABLED)
-                            .apply();
-
-                    int position = (int) (Math.random() * mTracks.size());
-                    Track track = mTracks.get(position).getTrack();
-
-                    List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
-
-                    for (TrackResponseItem item : mTracks) {
-                        copy.add(new TrackResponseItem(item));
-                    }
-
-                    mEventManager.postEvent(new SetPlaylistEvent(copy, position));
-
-                    Intent intent = new Intent(getContext(), NowPlayingActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra(NowPlayingActivity.TRACK, track);
-                    intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
-                    intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
-                    intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
-                    startActivity(intent);
-                }
-            }
-        });
 
         return view;
     }
@@ -136,6 +110,12 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
 
         if (savedInstanceState != null) {
             mPlaylist = savedInstanceState.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
+
+            View view = getView();
+            if (view != null) {
+                View progressBar = view.findViewById(R.id.progress_bar);
+                progressBar.setVisibility(View.INVISIBLE);
+            }
         }
     }
 
@@ -144,6 +124,7 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(PlaylistFragment.SELECTED_PLAYLIST, mPlaylist);
+        outState.putParcelableArrayList(TRACKS, (ArrayList<TrackResponseItem>) mTracks);
     }
 
     private void getTracks() {
@@ -161,49 +142,98 @@ public class TrackFragment extends Fragment implements RecyclerViewItemClickList
     }
 
     @Subscribe
-    public void onTracksObtained(TrackResponse response) {
-        Logger.i(TAG, "Tracks obtained");
+    public void onTracksObtained(TracksObtainedEvent event) {
+        if (event.getPlaylistId().equals(mPlaylist.getId())) {
+            TrackResponse response = event.getTrackResponse();
 
-        View view = getView();
-        if (view != null) {
             mTracks.addAll(response.getItems());
-            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
-            TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
-            adapter.updateTracks(mTracks);
 
-            View progressBar = view.findViewById(R.id.progress_bar);
-            progressBar.setVisibility(View.INVISIBLE);
+            if (response.getNext() == null) {
+                View view = getView();
+                if (view != null) {
+                    RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.track_list);
+                    TrackAdapter adapter = (TrackAdapter) recyclerView.getAdapter();
+                    adapter.updateTracks(mTracks);
+
+                    View progressBar = view.findViewById(R.id.progress_bar);
+                    progressBar.setVisibility(View.INVISIBLE);
+
+                    View shufflePlay = view.findViewById(R.id.shuffle_play_button);
+                    shufflePlay.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            shufflePlay();
+                        }
+                    });
+
+                    Logger.d(TAG, "Tracks obtained");
+                }
+            } else {
+                mEventManager.postEvent(new GetPlaylistTracksEvent(event.getUserId(), event.getPlaylistId(), response.getOffset() + response.getItems().size()));
+            }
         }
     }
 
-    @Override
-    public void onItemClick(RecyclerView.ViewHolder viewHolder) {
+    private void shufflePlay() {
+        if (mTracks != null) {
+            PreferenceManager.getDefaultSharedPreferences(getContext())
+                    .edit()
+                    .putBoolean(NowPlayingActivity.SHUFFLE_ENABLED, true)
+                    .apply();
+
+            int position = (int) (Math.random() * mTracks.size());
+            Track track = mTracks.get(position).getTrack();
+
+            moveToNowPlayingIfNeeded(position, track);
+        }
+    }
+
+    @Subscribe
+    public void onItemClick(RecyclerViewItemClickedEvent event) {
+        RecyclerView.ViewHolder viewHolder = event.getViewHolder();
+
         if (viewHolder instanceof TrackAdapter.ViewHolder) {
             TrackAdapter.ViewHolder selectedTrack = (TrackAdapter.ViewHolder) viewHolder;
             Track track = selectedTrack.mTrack;
 
             int position = viewHolder.getAdapterPosition();
 
-            List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
+            moveToNowPlayingIfNeeded(position, track);
+        }
+    }
 
-            for (TrackResponseItem item : mTracks) {
-                copy.add(new TrackResponseItem(item));
+    private void moveToNowPlayingIfNeeded(int position, Track track) {
+        List<TrackResponseItem> copy = new ArrayList<>(mTracks.size());
+
+        for (TrackResponseItem item : mTracks) {
+            copy.add(new TrackResponseItem(item));
+        }
+
+        mEventManager.postEvent(new SetPlaylistEvent(copy, position));
+
+        Activity activity = getActivity();
+
+        if (activity != null) {
+            View miniNowPlaying = activity.findViewById(R.id.main_music_controls);
+            if (miniNowPlaying == null || miniNowPlaying.getVisibility() != View.VISIBLE) {
+                Intent intent = new Intent(getContext(), NowPlayingActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra(NowPlayingActivity.TRACK, track);
+                intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
+                intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
+                intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
+                intent.putExtra(NowPlayingActivity.PLAYLIST_NAME, mPlaylist.getName());
+                startActivity(intent);
             }
-
-            mEventManager.postEvent(new SetPlaylistEvent(copy, position));
-
-            Intent intent = new Intent(getContext(), NowPlayingActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            intent.putExtra(NowPlayingActivity.TRACK, track);
-            intent.putExtra(NowPlayingActivity.SHOULD_PLAY_TRACK, true);
-            intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, false);
-            intent.putExtra(NowPlayingActivity.CURRENT_TIME, 0);
-            startActivity(intent);
         }
     }
 
     @Override
     public void onDestroy() {
+        mEventManager = null;
+        mTracks = null;
+        mPlaylist = null;
+
         ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
 
         super.onDestroy();

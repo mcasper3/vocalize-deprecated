@@ -10,6 +10,9 @@ import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.login.LogInActivity;
+import me.mikecasper.musicvoice.login.events.LogInEvent;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 
 public class MusicVoiceActivity extends AppCompatActivity {
@@ -40,6 +43,28 @@ public class MusicVoiceActivity extends AppCompatActivity {
                     // TODO back to log in screen
                     break;
                 default:
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!(this instanceof LogInActivity)) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            long lastLoginTime = sharedPreferences.getLong(LogInService.LAST_LOGIN_TIME, 0);
+            int expirationTime = sharedPreferences.getInt(LogInService.LOGIN_EXPIRATION_TIME, 0);
+
+            IEventManager eventManager = EventManagerProvider.getInstance(this);
+            if (System.currentTimeMillis() > lastLoginTime + expirationTime) {
+                eventManager.postEvent(new LogInEvent(this));
+            } else {
+                if (!MusicPlayer.isAlive()) {
+                    Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
+                    intent.setAction(MusicPlayer.CREATE_PLAYER);
+                    startService(intent);
+                }
             }
         }
     }

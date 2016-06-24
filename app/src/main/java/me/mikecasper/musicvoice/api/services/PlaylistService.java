@@ -9,11 +9,15 @@ import me.mikecasper.musicvoice.login.events.RefreshTokenEvent;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.playlist.events.GetPlaylistsEvent;
 import me.mikecasper.musicvoice.api.responses.PlaylistResponse;
+import me.mikecasper.musicvoice.track.events.TracksObtainedEvent;
+import me.mikecasper.musicvoice.util.Logger;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class PlaylistService {
+
+    private static final String TAG = "PlaylistService";
 
     private Bus mBus;
     private SpotifyApi mApi;
@@ -37,13 +41,15 @@ public class PlaylistService {
 
                     if (playlistResponse != null) {
                         mBus.post(playlistResponse);
+                    } else {
+                        Logger.d(TAG, "PlaylistResponse was null");
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<PlaylistResponse> call, Throwable t) {
-
+                Logger.e(TAG, "PlaylistResponse call failed", t);
             }
         });
     }
@@ -61,18 +67,16 @@ public class PlaylistService {
                     TrackResponse trackResponse = response.body();
 
                     if (trackResponse != null) {
-                        mBus.post(trackResponse);
-
-                        if (trackResponse.getNext() != null) {
-                            onGetPlaylistTracks(new GetPlaylistTracksEvent(event.getUserId(), event.getPlaylistId(), trackResponse.getOffset() + trackResponse.getItems().size()));
-                        }
+                        mBus.post(new TracksObtainedEvent(event.getPlaylistId(), event.getUserId(), trackResponse));
+                    } else {
+                        Logger.d(TAG, "TrackResponse was null");
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<TrackResponse> call, Throwable t) {
-
+                Logger.e(TAG, "TrackResponse call failed", t);
             }
         });
     }

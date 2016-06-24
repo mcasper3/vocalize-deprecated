@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="track_grammar_info">
+        <item>tracks.gram</item>
+        <item>tracks</item>
+        <item>track</item>
+        <item>track</item>
+    </string-array>
+    <string-array name="playlist_grammar_info">
+        <item>playlists.gram</item>
+        <item>playlists</item>
+        <item>playlist</item>
+        <item>play list</item>
+    </string-array>
+</resources>

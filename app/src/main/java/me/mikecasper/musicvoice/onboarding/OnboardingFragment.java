@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
+import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.onboarding.events.ScrollLeftEvent;
 import me.mikecasper.musicvoice.onboarding.events.ScrollRightEvent;
@@ -93,5 +94,14 @@ public class OnboardingFragment extends Fragment {
                 .edit()
                 .putBoolean(SettingsFragment.LEFTIE_LAYOUT_SELECTED, leftieLayout)
                 .apply();
+    }
+
+    @Override
+    public void onDestroy() {
+        mEventManager = null;
+
+        ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
+
+        super.onDestroy();
     }
 }

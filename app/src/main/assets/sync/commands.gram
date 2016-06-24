@@ -2,9 +2,10 @@
 
 grammar com.musicvoice.commands;
 
-<command> = (resume music)	|
-		  (pause music)		|
-		  (next song)		|
-		  (previous song)	;
+<command> = (resume playback)	|
+		  (pause music)			|
+		  (skip to next song)	|
+		  (shuffle play)        |
+		  (play previous song)	;
 
 public <commands> = <command>	;
