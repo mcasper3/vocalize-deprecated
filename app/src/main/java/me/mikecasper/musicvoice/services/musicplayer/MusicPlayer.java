@@ -332,7 +332,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         mShuffleEnabled = event.shouldOverrideShuffle() || !mShuffleEnabled;
 
-        organizeTracks(false, -1);
+        if (mOriginalTracks != null && mOriginalTracks.size() > 0) {
+            organizeTracks(false, -1);
+        }
     }
 
     @Subscribe

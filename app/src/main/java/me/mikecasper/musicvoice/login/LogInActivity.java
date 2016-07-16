@@ -22,7 +22,6 @@ import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.onboarding.OnboardingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
@@ -33,7 +32,6 @@ public class LogInActivity extends MusicVoiceActivity {
 
     private static final String TAG = "LogInActivity";
     private IEventManager mEventManager;
-    private boolean mLoggingIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +54,7 @@ public class LogInActivity extends MusicVoiceActivity {
                     @Override
                     public void onError() {
                         // Ignore
-                        Log.e("DSF", "DSF:LKJ");
+                        Log.e(TAG, "Failed to load image resource");
                         showBackgroundGradient();
                         showLogInButton();
                     }
@@ -82,32 +80,10 @@ public class LogInActivity extends MusicVoiceActivity {
         // ViewCompat.setElevation(view, 4dp);
 
         mEventManager.postEvent(new GetPlayerStatusEvent());
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        boolean isLoggedIn = sharedPreferences.getBoolean(IS_LOGGED_IN, false);
-
-        if (!mLoggingIn && isLoggedIn) {
-            long lastLoginTime = sharedPreferences.getLong(LogInService.LAST_LOGIN_TIME, 0);
-            int expirationTime = sharedPreferences.getInt(LogInService.LOGIN_EXPIRATION_TIME, 0);
-
-            if (System.currentTimeMillis() > lastLoginTime + expirationTime) {
-                mEventManager.postEvent(new LogInEvent(this));
-            } else {
-                Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
-                intent.setAction(MusicPlayer.CREATE_PLAYER);
-                startService(intent);
-
-                moveToMainView();
-            }
-        }
-
-        mLoggingIn = false;
     }
 
     public void onLogIn(View view) {
         mEventManager.postEvent(new LogInEvent(this));
-        mLoggingIn = true;
     }
 
     @Override
