@@ -12,20 +12,15 @@
         android:protectionLevel="signature" />
 
     <application
+        android:name=".MusicVoiceApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:name=".MusicVoiceApplication"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".login.LogInActivity"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <!-- Spotify log in activity -->
         <activity
@@ -55,6 +50,20 @@
             android:name=".services.AudioBroadcastReceiver"
             android:enabled="true"
             android:exported="true" />
+
+        <activity
+            android:name=".testnowplaying.AlternateNowPlaying"
+            android:label=""/>
+
+        <activity android:name=".SplashActivity"
+            android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

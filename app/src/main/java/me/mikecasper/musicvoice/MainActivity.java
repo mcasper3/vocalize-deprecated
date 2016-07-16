@@ -75,7 +75,6 @@ public class MainActivity extends MusicVoiceActivity
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-
         mEventManager = EventManagerProvider.getInstance(this);
         mEvents = new LinkedList<>();
         mRefreshingToken = false;

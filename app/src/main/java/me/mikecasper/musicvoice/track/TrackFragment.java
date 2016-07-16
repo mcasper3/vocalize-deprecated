@@ -30,6 +30,7 @@ import me.mikecasper.musicvoice.playlist.events.GetPlaylistTracksEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.SetPlaylistEvent;
+import me.mikecasper.musicvoice.services.musicplayer.events.ToggleShuffleEvent;
 import me.mikecasper.musicvoice.track.events.TracksObtainedEvent;
 import me.mikecasper.musicvoice.util.Logger;
 import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
@@ -183,6 +184,8 @@ public class TrackFragment extends Fragment {
 
             int position = (int) (Math.random() * mTracks.size());
             Track track = mTracks.get(position).getTrack();
+
+            mEventManager.postEvent(new ToggleShuffleEvent(true));
 
             moveToNowPlayingIfNeeded(position, track);
         }

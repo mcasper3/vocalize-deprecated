@@ -329,7 +329,8 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     @Subscribe
     public void onToggleShuffle(ToggleShuffleEvent event) {
         mShuffleWasEnabled = mShuffleEnabled;
-        mShuffleEnabled = !mShuffleEnabled;
+
+        mShuffleEnabled = event.shouldOverrideShuffle() || !mShuffleEnabled;
 
         organizeTracks(false, -1);
     }
