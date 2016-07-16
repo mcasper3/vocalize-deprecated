@@ -1,26 +1,17 @@
 package me.mikecasper.musicvoice;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
@@ -32,26 +23,18 @@ import java.util.LinkedList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import me.mikecasper.musicvoice.api.services.LogInService;
+import me.mikecasper.musicvoice.controllers.MainMusicButtonController;
 import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.login.events.LogOutEvent;
 import me.mikecasper.musicvoice.login.events.RefreshTokenEvent;
-import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.SpotifyUser;
-import me.mikecasper.musicvoice.models.Track;
-import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
-import me.mikecasper.musicvoice.settings.SettingsFragment;
 import retrofit2.Call;
 
 public class MainActivity extends MusicVoiceActivity
@@ -61,11 +44,8 @@ public class MainActivity extends MusicVoiceActivity
 
     private IEventManager mEventManager;
     private LinkedList<RefreshTokenEvent> mEvents;
-    private ProgressBar mProgressBar;
     private boolean mRefreshingToken;
-    private boolean mLeftieLayout;
-    private boolean mIsPlaying;
-    private Track mTrack;
+    private MainMusicButtonController mController;
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -89,8 +69,6 @@ public class MainActivity extends MusicVoiceActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        mProgressBar = (ProgressBar) findViewById(R.id.mini_song_time);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -124,51 +102,16 @@ public class MainActivity extends MusicVoiceActivity
             profileName.setText(userName);
         }
 
-        mLeftieLayout = sharedPreferences.getBoolean(SettingsFragment.LEFTIE_LAYOUT_SELECTED, false);
-
         View miniNowPlaying = findViewById(R.id.main_music_controls);
-
-        miniNowPlaying.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, NowPlayingActivity.class);
-                intent.putExtra(NowPlayingActivity.TRACK, mTrack);
-                intent.putExtra(NowPlayingActivity.IS_PLAYING_MUSIC, mIsPlaying);
-                intent.putExtra(NowPlayingActivity.CURRENT_TIME, mProgressBar.getProgress());
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-            }
-        });
-
-        ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
-        ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
-
-        View.OnClickListener onClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mIsPlaying = !mIsPlaying;
-                mEventManager.postEvent(new TogglePlaybackEvent());
-
-                updatePlayButton((ImageView) v);
-            }
-        };
-
-        if (mLeftieLayout) {
-            leftImage.setImageResource(R.drawable.ic_play);
-            rightImage.setImageResource(R.drawable.default_playlist);
-
-            leftImage.setOnClickListener(onClickListener);
-        } else {
-            leftImage.setImageResource(R.drawable.default_playlist);
-            rightImage.setImageResource(R.drawable.ic_play);
-
-            rightImage.setOnClickListener(onClickListener);
-        }
+        mController = new MainMusicButtonController(miniNowPlaying);
     }
 
     @Override
     protected void onPause() {
+        mController.setContext(null);
+
         mEventManager.postEvent(new DisplayNotificationEvent());
+        mEventManager.unregister(mController);
         mEventManager.unregister(this);
         super.onPause();
     }
@@ -177,93 +120,10 @@ public class MainActivity extends MusicVoiceActivity
     protected void onResume() {
         super.onResume();
         mEventManager.register(this);
+        mEventManager.register(mController);
+        mController.setContext(this);
 
         mEventManager.postEvent(new GetPlayerStatusEvent());
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return super.onTouchEvent(event);
-    }
-
-    @Subscribe
-    public void onPlayerStatusObtained(UpdatePlayerStatusEvent event) {
-        View miniNowPlaying = findViewById(R.id.main_music_controls);
-
-        mIsPlaying = event.isPlaying();
-        mTrack = event.getTrack();
-
-        if (miniNowPlaying != null && (mIsPlaying || mTrack != null)) {
-            if (mTrack != null) {
-                updateMiniNowPlaying();
-            }
-
-            mProgressBar.setProgress(event.getCurrentSongPosition());
-
-            // display the view if it is hidden
-            if (miniNowPlaying.getVisibility() == View.GONE) {
-                Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
-
-                miniNowPlaying.setVisibility(View.VISIBLE);
-                miniNowPlaying.startAnimation(slideUp);
-            }
-        } else if (miniNowPlaying != null) {
-            miniNowPlaying.setVisibility(View.GONE);
-        }
-    }
-
-    @Subscribe
-    public void onSongChange(SongChangeEvent event) {
-        mIsPlaying = event.isPlayingSong();
-        mTrack = event.getTrack();
-
-        updateMiniNowPlaying();
-    }
-
-    @Subscribe
-    public void onLostPermission(LostPermissionEvent event) {
-        if (mIsPlaying) {
-            mIsPlaying = false;
-            updateMiniNowPlaying();
-        }
-    }
-
-    @Subscribe
-    public void onSongTimeUpdated(UpdateSongTimeEvent event) {
-        mProgressBar.setProgress(event.getSongTime());
-    }
-
-    private void updateMiniNowPlaying() {
-        View miniNowPlaying = findViewById(R.id.main_music_controls);
-        mProgressBar.setMax(mTrack.getDuration());
-
-        if (miniNowPlaying != null) {
-            ImageView leftImage = (ImageView) miniNowPlaying.findViewById(R.id.left_image);
-            ImageView rightImage = (ImageView) miniNowPlaying.findViewById(R.id.right_image);
-            TextView trackName = (TextView) miniNowPlaying.findViewById(R.id.mini_track_name);
-            TextView artistName = (TextView) miniNowPlaying.findViewById(R.id.mini_artist_name);
-
-            int drawableId = mIsPlaying ? R.drawable.ic_pause : R.drawable.ic_play;
-
-            if (mLeftieLayout) {
-                leftImage.setImageResource(drawableId);
-                Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(rightImage);
-            } else {
-                Picasso.with(this).load(mTrack.getAlbum().getImages().get(0).getUrl()).into(leftImage);
-                rightImage.setImageResource(drawableId);
-            }
-
-            trackName.setText(mTrack.getName());
-
-            String artistNames = "";
-
-            for (Artist artist : mTrack.getArtists()) {
-                artistNames += artist.getName() + ", ";
-            }
-
-            artistNames = artistNames.substring(0, artistNames.length() - 2);
-            artistName.setText(artistNames);
-        }
     }
 
     @Subscribe
@@ -352,35 +212,12 @@ public class MainActivity extends MusicVoiceActivity
         }
     }
 
-    private void updatePlayButton(ImageView imageView) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            animatePlayButton(imageView);
-        } else {
-            int id = mIsPlaying ? R.drawable.ic_pause : R.drawable.ic_play;
-
-            imageView.setImageResource(id);
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void animatePlayButton(ImageView imageView) {
-        AnimatedVectorDrawable drawable;
-        if (mIsPlaying) {
-            drawable = (AnimatedVectorDrawable) ContextCompat.getDrawable(this, R.drawable.avd_play_to_pause);
-        } else {
-            drawable = (AnimatedVectorDrawable) ContextCompat.getDrawable(this, R.drawable.avd_pause_to_play);
-        }
-
-        imageView.setImageDrawable(drawable);
-        drawable.start();
-    }
-
     @Override
     protected void onDestroy() {
         mEventManager = null;
-        mTrack = null;
-        mProgressBar = null;
         mEvents = null;
+        mController.tearDown();
+        mController = null;
 
         ((MusicVoiceApplication) getApplication()).getRefWatcher().watch(this);
 

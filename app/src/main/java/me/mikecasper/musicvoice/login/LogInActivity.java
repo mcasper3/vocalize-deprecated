@@ -24,7 +24,6 @@ import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
-import me.mikecasper.musicvoice.testnowplaying.AlternateNowPlaying;
 import me.mikecasper.musicvoice.util.Logger;
 
 public class LogInActivity extends MusicVoiceActivity {
@@ -135,11 +134,6 @@ public class LogInActivity extends MusicVoiceActivity {
     private void determineNextView() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean firstLogin = sharedPreferences.getBoolean(FIRST_LOGIN, false);
-
-        boolean testing = true;
-
-        //Intent intent = new Intent(this, AlternateNowPlaying.class);
-        //startActivity(intent);
 
         if (firstLogin) {
             sharedPreferences.edit()
