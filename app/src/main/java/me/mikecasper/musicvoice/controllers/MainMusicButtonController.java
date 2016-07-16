@@ -211,6 +211,7 @@ public class MainMusicButtonController implements MusicButtonsController, MusicI
         mContext.startActivity(intent);
     }
 
+    @Override
     public void tearDown() {
         mTrack = null;
         mProgressBar = null;

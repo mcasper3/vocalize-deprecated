@@ -11,4 +11,6 @@ public interface MusicButtonsController {
     void onSongChange(SongChangeEvent event);
 
     void onLostPermission(LostPermissionEvent event);
+
+    void tearDown();
 }
