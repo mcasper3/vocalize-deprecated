@@ -1,6 +1,9 @@
 package me.mikecasper.musicvoice.controllers;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -23,21 +26,46 @@ import me.mikecasper.musicvoice.util.DateUtility;
 
 public class NowPlayingTrackInfoController implements MusicInfoController {
 
+    private Context mContext;
     private IEventManager mEventManager;
     private SeekBar mSeekBar;
     private TextView mCurrentTime;
+    private TextView mTrackName;
+    private TextView mArtistName;
+    private TextView mRemainingTime;
 
-    public NowPlayingTrackInfoController(View view, Track track) {
+    public NowPlayingTrackInfoController(View view, Bundle args) {
+        mContext = view.getContext();
         mEventManager = EventManagerProvider.getInstance(view.getContext());
 
-        setUpViews(view);
+        Track track = args.getParcelable(NowPlayingActivity.TRACK);
+
+        setUpViews(view, args);
 
         if (track != null) {
             updateView(track);
         }
     }
 
-    private void setUpViews(View view) {
+    private void setUpViews(View view, Bundle args) {
+        TextView playlistName = (TextView) view.findViewById(R.id.playlist_name);
+        playlistName.setSelected(true);
+        playlistName.setSingleLine(true);
+
+        String playlist = args.getString(NowPlayingActivity.PLAYLIST_NAME, null);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        if (playlist == null) {
+            playlist = sharedPreferences.getString(NowPlayingActivity.PLAYLIST_NAME, null);
+        } else {
+            sharedPreferences.edit()
+                    .putString(NowPlayingActivity.PLAYLIST_NAME, playlist)
+                    .apply();
+        }
+
+        playlistName.setText(mContext.getString(R.string.playing_from, playlist));
+
         View queueButton = view.findViewById(R.id.queue_button);
         queueButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,6 +76,9 @@ public class NowPlayingTrackInfoController implements MusicInfoController {
 
         mCurrentTime = (TextView) view.findViewById(R.id.current_time);
         mSeekBar = (SeekBar) view.findViewById(R.id.song_seek_bar);
+        mTrackName = (TextView) view.findViewById(R.id.track_name);
+        mArtistName = (TextView) view.findViewById(R.id.artist_name);
+        mRemainingTime = (TextView) view.findViewById(R.id.remaining_time);
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -89,13 +120,9 @@ public class NowPlayingTrackInfoController implements MusicInfoController {
         Track track = event.getTrack();
 
         if (track != null) {
-            TextView trackName = (TextView) view.findViewById(R.id.track_name);
-            if (trackName != null && !trackName.getText().toString().equals(track.getName())) {
+            if (!mTrackName.getText().toString().equals(track.getName())) {
 
-                TextView currentTime = (TextView) view.findViewById(R.id.current_time);
-                if (currentTime != null) {
-                    currentTime.setText(R.string.initial_time);
-                }
+                mCurrentTime.setText(R.string.initial_time);
 
                 updateView(track);
             }
@@ -117,34 +144,34 @@ public class NowPlayingTrackInfoController implements MusicInfoController {
 
     @Override
     public void tearDown() {
-        // TODO
+        mArtistName = null;
+        mRemainingTime = null;
+        mTrackName = null;
+        mCurrentTime = null;
+        mSeekBar = null;
+        mContext = null;
+        mEventManager = null;
     }
 
     private void updateView(Track track) {
         mSeekBar.setMax(track.getDuration());
 
-            TextView trackName = (TextView) view.findViewById(R.id.track_name);
-            TextView artistName = (TextView) view.findViewById(R.id.artist_name);
-            TextView remainingTime = (TextView) view.findViewById(R.id.remaining_time);
+        mTrackName.setText(track.getName());
+        mTrackName.setSelected(true);
+        mTrackName.setSingleLine(true);
 
-            if (trackName != null && artistName != null && remainingTime != null) {
-                trackName.setText(track.getName());
-                trackName.setSelected(true);
-                trackName.setSingleLine(true);
+        mRemainingTime.setText(DateUtility.formatDuration(track.getDuration()));
 
-                remainingTime.setText(DateUtility.formatDuration(track.getDuration()));
+        String artistNames = "";
 
-                String artistNames = "";
+        for (Artist artist : track.getArtists()) {
+            artistNames += artist.getName() + ", ";
+        }
 
-                for (Artist artist : track.getArtists()) {
-                    artistNames += artist.getName() + ", ";
-                }
+        artistNames = artistNames.substring(0, artistNames.length() - 2);
 
-                artistNames = artistNames.substring(0, artistNames.length() - 2);
-
-                artistName.setText(artistNames);
-                artistName.setSelected(true);
-                artistName.setSingleLine(true);
-            }
+        mArtistName.setText(artistNames);
+        mArtistName.setSelected(true);
+        mArtistName.setSingleLine(true);
     }
 }

@@ -14,6 +14,8 @@ import com.squareup.otto.Subscribe;
 
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.nowplaying.NowPlayingActivity;
+import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
+import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
@@ -25,17 +27,24 @@ import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEv
 
 public class NowPlayingMusicControls implements MusicButtonsController {
 
-    private View mView;
     private Context mContext;
+    private IEventManager mEventManager;
     private ImageView mPlayPauseButton;
+    private ImageView mShuffleButton;
+    private ImageView mRepeatButton;
     private boolean mIsPlayingMusic;
     private boolean mShuffleEnabled;
     private int mRepeatMode;
 
-    public NowPlayingMusicControls(View view) {
-        mContext = mView.getContext();
+    public NowPlayingMusicControls(View view, boolean isPlayingMusic, boolean shuffleEnabled, int repeateMode) {
+        mContext = view.getContext();
+        mEventManager = EventManagerProvider.getInstance(mContext);
 
+        mIsPlayingMusic = isPlayingMusic;
+        mShuffleEnabled = shuffleEnabled;
+        mRepeatMode = repeateMode;
 
+        setUpButtons(view);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -74,13 +83,13 @@ public class NowPlayingMusicControls implements MusicButtonsController {
             }
         });
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         mRepeatMode = preferences.getInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_DISABLED);
         mShuffleEnabled = preferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
 
-        ImageView repeatButton = (ImageView) view.findViewById(R.id.repeat_button);
-        repeatButton.setOnClickListener(new View.OnClickListener() {
+        mRepeatButton = (ImageView) view.findViewById(R.id.repeat_button);
+        mRepeatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mEventManager.postEvent(new ToggleRepeatEvent());
@@ -89,13 +98,12 @@ public class NowPlayingMusicControls implements MusicButtonsController {
         });
 
         if (mRepeatMode == NowPlayingActivity.MODE_ENABLED) {
-            repeatButton.setImageResource(R.drawable.ic_repeat);
+            mRepeatButton.setImageResource(R.drawable.ic_repeat);
         } else if (mRepeatMode == NowPlayingActivity.MODE_SINGLE) {
-            repeatButton.setImageResource(R.drawable.ic_repeat_song);
+            mRepeatButton.setImageResource(R.drawable.ic_repeat_song);
         }
-
-        ImageView shuffleButton = (ImageView) view.findViewById(R.id.shuffle_button);
-        shuffleButton.setOnClickListener(new View.OnClickListener() {
+        mShuffleButton = (ImageView) view.findViewById(R.id.shuffle_button);
+        mShuffleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mEventManager.postEvent(new ToggleShuffleEvent());
@@ -104,7 +112,7 @@ public class NowPlayingMusicControls implements MusicButtonsController {
         });
 
         if (mShuffleEnabled) {
-            shuffleButton.setImageResource(R.drawable.ic_shuffle);
+            mShuffleButton.setImageResource(R.drawable.ic_shuffle);
         }
     }
 
@@ -141,7 +149,11 @@ public class NowPlayingMusicControls implements MusicButtonsController {
 
     @Override
     public void tearDown() {
-        // TODO
+        mRepeatButton = null;
+        mShuffleButton = null;
+        mContext = null;
+        mEventManager = null;
+        mPlayPauseButton = null;
     }
 
     private void updatePlayButton() {
@@ -150,15 +162,7 @@ public class NowPlayingMusicControls implements MusicButtonsController {
         } else {
             int id = mIsPlayingMusic ? R.drawable.ic_pause : R.drawable.ic_play;
 
-            View view = getView();
-
-            if (view != null) {
-                ImageView button = (ImageView) view.findViewById(R.id.play_pause_button);
-
-                if (button != null) {
-                    button.setImageResource(id);
-                }
-            }
+                    mPlayPauseButton.setImageResource(id);
         }
     }
 
@@ -166,9 +170,9 @@ public class NowPlayingMusicControls implements MusicButtonsController {
     private void animatePlayButton() {
         AnimatedVectorDrawable drawable;
         if (mIsPlayingMusic) {
-            drawable = (AnimatedVectorDrawable) ContextCompat.getDrawable(getContext(), R.drawable.avd_play_to_pause);
+            drawable = (AnimatedVectorDrawable) ContextCompat.getDrawable(mContext, R.drawable.avd_play_to_pause);
         } else {
-            drawable = (AnimatedVectorDrawable) ContextCompat.getDrawable(getContext(), R.drawable.avd_pause_to_play);
+            drawable = (AnimatedVectorDrawable) ContextCompat.getDrawable(mContext, R.drawable.avd_pause_to_play);
         }
 
         mPlayPauseButton.setImageDrawable(drawable);
@@ -176,69 +180,47 @@ public class NowPlayingMusicControls implements MusicButtonsController {
     }
 
     private void updateShuffleButton() {
-        View view = getView();
-
-        if (view != null) {
-            ImageView shuffleButton = (ImageView) view.findViewById(R.id.shuffle_button);
-
-            if (shuffleButton != null) {
                 if (mShuffleEnabled) {
-                    shuffleButton.setImageResource(R.drawable.ic_shuffle_disabled);
+                    mShuffleButton.setImageResource(R.drawable.ic_shuffle_disabled);
                 } else {
-                    shuffleButton.setImageResource(R.drawable.ic_shuffle);
+                    mShuffleButton.setImageResource(R.drawable.ic_shuffle);
                 }
 
                 mShuffleEnabled = !mShuffleEnabled;
 
-                PreferenceManager.getDefaultSharedPreferences(getContext())
+                PreferenceManager.getDefaultSharedPreferences(mContext)
                         .edit()
                         .putBoolean(NowPlayingActivity.SHUFFLE_ENABLED, mShuffleEnabled)
                         .apply();
-            }
-        }
     }
 
     private void updateRepeatButton() {
-        View view = getView();
-
-        if (view != null) {
-            ImageView repeatButton = (ImageView) view.findViewById(R.id.repeat_button);
-
-            if (repeatButton != null) {
-                if (mRepeatMode == NowPlayingActivity.MODE_DISABLED) {
-                    repeatButton.setImageResource(R.drawable.ic_repeat);
-                    mRepeatMode = NowPlayingActivity.MODE_ENABLED;
-                } else if (mRepeatMode == NowPlayingActivity.MODE_ENABLED) {
-                    repeatButton.setImageResource(R.drawable.ic_repeat_song);
-                    mRepeatMode = NowPlayingActivity.MODE_SINGLE;
-                } else {
-                    repeatButton.setImageResource(R.drawable.ic_repeat_disabled);
-                    mRepeatMode = NowPlayingActivity.MODE_DISABLED;
-                }
-
-                PreferenceManager.getDefaultSharedPreferences(getContext())
-                        .edit()
-                        .putInt(NowPlayingActivity.REPEAT_MODE, mRepeatMode)
-                        .apply();
-            }
+        if (mRepeatMode == NowPlayingActivity.MODE_DISABLED) {
+            mRepeatButton.setImageResource(R.drawable.ic_repeat);
+            mRepeatMode = NowPlayingActivity.MODE_ENABLED;
+        } else if (mRepeatMode == NowPlayingActivity.MODE_ENABLED) {
+            mRepeatButton.setImageResource(R.drawable.ic_repeat_song);
+            mRepeatMode = NowPlayingActivity.MODE_SINGLE;
+        } else {
+            mRepeatButton.setImageResource(R.drawable.ic_repeat_disabled);
+            mRepeatMode = NowPlayingActivity.MODE_DISABLED;
         }
+
+        PreferenceManager.getDefaultSharedPreferences(mContext)
+                .edit()
+                .putInt(NowPlayingActivity.REPEAT_MODE, mRepeatMode)
+                .apply();
     }
 
     private void checkRepeatMode() {
-        View view = getView();
+        if (mRepeatMode == NowPlayingActivity.MODE_SINGLE) {
+            mRepeatMode = NowPlayingActivity.MODE_ENABLED;
+            mRepeatButton.setImageResource(R.drawable.ic_repeat);
 
-        if (view != null) {
-            ImageView repeatButton = (ImageView) view.findViewById(R.id.repeat_button);
-
-            if (mRepeatMode == NowPlayingActivity.MODE_SINGLE) {
-                mRepeatMode = NowPlayingActivity.MODE_ENABLED;
-                repeatButton.setImageResource(R.drawable.ic_repeat);
-
-                PreferenceManager.getDefaultSharedPreferences(getContext())
-                        .edit()
-                        .putInt(NowPlayingActivity.REPEAT_MODE, mRepeatMode)
-                        .apply();
-            }
+            PreferenceManager.getDefaultSharedPreferences(mContext)
+                    .edit()
+                    .putInt(NowPlayingActivity.REPEAT_MODE, mRepeatMode)
+                    .apply();
         }
     }
 }

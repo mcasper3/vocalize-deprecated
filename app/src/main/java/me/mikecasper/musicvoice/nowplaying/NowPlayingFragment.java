@@ -1,23 +1,15 @@
 package me.mikecasper.musicvoice.nowplaying;
 
-import android.annotation.TargetApi;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
@@ -29,24 +21,15 @@ import me.mikecasper.musicvoice.controllers.MusicButtonsController;
 import me.mikecasper.musicvoice.controllers.MusicInfoController;
 import me.mikecasper.musicvoice.controllers.NowPlayingMusicControls;
 import me.mikecasper.musicvoice.controllers.NowPlayingTrackInfoController;
-import me.mikecasper.musicvoice.models.Artist;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.events.StartQueueFragmentEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.LostPermissionEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.SeekToEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.StopSeekbarUpdateEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.ToggleRepeatEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.ToggleShuffleEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
-import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
-import me.mikecasper.musicvoice.util.DateUtility;
 
 public class NowPlayingFragment extends Fragment {
 
@@ -124,10 +107,6 @@ public class NowPlayingFragment extends Fragment {
         mEventManager = EventManagerProvider.getInstance(getContext());
 
         Bundle args = getArguments();
-        Track track = args.getParcelable(NowPlayingActivity.TRACK);
-        
-        mMusicButtonsController = new NowPlayingMusicControls(view);
-        mMusicInfoController = new NowPlayingTrackInfoController(view, track);
 
         boolean shouldPlaySong = args.getBoolean(NowPlayingActivity.SHOULD_PLAY_TRACK, false);
         mIsPlayingMusic = args.getBoolean(NowPlayingActivity.IS_PLAYING_MUSIC, false);
@@ -142,25 +121,8 @@ public class NowPlayingFragment extends Fragment {
             mRepeatMode = savedInstanceState.getInt(NowPlayingActivity.REPEAT_MODE);
         }
 
-        TextView playlistName = (TextView) view.findViewById(R.id.playlist_name);
-        playlistName.setSelected(true);
-        playlistName.setSingleLine(true);
-
-        String playlist = args.getString(NowPlayingActivity.PLAYLIST_NAME, null);
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        if (playlist == null) {
-            playlist = sharedPreferences.getString(NowPlayingActivity.PLAYLIST_NAME, null);
-        } else {
-            sharedPreferences.edit()
-                    .putString(NowPlayingActivity.PLAYLIST_NAME, playlist)
-                    .apply();
-        }
-
-        playlistName.setText(getString(R.string.playing_from, playlist));
-
-
+        mMusicButtonsController = new NowPlayingMusicControls(view, mIsPlayingMusic, mShuffleEnabled, mRepeatMode);
+        mMusicInfoController = new NowPlayingTrackInfoController(view, args);
 
         mAlbumArt = (ImageView) view.findViewById(R.id.album_art);
         mAlbumArt.setOnTouchListener(new View.OnTouchListener() {
