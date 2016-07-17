@@ -16,5 +16,7 @@ public class AudioBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         IEventManager eventManager = EventManagerProvider.getInstance(context);
         eventManager.postEvent(new PauseMusicEvent());
+
+        // TODO pause voice recognition
     }
 }
