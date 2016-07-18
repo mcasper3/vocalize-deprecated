@@ -176,6 +176,11 @@ public class NowPlayingFragment extends Fragment {
         Track track = event.getTrack();
 
         if (track != null) {
+            Picasso.with(getContext())
+                    .load(track.getAlbum().getImages().get(0).getUrl())
+                    .error(R.drawable.default_playlist)
+                    .into(mTarget);
+
             Bundle args = getArguments();
             args.putParcelable(NowPlayingActivity.TRACK, track);
         } else {

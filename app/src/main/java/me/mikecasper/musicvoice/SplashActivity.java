@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
+
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.login.LogInActivity;
@@ -13,8 +17,9 @@ import me.mikecasper.musicvoice.login.events.LogInEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
+import me.mikecasper.musicvoice.util.Logger;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends MusicVoiceActivity {
 
     private IEventManager mEventManager;
 
@@ -49,6 +54,26 @@ public class SplashActivity extends AppCompatActivity {
 
             Intent mainActivityIntent = new Intent(this, MainActivity.class);
             startActivity(mainActivityIntent);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == LogInService.LOGIN_REQUEST_CODE) {
+            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
+
+            switch (response.getType()) {
+                case TOKEN:
+                    Intent mainActivityIntent = new Intent(this, MainActivity.class);
+                    startActivity(mainActivityIntent);
+                    break;
+                case ERROR:
+                    Toast.makeText(this, R.string.login_failure, Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+            }
         }
     }
 
