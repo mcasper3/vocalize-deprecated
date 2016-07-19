@@ -129,6 +129,7 @@ public class NowPlayingTrackInfoController implements MusicInfoController {
         }
     }
 
+    @Subscribe
     @Override
     public void onPlayerStatusObtained(UpdatePlayerStatusEvent event) {
         Track track = event.getTrack();

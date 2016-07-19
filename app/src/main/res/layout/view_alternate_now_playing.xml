@@ -31,11 +31,6 @@
             android:scaleType="centerCrop"
             android:src="@drawable/corner_color" />
 
-        <me.mikecasper.musicvoice.views.TransparentToolbar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/toolbar" />
-
         <include
             layout="@layout/track_info"
             android:layout_width="match_parent"
@@ -47,6 +42,11 @@
             android:layout_alignParentBottom="true"
             android:id="@+id/music_controls"
             layout="@layout/music_controls" />
+
+        <me.mikecasper.musicvoice.views.TransparentToolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/toolbar" />
 
     </RelativeLayout>
 

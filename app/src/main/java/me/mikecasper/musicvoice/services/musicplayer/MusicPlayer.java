@@ -374,14 +374,14 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             mVoiceRecognizer.startListening();
         }
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mShuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
+
         int position = event.getPosition();
         organizeTracks(true, position);
         mSongIndex = 0;
         mPreviousSongIndex = mPlaylistSize - 1;
         mPlayingFromPriorityQueue = false;
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        mShuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
 
         if (mPlayer == null) {
             initPlayer();

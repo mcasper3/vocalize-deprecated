@@ -4,8 +4,15 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,23 +22,26 @@ import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.R;
 import me.mikecasper.musicvoice.controllers.MusicButtonsController;
 import me.mikecasper.musicvoice.controllers.MusicInfoController;
 import me.mikecasper.musicvoice.controllers.NowPlayingMusicControls;
 import me.mikecasper.musicvoice.controllers.NowPlayingTrackInfoController;
+import me.mikecasper.musicvoice.login.events.LogOutEvent;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.events.StartQueueFragmentEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
+import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
 
-public class NowPlayingFragment extends Fragment {
+public class NowPlayingFragment extends Fragment implements NavigationView.OnNavigationItemSelectedListener {
 
     // Constants for Saving View State
     private static final String IS_PLAYING = "isPlaying";
@@ -46,6 +56,7 @@ public class NowPlayingFragment extends Fragment {
     private ImageView mAlbumArt;
     private MusicInfoController mMusicInfoController;
     private MusicButtonsController mMusicButtonsController;
+    private DrawerLayout mDrawerLayout;
 
     // For swiping
     private float mInitialXValue;
@@ -147,6 +158,20 @@ public class NowPlayingFragment extends Fragment {
                 return true;
             }
         });
+
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        ((MusicVoiceActivity) getActivity()).setSupportActionBar(toolbar);
+
+        mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                getActivity(), mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
+        mDrawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) view.findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.music_home);
     }
 
     @Override
@@ -206,11 +231,26 @@ public class NowPlayingFragment extends Fragment {
     public void onDestroy() {
         mEventManager = null;
         mAlbumArt = null;
+        mDrawerLayout = null;
         mMusicButtonsController.tearDown();
         mMusicInfoController.tearDown();
 
         ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
 
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_log_out) {
+            mEventManager.postEvent(new LogOutEvent(getContext()));
+            mEventManager.postEvent(new DestroyPlayerEvent());
+        }
+
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
