@@ -610,9 +610,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             Track track = mOriginalTracks.get(position);
 
             if (shouldResume) {
-                if (!mIsPlaying) {
-                    mPlayer.resume();
-                }
+                mPlayer.resume();
             } else {
                 mRecentlyPlayedMusic = true;
                 mPreviousSongTime = 0;
