@@ -64,12 +64,16 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
 
     public void startListening() {
         Log.i(TAG, "started");
-        mRecognizer.startListening(MAIN_SEARCH);
+        if (mRecognizer != null) {
+            mRecognizer.startListening(MAIN_SEARCH);
+        }
     }
 
     public void stopListening() {
         Log.i(TAG, "stopped");
-        mRecognizer.stop();
+        if (mRecognizer != null) {
+            mRecognizer.stop();
+        }
     }
 
     @Override
