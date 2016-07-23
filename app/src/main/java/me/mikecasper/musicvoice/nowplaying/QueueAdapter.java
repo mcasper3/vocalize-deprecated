@@ -23,7 +23,7 @@ import me.mikecasper.musicvoice.util.RecyclerViewItemClickedEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 
-public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> implements QueueFragment.ItemTouchAdapterListener {
+public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> {
 
     private static final int TITLE_TYPE = 0;
     private static final int NOW_PLAYING_TYPE = 1;
@@ -251,7 +251,7 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         return size;
     }
 
-    @Override
+    //@Override
     public boolean onItemMove(int fromPosition, int toPosition) {
 //        if (fromPosition < toPosition) {
 //            for (int i = fromPosition; i < toPosition; i++) {

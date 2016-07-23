@@ -146,7 +146,8 @@ public class QueueFragment extends Fragment {
             @Override
             public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
                 int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-                return makeMovementFlags(dragFlags, 0);
+                int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+                return makeMovementFlags(dragFlags, swipeFlags);
             }
 
             @Override
@@ -161,6 +162,11 @@ public class QueueFragment extends Fragment {
 
             @Override
             public boolean isLongPressDragEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
                 return true;
             }
         });
@@ -376,6 +382,7 @@ public class QueueFragment extends Fragment {
     }
 
     public interface ItemTouchAdapterListener {
-        boolean onItemMove(int fromPosition, int toPosition);
+        void onItemMove(int fromPosition, int toPosition);
+        void onItemDismiss(int position);
     }
 }
