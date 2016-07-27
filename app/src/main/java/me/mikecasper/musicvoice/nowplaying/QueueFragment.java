@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -140,6 +141,35 @@ public class QueueFragment extends Fragment {
         playlistNameTextView.setSelected(true);
         playlistNameTextView.setSingleLine(true);
         playlistNameTextView.setText(getString(R.string.playing_from, playlistName));
+
+        ItemTouchHelper songDragHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+                return makeMovementFlags(dragFlags, swipeFlags);
+            }
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return true;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+
+            @Override
+            public boolean isLongPressDragEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
+                return true;
+            }
+        });
 
         // Set the adapter
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.queue_list);
@@ -349,5 +379,10 @@ public class QueueFragment extends Fragment {
 
         imageView.setImageDrawable(drawable);
         drawable.start();
+    }
+
+    public interface ItemTouchAdapterListener {
+        void onItemMove(int fromPosition, int toPosition);
+        void onItemDismiss(int position);
     }
 }

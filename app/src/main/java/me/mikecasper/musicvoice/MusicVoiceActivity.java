@@ -51,7 +51,7 @@ public class MusicVoiceActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (!(this instanceof LogInActivity)) {
+        if (!(this instanceof LogInActivity) && !(this instanceof SplashActivity)) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             long lastLoginTime = sharedPreferences.getLong(LogInService.LAST_LOGIN_TIME, 0);
             int expirationTime = sharedPreferences.getInt(LogInService.LOGIN_EXPIRATION_TIME, 0);

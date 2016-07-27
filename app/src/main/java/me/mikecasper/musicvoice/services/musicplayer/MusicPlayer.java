@@ -55,6 +55,7 @@ import me.mikecasper.musicvoice.nowplaying.events.AddTracksToPriorityQueueEvent;
 import me.mikecasper.musicvoice.nowplaying.events.RemoveTracksFromQueueEvent;
 import me.mikecasper.musicvoice.nowplaying.models.QueueItemInformation;
 import me.mikecasper.musicvoice.services.AudioBroadcastReceiver;
+import me.mikecasper.musicvoice.services.HeadphoneBroadcastReceiver;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.*;
@@ -105,7 +106,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     private IEventManager mEventManager;
     private AudioManager mAudioManager;
     private BroadcastReceiver mAudioBroadcastReceiver;
+    private BroadcastReceiver mHeadphonesBroadcastReceiver;
     private final IntentFilter mIntentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+    private final IntentFilter mHeadphoneFilter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
     private NotificationCompat.Builder mNotificationBuilder;
 
     // Voice recognition
@@ -168,6 +171,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mOriginalTracks = new ArrayList<>();
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mAudioBroadcastReceiver = new AudioBroadcastReceiver();
+        mHeadphonesBroadcastReceiver = new HeadphoneBroadcastReceiver();
 
         mTarget = new Target() {
             @Override
@@ -268,7 +272,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         });
 
         mRepeatMode = sharedPreferences.getInt(NowPlayingActivity.REPEAT_MODE, NowPlayingActivity.MODE_DISABLED);
-        mShuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
     }
 
     @Subscribe
@@ -330,9 +333,12 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
     @Subscribe
     public void onToggleShuffle(ToggleShuffleEvent event) {
         mShuffleWasEnabled = mShuffleEnabled;
-        mShuffleEnabled = !mShuffleEnabled;
 
-        organizeTracks(false, -1);
+        mShuffleEnabled = event.shouldOverrideShuffle() || !mShuffleEnabled;
+
+        if (mOriginalTracks != null && mOriginalTracks.size() > 0) {
+            organizeTracks(false, -1);
+        }
     }
 
     @Subscribe
@@ -340,6 +346,16 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mRepeatMode = ++mRepeatMode % 3;
 
         createQueue(false);
+    }
+
+    @Subscribe
+    public void onBeginListening(BeginListeningEvent event) {
+        mVoiceRecognizer.startListening();
+    }
+
+    @Subscribe
+    public void onPauseListening(PauseListeningEvent event) {
+        mVoiceRecognizer.stopListening();
     }
 
     @Subscribe
@@ -353,7 +369,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             mOriginalTracks.add(item.getTrack());
         }
 
-        mVoiceRecognizer.startListening();
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager.isWiredHeadsetOn()) {
+            mVoiceRecognizer.startListening();
+        }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mShuffleEnabled = sharedPreferences.getBoolean(NowPlayingActivity.SHUFFLE_ENABLED, false);
 
         int position = event.getPosition();
         organizeTracks(true, position);
@@ -566,6 +588,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             mIsPlaying = true;
             registerReceiver(mAudioBroadcastReceiver, mIntentFilter);
 
+            registerReceiver(mHeadphonesBroadcastReceiver, mHeadphoneFilter);
+
+            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (audioManager.isWiredHeadsetOn()) {
+                mVoiceRecognizer.startListening();
+            }
+
             if (mIsForeground) {
                 setAsForegroundService();
             }
@@ -604,6 +633,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         mIsPlaying = false;
 
         unregisterReceiver(mAudioBroadcastReceiver);
+        unregisterReceiver(mHeadphonesBroadcastReceiver);
 
         if (mIsForeground) {
             updateNotification();
@@ -995,6 +1025,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
                     mWasPlaying = true;
                 } else {
                     mWasPlaying = false;
+                    mVoiceRecognizer.stopListening();
                 }
                 break;
         }

@@ -4,11 +4,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
@@ -18,7 +22,6 @@ import me.mikecasper.musicvoice.MainActivity;
 import me.mikecasper.musicvoice.onboarding.OnboardingActivity;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.util.Logger;
 
@@ -36,6 +39,37 @@ public class LogInActivity extends MusicVoiceActivity {
         setContentView(R.layout.activity_log_in);
 
         mEventManager = EventManagerProvider.getInstance(this);
+
+        ImageView logInBackground = (ImageView) findViewById(R.id.logInBackground);
+
+        Picasso.with(this)
+                .load(R.drawable.log_in_background_blurred)
+                .into(logInBackground, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        showBackgroundGradient();
+                        showLogInButton();
+                    }
+
+                    @Override
+                    public void onError() {
+                        // Ignore
+                        Log.e(TAG, "Failed to load image resource");
+                        showBackgroundGradient();
+                        showLogInButton();
+                    }
+                });
+
+    }
+
+    private void showBackgroundGradient() {
+        View backgroundGradient = findViewById(R.id.background_gradient);
+        backgroundGradient.setVisibility(View.VISIBLE);
+    }
+
+    private void showLogInButton() {
+        View logInButton = findViewById(R.id.log_in_button);
+        logInButton.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -46,25 +80,6 @@ public class LogInActivity extends MusicVoiceActivity {
         // ViewCompat.setElevation(view, 4dp);
 
         mEventManager.postEvent(new GetPlayerStatusEvent());
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        boolean isLoggedIn = sharedPreferences.getBoolean(IS_LOGGED_IN, false);
-
-        if (isLoggedIn) {
-            long lastLoginTime = sharedPreferences.getLong(LogInService.LAST_LOGIN_TIME, 0);
-            int expirationTime = sharedPreferences.getInt(LogInService.LOGIN_EXPIRATION_TIME, 0);
-
-            if (System.currentTimeMillis() > lastLoginTime + expirationTime) {
-                mEventManager.postEvent(new LogInEvent(this));
-            } else {
-                Intent intent = new Intent(getApplicationContext(), MusicPlayer.class);
-                intent.setAction(MusicPlayer.CREATE_PLAYER);
-                startService(intent);
-
-                moveToMainView();
-            }
-        }
     }
 
     public void onLogIn(View view) {

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
+    android:background="@color/colorAccent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".login.LogInActivity">
 
@@ -11,18 +11,24 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/log_in_background_screen"/>
+        android:id="@+id/logInBackground"/>
 
-    <ImageView
-        android:layout_width="0dp"
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:id="@+id/background_gradient"
+        android:background="@drawable/log_in_background_gradient" />
+
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_widthPercent="70%"
-        android:adjustViewBounds="true"
-        android:id="@+id/log_in_name"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:textSize="60sp"
+        android:textColor="@android:color/white"
+        android:fontFamily="sans-serif-thin"
         app:layout_marginTopPercent="20%"
-        android:src="@drawable/log_in_name" />
+        android:layout_centerHorizontal="true"
+        android:text="vocalize"/>
 
     <include
         android:layout_width="0dp"

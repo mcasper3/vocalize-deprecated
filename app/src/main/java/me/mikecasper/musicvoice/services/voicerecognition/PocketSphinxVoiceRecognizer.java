@@ -2,6 +2,7 @@ package me.mikecasper.musicvoice.services.voicerecognition;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -23,13 +24,13 @@ import static edu.cmu.pocketsphinx.SpeechRecognizerSetup.defaultSetup;
 
 public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceRecognizer {
 
-    private static final String TAG = "PocketSphinxVoiceRecognizer";
+    private static final String TAG = "SphinxVoiceRecognizer";
 
     private static final String ENGLISH_US = "en-us-ptm";
     private static final String ENGLISH_US_DICT = "cmudict-en-us.dict";
     private static final String ALL_PHONE = "-allphone_ci";
     private static final String MAIN_SEARCH = "main";
-    private static final String KEYPHRASE = "music voice listen up";
+    private static final String KEYPHRASE = "vocalize hear me out";
     private static final String COMMAND_SEARCH = "commands";
 
     // Basic commands
@@ -62,11 +63,17 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
     }
 
     public void startListening() {
-        mRecognizer.startListening(MAIN_SEARCH);
+        Log.i(TAG, "started");
+        if (mRecognizer != null) {
+            mRecognizer.startListening(MAIN_SEARCH);
+        }
     }
 
     public void stopListening() {
-        mRecognizer.stop();
+        Log.i(TAG, "stopped");
+        if (mRecognizer != null) {
+            mRecognizer.stop();
+        }
     }
 
     @Override
@@ -141,7 +148,7 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
 
         // TODO figure out if this needs to change with two grammars
         if (searchName.equals(MAIN_SEARCH)) {
-            mRecognizer.startListening(searchName);
+            mRecognizer.startListening(searchName, 4000);
         } else {
             // TODO why is this the same?
             mRecognizer.startListening(searchName);

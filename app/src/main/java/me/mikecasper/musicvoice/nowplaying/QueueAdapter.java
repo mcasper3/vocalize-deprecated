@@ -6,12 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.Collections;
 import java.util.List;
 
 import me.mikecasper.musicvoice.R;
@@ -249,6 +249,22 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
         }
 
         return size;
+    }
+
+    //@Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+//        if (fromPosition < toPosition) {
+//            for (int i = fromPosition; i < toPosition; i++) {
+//                Collections.swap(, i, i + 1);
+//            }
+//        } else {
+//            for (int i = fromPosition; i > toPosition; i--) {
+//                Collections.swap(mItems, i, i - 1);
+//            }
+//        }
+//        notifyItemMoved(fromPosition, toPosition);
+//        return true;
+        return true;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
