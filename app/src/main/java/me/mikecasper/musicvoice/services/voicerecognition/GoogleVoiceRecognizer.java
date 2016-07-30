@@ -27,7 +27,7 @@ public class GoogleVoiceRecognizer implements IVoiceRecognizer, RecognitionListe
 
     @Override
     public void startListening() {
-        mSpeechRecognizer.startListening();
+//        mSpeechRecognizer.startListening();
     }
 
     @Override
@@ -42,14 +42,14 @@ public class GoogleVoiceRecognizer implements IVoiceRecognizer, RecognitionListe
 
     @Override
     public void onEndOfSpeech() {
-        if (!mRecognizer.getSearchName().equals(MAIN_SEARCH)) {
-            switchSearch(MAIN_SEARCH);
-        }
+//        if (!mRecognizer.getSearchName().equals(MAIN_SEARCH)) {
+//            switchSearch(MAIN_SEARCH);
+//        }
     }
 
-    @Override
+    //@Override
     public void onPartialResult(Hypothesis hypothesis) {
-        if (hypothesis == null) {
+        /*if (hypothesis == null) {
             return;
         }
 
@@ -58,12 +58,12 @@ public class GoogleVoiceRecognizer implements IVoiceRecognizer, RecognitionListe
 
         if (text.equals(KEYPHRASE)) {
             switchSearch(COMMAND_SEARCH);
-        }
+        }*/
     }
 
     @Override
     public void onError(int error) {
-        Logger.e(TAG, "Error " + error);
+        //Logger.e(TAG, "Error " + error);
         // TODO maybe a "I didn't catch that" toast?
 
         Toast.makeText(mContext, "I didn't catch that", Toast.LENGTH_SHORT).show();
@@ -86,7 +86,7 @@ public class GoogleVoiceRecognizer implements IVoiceRecognizer, RecognitionListe
 
     @Override
     public void onResults(Bundle results) {
-        if (hypothesis != null) {
+        /*if (hypothesis != null) {
             String text = hypothesis.getHypstr();
 
             switch (text) {
@@ -107,7 +107,7 @@ public class GoogleVoiceRecognizer implements IVoiceRecognizer, RecognitionListe
                     mEventManager.postEvent(new PlayMusicEvent());
                     break;
             }
-        }
+        }*/
     }
 
     @Override
