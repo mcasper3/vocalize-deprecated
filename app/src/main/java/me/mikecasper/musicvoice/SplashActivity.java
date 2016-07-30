@@ -70,7 +70,8 @@ public class SplashActivity extends MusicVoiceActivity {
                     startActivity(mainActivityIntent);
                     break;
                 case ERROR:
-                    Toast.makeText(this, R.string.login_failure, Toast.LENGTH_SHORT).show();
+                    Intent logInActivityIntent = new Intent(this, LogInActivity.class);
+                    startActivity(logInActivityIntent);
                     break;
                 default:
             }
