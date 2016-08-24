@@ -33,18 +33,21 @@
     <!-- End NowPlaying Strings -->
 
     <!-- Onboarding Strings -->
-    <string name="settings_onboarding">Customize your music controls to fit your style</string>
-    <string name="voice_onboarding">Available commands when listening with headphones:</string>
-    <string name="play_hint">Resume Music</string>
-    <string name="pause_hint">Pause Music</string>
-    <string name="skip_forward_hint">Skip to next song</string>
-    <string name="skip_backward_hint">Skip to previous song</string>
+    <string name="settings_onboarding">Customize your music controls to fit your style; which hand do you hold your phone in?</string>
+    <string name="voice_onboarding">Initiate a voice command by saying "vocalize" followed by one of the following commands:\n</string>
+    <string-array name="voice_commands">
+        <item name="play_hint">Resume music</item>
+        <item name="pause_hint">Pause music</item>
+        <item name="skip_forward_hint">Skip to next song</item>
+        <item name="skip_backward_hint">Skip to previous song</item>
+    </string-array>
     <string name="left">Left</string>
     <string name="right">Right</string>
     <string name="back">Back</string>
     <string name="next">Next</string>
     <string name="ok">OK</string>
     <string name="skip">Skip</string>
+    <string name="got_it">Got it!</string>
     <!-- End Onboarding Strings -->
 
     <!-- Speech Recognizer Strings -->

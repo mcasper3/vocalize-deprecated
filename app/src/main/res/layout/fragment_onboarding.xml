@@ -14,22 +14,28 @@
         android:layout_centerHorizontal="true"
         android:id="@+id/onboarding_image" />
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/log_in_background_gradient"/>
+
     <TextView
         android:id="@+id/info_text"
-        android:layout_below="@+id/onboarding_image"
         android:textSize="22sp"
-        android:textColor="@android:color/white"
+        android:textColor="@color/light_gray"
         android:gravity="center_horizontal"
         android:layout_centerHorizontal="true"
         app:layout_widthPercent="75%"
-        app:layout_marginBottomPercent="10%"
+        android:layout_marginBottom="16dp"
+        android:layout_above="@+id/first_option"
         android:layout_width="0dp"
         android:layout_height="wrap_content" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/info_text"
+        android:layout_alignParentBottom="true"
+        app:layout_marginBottomPercent="20%"
         app:layout_marginLeftPercent="15%"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:textAllCaps="false"
@@ -45,7 +51,8 @@
         app:layout_marginRightPercent="15%"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/info_text"
+        android:layout_alignParentBottom="true"
+        app:layout_marginBottomPercent="20%"
         android:id="@+id/second_option"
         android:clickable="true"
         android:padding="4dp"

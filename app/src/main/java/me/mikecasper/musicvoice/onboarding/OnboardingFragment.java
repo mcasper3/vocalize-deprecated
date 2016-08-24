@@ -64,7 +64,22 @@ public class OnboardingFragment extends Fragment {
         mInfoText = (TextView) view.findViewById(R.id.info_text);
 
         int infoText = args.getInt(TEXT_ID, R.string.settings_onboarding);
-        mInfoText.setText(infoText);
+        StringBuilder text = new StringBuilder(getString(infoText));
+
+        if (args.containsKey(VOICE_COMMANDS)) {
+            int voiceCommands = args.getInt(VOICE_COMMANDS);
+
+            String[] commands = getResources().getStringArray(voiceCommands);
+
+            if (commands != null) {
+                for (String command : commands) {
+                    text.append("\n");
+                    text.append(command);
+                }
+            }
+        }
+
+        mInfoText.setText(text.toString());
 
         Button leftOption = (Button) view.findViewById(R.id.first_option);
         Button rightOption = (Button) view.findViewById(R.id.second_option);
@@ -119,6 +134,7 @@ public class OnboardingFragment extends Fragment {
     public void onDestroy() {
         mEventManager = null;
         mBackgroundImage = null;
+        mInfoText = null;
 
         ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
 

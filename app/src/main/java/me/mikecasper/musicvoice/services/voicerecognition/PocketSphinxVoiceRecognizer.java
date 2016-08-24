@@ -38,6 +38,7 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
     private static final String PREVIOUS = "play previous song";
     private static final String PAUSE = "pause music";
     private static final String RESUME = "resume playback";
+    private static final String SHUFFLE = "shuffle play";
 
     private static final float KEYWORD_THRESHOLD = 1e-20f;
 
