@@ -11,19 +11,21 @@
         android:scaleType="centerCrop"
         android:id="@+id/album_art_behind" />
 
-    <ImageView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_heightPercent="100%"
-        app:layout_aspectRatio="100%"
-        android:layout_below="@+id/track_info"
-        android:layout_above="@+id/music_controls"
-        android:id="@+id/album_art" />
-
     <View
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:background="@drawable/now_playing_gradient" />
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_widthPercent="94%"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        app:layout_aspectRatio="100%"
+        android:layout_below="@+id/track_info"
+        android:layout_above="@+id/music_controls"
+        android:id="@+id/album_art" />
 
     <ImageView
         android:layout_width="match_parent"
