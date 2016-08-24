@@ -4,7 +4,7 @@
     <color name="colorPrimaryOld">#212121</color>
     <color name="colorPrimaryDark">#212121</color>
     <color name="colorAccent">#00BFA5</color>
-    <color name="colorAccentTransparent">#3300BFA5</color>
+    <color name="colorAccentTransparent">#5600BFA5</color>
     <color name="darkGray">#424242</color>
     <color name="center_log_in_gradient">#aa222222</color>
     <color name="start_log_in_gradient">#ee222222</color>
@@ -12,15 +12,17 @@
     <color name="light_gray">#C3C3C3</color>
     <color name="disabled_gray">#A0A0A0</color>
     <color name="first_onboarding_view">@color/teal_gray</color>
-    <color name="second_onboarding_view">@color/gold</color>
+    <color name="second_onboarding_view">@color/green</color>
     <color name="third_onboarding_view">@color/purple</color>
     <color name="first_onboarding_view_dark">@color/dark_teal_gray</color>
-    <color name="second_onboarding_view_dark">@color/dark_gold</color>
+    <color name="second_onboarding_view_dark">@color/dark_green</color>
     <color name="third_onboarding_view_dark">@color/dark_purple</color>
     <color name="teal_gray">#3D7F77</color>
     <color name="gold">#D2B12D</color>
     <color name="purple">#60258D</color>
+    <color name="green">#25AC3F</color>
     <color name="dark_gold">#836900</color>
     <color name="dark_purple">#340658</color>
     <color name="dark_teal_gray">#0B4A43</color>
+    <color name="dark_green">#017115</color>
 </resources>

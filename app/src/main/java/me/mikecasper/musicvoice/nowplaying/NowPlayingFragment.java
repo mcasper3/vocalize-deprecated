@@ -10,7 +10,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -40,6 +39,7 @@ import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
+import me.mikecasper.musicvoice.util.NavViewController;
 
 public class NowPlayingFragment extends Fragment implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -48,6 +48,7 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
 
     // Services
     private IEventManager mEventManager;
+    private NavViewController mNavViewController;
 
     // Data Members
     private boolean mIsPlayingMusic;
@@ -67,12 +68,16 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
     private final Target mTarget = new Target() {
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            mAlbumArt.setImageBitmap(bitmap);
+            if (mAlbumArt != null) {
+                mAlbumArt.setImageBitmap(bitmap);
+            }
         }
 
         @Override
         public void onBitmapFailed(Drawable errorDrawable) {
-            mAlbumArt.setImageDrawable(errorDrawable);
+            if (mAlbumArt != null) {
+                mAlbumArt.setImageDrawable(errorDrawable);
+            }
         }
 
         @Override
@@ -171,7 +176,9 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
 
         NavigationView navigationView = (NavigationView) view.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setCheckedItem(R.id.music_home);
+
+        MusicVoiceActivity activity = (MusicVoiceActivity) getActivity();
+        mNavViewController = new NavViewController(activity, mDrawerLayout);
     }
 
     @Override
@@ -232,8 +239,19 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
         mEventManager = null;
         mAlbumArt = null;
         mDrawerLayout = null;
-        mMusicButtonsController.tearDown();
-        mMusicInfoController.tearDown();
+
+        if (mMusicButtonsController != null) {
+            mMusicButtonsController.tearDown();
+            mMusicButtonsController = null;
+        }
+        if (mMusicInfoController != null) {
+            mMusicInfoController.tearDown();
+            mMusicInfoController = null;
+        }
+        if (mNavViewController != null) {
+            mNavViewController .destroy();
+            mNavViewController = null;
+        }
 
         ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
 
@@ -245,12 +263,8 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_log_out) {
-            mEventManager.postEvent(new LogOutEvent(getContext()));
-            mEventManager.postEvent(new DestroyPlayerEvent());
-        }
+        mNavViewController.handleAction(id);
 
-        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 }

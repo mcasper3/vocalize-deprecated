@@ -33,7 +33,12 @@
     <!-- End NowPlaying Strings -->
 
     <!-- Onboarding Strings -->
-    <string name="select_view_layout">With which hand do you hold your device?</string>
+    <string name="settings_onboarding">Customize your music controls to fit your style</string>
+    <string name="voice_onboarding">Available commands when listening with headphones:</string>
+    <string name="play_hint">Resume Music</string>
+    <string name="pause_hint">Pause Music</string>
+    <string name="skip_forward_hint">Skip to next song</string>
+    <string name="skip_backward_hint">Skip to previous song</string>
     <string name="left">Left</string>
     <string name="right">Right</string>
     <string name="back">Back</string>

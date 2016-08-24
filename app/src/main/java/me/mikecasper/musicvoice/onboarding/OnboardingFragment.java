@@ -9,7 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import me.mikecasper.musicvoice.MusicVoiceApplication;
 import me.mikecasper.musicvoice.R;
@@ -22,12 +26,15 @@ import me.mikecasper.musicvoice.settings.SettingsFragment;
 public class OnboardingFragment extends Fragment {
 
     public static final String BACKGROUND_COLOR = "backgroundColor";
+    public static final String VOICE_COMMANDS = "voiceCommands";
     public static final String IMAGE_ID = "imageId";
     public static final String TEXT_ID = "textId";
     public static final String LEFT_OPTION = "leftOption";
     public static final String RIGHT_OPTION = "rightOption";
 
     private IEventManager mEventManager;
+    private ImageView mBackgroundImage;
+    private TextView mInfoText;
 
     @Nullable
     @Override
@@ -46,6 +53,18 @@ public class OnboardingFragment extends Fragment {
 
         RelativeLayout parent = (RelativeLayout) view.findViewById(R.id.onboarding_fragment_parent);
         parent.setBackgroundColor(ContextCompat.getColor(getContext(), color));
+
+        mBackgroundImage = (ImageView) view.findViewById(R.id.onboarding_image);
+
+        int backgroundImage = args.getInt(IMAGE_ID, R.drawable.guy_headphones);
+        Picasso.with(getContext())
+                .load(backgroundImage)
+                .into(mBackgroundImage);
+
+        mInfoText = (TextView) view.findViewById(R.id.info_text);
+
+        int infoText = args.getInt(TEXT_ID, R.string.settings_onboarding);
+        mInfoText.setText(infoText);
 
         Button leftOption = (Button) view.findViewById(R.id.first_option);
         Button rightOption = (Button) view.findViewById(R.id.second_option);
@@ -99,6 +118,7 @@ public class OnboardingFragment extends Fragment {
     @Override
     public void onDestroy() {
         mEventManager = null;
+        mBackgroundImage = null;
 
         ((MusicVoiceApplication) getActivity().getApplication()).getRefWatcher().watch(this);
 

@@ -26,15 +26,14 @@ import me.mikecasper.musicvoice.api.services.LogInService;
 import me.mikecasper.musicvoice.controllers.MainMusicButtonController;
 import me.mikecasper.musicvoice.login.events.GetUserEvent;
 import me.mikecasper.musicvoice.login.events.LogInEvent;
-import me.mikecasper.musicvoice.login.events.LogOutEvent;
 import me.mikecasper.musicvoice.login.events.RefreshTokenEvent;
 import me.mikecasper.musicvoice.models.SpotifyUser;
 import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
+import me.mikecasper.musicvoice.util.NavViewController;
 import retrofit2.Call;
 
 public class MainActivity extends MusicVoiceActivity
@@ -46,6 +45,7 @@ public class MainActivity extends MusicVoiceActivity
     private LinkedList<RefreshTokenEvent> mEvents;
     private boolean mRefreshingToken;
     private MainMusicButtonController mController;
+    private NavViewController mNavViewController;
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -72,7 +72,7 @@ public class MainActivity extends MusicVoiceActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setCheckedItem(R.id.music_home);
+        //navigationView.setCheckedItem(R.id.music_home);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -104,6 +104,8 @@ public class MainActivity extends MusicVoiceActivity
 
         View miniNowPlaying = findViewById(R.id.main_music_controls);
         mController = new MainMusicButtonController(miniNowPlaying);
+
+        mNavViewController = new NavViewController(this, drawer);
     }
 
     @Override
@@ -173,15 +175,8 @@ public class MainActivity extends MusicVoiceActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_log_out) {
-            mEventManager.postEvent(new LogOutEvent(this));
-            mEventManager.postEvent(new DestroyPlayerEvent());
-        }
+        mNavViewController.handleAction(id);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer != null) {
-            drawer.closeDrawer(GravityCompat.START);
-        }
         return true;
     }
 
@@ -218,6 +213,8 @@ public class MainActivity extends MusicVoiceActivity
         mEvents = null;
         mController.tearDown();
         mController = null;
+        mNavViewController.destroy();
+        mNavViewController = null;
 
         ((MusicVoiceApplication) getApplication()).getRefWatcher().watch(this);
 

@@ -116,11 +116,11 @@ public class LogInActivity extends MusicVoiceActivity {
 
     private void determineNextView() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean firstLogin = sharedPreferences.getBoolean(FIRST_LOGIN, false);
+        boolean firstLogin = sharedPreferences.getBoolean(FIRST_LOGIN, true);
 
-        if (firstLogin) {
+        if (firstLogin || true) {
             sharedPreferences.edit()
-                    .putBoolean(FIRST_LOGIN, true)
+                    .putBoolean(FIRST_LOGIN, false)
                     .apply();
 
             moveToOnboarding();

@@ -140,11 +140,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
         }
     };
 
-    private static final int NOTIFICATION_DELAY = 250;
+    private static final int NOTIFICATION_DELAY = 500;
     private final Runnable mShowNotification = new Runnable() {
         @Override
         public void run() {
-            setAsForegroundService();
+            if (sIsAlive) {
+                setAsForegroundService();
+            }
         }
     };
 
@@ -276,6 +278,7 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     @Subscribe
     public void onDestroyPlayer(DestroyPlayerEvent event) {
+        pauseMusic();
         stopSelf();
     }
 
@@ -632,17 +635,23 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         mIsPlaying = false;
 
-        unregisterReceiver(mAudioBroadcastReceiver);
-        unregisterReceiver(mHeadphonesBroadcastReceiver);
+        try {
+            unregisterReceiver(mAudioBroadcastReceiver);
+        } catch (IllegalArgumentException e) {}
+        try {
+            unregisterReceiver(mHeadphonesBroadcastReceiver);
+        } catch (IllegalArgumentException e) {}
 
         if (mIsForeground) {
             updateNotification();
             stopForeground(false);
         }
 
-        int position = mQueue.peekFirst();
-        Track track = mOriginalTracks.get(position);
-        mEventManager.postEvent(new SongChangeEvent(track, mIsPlaying));
+        if (mQueue != null && mQueue.size() > 0 && mOriginalTracks != null && mEventManager != null) {
+            int position = mQueue.peekFirst();
+            Track track = mOriginalTracks.get(position);
+            mEventManager.postEvent(new SongChangeEvent(track, mIsPlaying));
+        }
     }
 
     @Subscribe
