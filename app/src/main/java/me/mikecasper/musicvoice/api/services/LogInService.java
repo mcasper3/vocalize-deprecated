@@ -33,7 +33,8 @@ public class LogInService {
         AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
-        builder.setScopes(new String[]{"user-read-private", "streaming"});
+        builder.setScopes(new String[]{ "user-read-private", "streaming", "playlist-read-private", "playlist-read-collaborative" });
+        builder.setShowDialog(true);
         AuthenticationRequest request = builder.build();
 
         AuthenticationClient.openLoginActivity(event.getActivity(), LOGIN_REQUEST_CODE, request);
