@@ -29,7 +29,7 @@ import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.TogglePlaybackEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdateSongTimeEvent;
-import me.mikecasper.musicvoice.settings.SettingsFragment;
+import me.mikecasper.musicvoice.settings.SettingsActivity;
 
 public class MainMusicButtonController implements MusicButtonsController, MusicInfoController {
 
@@ -63,7 +63,7 @@ public class MainMusicButtonController implements MusicButtonsController, MusicI
 
     private void setUpView() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mLeftieLayout = sharedPreferences.getBoolean(SettingsFragment.LEFTIE_LAYOUT_SELECTED, false);
+        mLeftieLayout = sharedPreferences.getBoolean(SettingsActivity.LEFTIE_LAYOUT_SELECTED, false);
 
         mLeftImage = (ImageView) mView.findViewById(R.id.left_image);
         mRightImage = (ImageView) mView.findViewById(R.id.right_image);

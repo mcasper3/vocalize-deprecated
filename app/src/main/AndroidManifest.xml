@@ -20,8 +20,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".login.LogInActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"></activity>
         <!-- Spotify log in activity -->
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
@@ -33,8 +32,8 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".nowplaying.NowPlayingActivity"
-            android:screenOrientation="portrait"
             android:label=""
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".onboarding.OnboardingActivity"
@@ -54,18 +53,20 @@
 
         <activity
             android:name=".testnowplaying.AlternateNowPlaying"
+            android:label=""
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SplashActivity"
             android:screenOrientation="portrait"
-            android:label=""/>
-
-        <activity android:name=".SplashActivity"
-            android:theme="@style/SplashTheme"
-            android:screenOrientation="portrait" >
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".settings.SettingsActivity"></activity>
+        <activity android:name=".settings.libraries.LibrariesActivity"></activity>
     </application>
 
 </manifest>

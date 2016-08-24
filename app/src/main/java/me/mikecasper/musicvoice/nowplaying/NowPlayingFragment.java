@@ -1,12 +1,13 @@
 package me.mikecasper.musicvoice.nowplaying;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.GravityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -28,18 +29,17 @@ import me.mikecasper.musicvoice.controllers.MusicButtonsController;
 import me.mikecasper.musicvoice.controllers.MusicInfoController;
 import me.mikecasper.musicvoice.controllers.NowPlayingMusicControls;
 import me.mikecasper.musicvoice.controllers.NowPlayingTrackInfoController;
-import me.mikecasper.musicvoice.login.events.LogOutEvent;
 import me.mikecasper.musicvoice.models.Track;
 import me.mikecasper.musicvoice.nowplaying.events.StartQueueFragmentEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipBackwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SkipForwardEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.SongChangeEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.UpdatePlayerStatusEvent;
 import me.mikecasper.musicvoice.util.NavViewController;
+import me.mikecasper.musicvoice.util.Utility;
 
 public class NowPlayingFragment extends Fragment implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -55,6 +55,7 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
     private boolean mShuffleEnabled;
     private int mRepeatMode;
     private ImageView mAlbumArt;
+    private ImageView mSecondaryArt;
     private MusicInfoController mMusicInfoController;
     private MusicButtonsController mMusicButtonsController;
     private DrawerLayout mDrawerLayout;
@@ -70,6 +71,9 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             if (mAlbumArt != null) {
                 mAlbumArt.setImageBitmap(bitmap);
+
+                Bitmap blurred = Utility.blurImage(bitmap, .5f, 20);
+                mSecondaryArt.setImageBitmap(blurred);
             }
         }
 
@@ -77,6 +81,7 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
         public void onBitmapFailed(Drawable errorDrawable) {
             if (mAlbumArt != null) {
                 mAlbumArt.setImageDrawable(errorDrawable);
+                mSecondaryArt.setImageDrawable(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.disabled_gray)));
             }
         }
 
@@ -140,6 +145,7 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
         mMusicButtonsController = new NowPlayingMusicControls(view, mIsPlayingMusic, mShuffleEnabled, mRepeatMode);
         mMusicInfoController = new NowPlayingTrackInfoController(view, args);
 
+        mSecondaryArt = (ImageView) view.findViewById(R.id.album_art_behind);
         mAlbumArt = (ImageView) view.findViewById(R.id.album_art);
         mAlbumArt.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -239,6 +245,7 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
         mEventManager = null;
         mAlbumArt = null;
         mDrawerLayout = null;
+        mSecondaryArt = null;
 
         if (mMusicButtonsController != null) {
             mMusicButtonsController.tearDown();

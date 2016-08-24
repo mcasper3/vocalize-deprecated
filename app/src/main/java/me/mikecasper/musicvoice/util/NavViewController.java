@@ -15,6 +15,7 @@ import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
+import me.mikecasper.musicvoice.settings.SettingsActivity;
 
 public class NavViewController {
 
@@ -59,6 +60,9 @@ public class NavViewController {
                             .commit();
                 }
             }
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(mActivity, SettingsActivity.class);
+            mActivity.startActivity(intent);
         }
 
         if (mDrawer != null) {

@@ -7,16 +7,17 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import me.mikecasper.musicvoice.R;
-import me.mikecasper.musicvoice.settings.dummy.DummyContent.DummyItem;
-
-import java.util.List;
 
 public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final String[] mSettings;
+    private final String[] mDescriptions;
+    private final SettingsActivity mActivity;
 
-    public SettingsRecyclerViewAdapter(List<DummyItem> items) {
-        mValues = items;
+    public SettingsRecyclerViewAdapter(SettingsActivity activity) {
+        mActivity = activity;
+        mSettings = mActivity.getResources().getStringArray(R.array.settings);
+        mDescriptions = mActivity.getResources().getStringArray(R.array.settings_descriptions);
     }
 
     @Override
@@ -27,34 +28,36 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
+        holder.mSetting = mSettings[position];
+        holder.mDescription = mDescriptions[position];
+        holder.mIdView.setText(holder.mSetting);
+        holder.mContentView.setText(holder.mDescription);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO
+                mActivity.onClick(holder, position);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return mSettings.length;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public DummyItem mItem;
+        public String mSetting;
+        public String mDescription;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
+            mIdView = (TextView) view.findViewById(R.id.setting_name);
             mContentView = (TextView) view.findViewById(R.id.content);
         }
 
