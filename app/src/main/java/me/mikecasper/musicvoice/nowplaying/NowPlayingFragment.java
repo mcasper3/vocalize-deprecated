@@ -72,7 +72,7 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
             if (mAlbumArt != null) {
                 mAlbumArt.setImageBitmap(bitmap);
 
-                Bitmap blurred = Utility.blurImage(bitmap, .2f, 10);
+                Bitmap blurred = Utility.blurImage(bitmap, .3f, 10);
                 mSecondaryArt.setImageBitmap(blurred);
             }
         }
