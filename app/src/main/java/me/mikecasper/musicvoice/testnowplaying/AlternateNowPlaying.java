@@ -13,7 +13,7 @@ public class AlternateNowPlaying extends MusicVoiceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.view_alternate_now_playing);
+        setContentView(R.layout.fragment_now_playing);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

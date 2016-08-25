@@ -14,7 +14,6 @@ import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.MusicPlayer;
 import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
-import me.mikecasper.musicvoice.util.Logger;
 
 public class NowPlayingActivity extends MusicVoiceActivity {
 
@@ -69,13 +68,6 @@ public class NowPlayingActivity extends MusicVoiceActivity {
                     .replace(R.id.now_playing_content, fragment)
                     .commit();
         }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        Logger.d("NowPlayingActivity", "In new intent");
     }
 
     @Override

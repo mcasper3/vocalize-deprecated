@@ -8,16 +8,16 @@ import android.widget.TextView;
 
 import me.mikecasper.musicvoice.R;
 
-public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerViewAdapter.ViewHolder> {
+public class SettingRecyclerViewAdapter extends RecyclerView.Adapter<SettingRecyclerViewAdapter.ViewHolder> {
 
-    private final String[] mSettings;
-    private final String[] mDescriptions;
-    private final SettingsActivity mActivity;
+    private SettingFragment mListener;
+    private String[] mSettings;
+    private String[] mSettingsDescriptions;
 
-    public SettingsRecyclerViewAdapter(SettingsActivity activity) {
-        mActivity = activity;
-        mSettings = mActivity.getResources().getStringArray(R.array.settings);
-        mDescriptions = mActivity.getResources().getStringArray(R.array.settings_descriptions);
+    public SettingRecyclerViewAdapter(SettingFragment fragment) {
+        mSettings = fragment.getResources().getStringArray(R.array.settings);
+        mSettingsDescriptions = fragment.getResources().getStringArray(R.array.settings_descriptions);
+        mListener = fragment;
     }
 
     @Override
@@ -28,16 +28,18 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position) {
-        holder.mSetting = mSettings[position];
-        holder.mDescription = mDescriptions[position];
-        holder.mIdView.setText(holder.mSetting);
-        holder.mContentView.setText(holder.mDescription);
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        holder.mNameView.setText(mSettings[position]);
+        holder.mContentView.setText(mSettingsDescriptions[position]);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mActivity.onClick(holder, position);
+                if (null != mListener) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    mListener.onClick(holder.getAdapterPosition());
+                }
             }
         });
     }
@@ -47,17 +49,19 @@ public class SettingsRecyclerViewAdapter extends RecyclerView.Adapter<SettingsRe
         return mSettings.length;
     }
 
+    public void cleanUp() {
+        mListener = null;
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
+        public final TextView mNameView;
         public final TextView mContentView;
-        public String mSetting;
-        public String mDescription;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.setting_name);
+            mNameView = (TextView) view.findViewById(R.id.setting_name);
             mContentView = (TextView) view.findViewById(R.id.content);
         }
 

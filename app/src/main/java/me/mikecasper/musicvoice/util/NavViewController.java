@@ -15,7 +15,7 @@ import me.mikecasper.musicvoice.playlist.PlaylistFragment;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.DestroyPlayerEvent;
-import me.mikecasper.musicvoice.settings.SettingsActivity;
+import me.mikecasper.musicvoice.settings.SettingFragment;
 
 public class NavViewController {
 
@@ -61,8 +61,25 @@ public class NavViewController {
                 }
             }
         } else if (id == R.id.nav_settings) {
-            Intent intent = new Intent(mActivity, SettingsActivity.class);
-            mActivity.startActivity(intent);
+            FragmentManager fragmentManager = mActivity.getSupportFragmentManager();
+
+            Fragment fragment = fragmentManager.findFragmentById(R.id.main_content);
+
+            boolean isNowPlayingActivity = mActivity instanceof NowPlayingActivity;
+
+            if (isNowPlayingActivity) {
+                Intent intent = new Intent(mActivity, MainActivity.class);
+                intent.putExtra(MainActivity.DISPLAY_SETTINGS, true);
+                mActivity.startActivity(intent);
+            } else {
+                if (fragment == null || !(fragment instanceof SettingFragment)) {
+                    Fragment newFragment = new SettingFragment();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.main_content, newFragment)
+                            .addToBackStack(null)
+                            .commit();
+                }
+            }
         }
 
         if (mDrawer != null) {

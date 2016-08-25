@@ -118,7 +118,7 @@ public class LogInActivity extends MusicVoiceActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean firstLogin = sharedPreferences.getBoolean(FIRST_LOGIN, true);
 
-        if (firstLogin || true) {
+        if (firstLogin) {
             sharedPreferences.edit()
                     .putBoolean(FIRST_LOGIN, false)
                     .apply();

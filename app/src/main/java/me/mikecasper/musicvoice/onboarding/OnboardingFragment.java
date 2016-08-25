@@ -21,7 +21,7 @@ import me.mikecasper.musicvoice.onboarding.events.ScrollLeftEvent;
 import me.mikecasper.musicvoice.onboarding.events.ScrollRightEvent;
 import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
-import me.mikecasper.musicvoice.settings.SettingsActivity;
+import me.mikecasper.musicvoice.settings.SettingFragment;
 
 public class OnboardingFragment extends Fragment {
 
@@ -126,7 +126,7 @@ public class OnboardingFragment extends Fragment {
     private void updateViewOption(boolean leftieLayout) {
         PreferenceManager.getDefaultSharedPreferences(getContext())
                 .edit()
-                .putBoolean(SettingsActivity.LEFTIE_LAYOUT_SELECTED, leftieLayout)
+                .putBoolean(SettingFragment.LEFTIE_LAYOUT_SELECTED, leftieLayout)
                 .apply();
     }
 

@@ -33,11 +33,14 @@ import me.mikecasper.musicvoice.services.eventmanager.EventManagerProvider;
 import me.mikecasper.musicvoice.services.eventmanager.IEventManager;
 import me.mikecasper.musicvoice.services.musicplayer.events.DisplayNotificationEvent;
 import me.mikecasper.musicvoice.services.musicplayer.events.GetPlayerStatusEvent;
+import me.mikecasper.musicvoice.settings.SettingFragment;
 import me.mikecasper.musicvoice.util.NavViewController;
 import retrofit2.Call;
 
 public class MainActivity extends MusicVoiceActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static final String DISPLAY_SETTINGS = "displaySettings";
 
     private static final String TAG = "MainActivity";
 
@@ -76,12 +79,13 @@ public class MainActivity extends MusicVoiceActivity
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if (savedInstanceState == null) {
+        Intent intent = getIntent();
+        if (savedInstanceState == null && !intent.hasExtra(DISPLAY_SETTINGS)) {
             PlaylistFragment playlistFragment = new PlaylistFragment();
 
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.main_content, playlistFragment)
+                    .replace(R.id.main_content, playlistFragment)
                     .commit();
 
         }
@@ -106,6 +110,23 @@ public class MainActivity extends MusicVoiceActivity
         mController = new MainMusicButtonController(miniNowPlaying);
 
         mNavViewController = new NavViewController(this, drawer);
+
+        handleIntent(intent);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent.hasExtra(DISPLAY_SETTINGS)) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_content, new SettingFragment())
+                    .commit();
+        }
     }
 
     @Override
@@ -163,9 +184,13 @@ public class MainActivity extends MusicVoiceActivity
             if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
                 super.onBackPressed();
             } else {
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_HOME);
-                startActivity(intent);
+                if (getSupportFragmentManager().findFragmentById(R.id.main_content) instanceof SettingFragment) {
+                    super.onBackPressed();
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    startActivity(intent);
+                }
             }
         }
     }

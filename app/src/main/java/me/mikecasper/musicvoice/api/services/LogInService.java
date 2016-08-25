@@ -1,5 +1,6 @@
 package me.mikecasper.musicvoice.api.services;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
@@ -34,7 +35,11 @@ public class LogInService {
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
         builder.setScopes(new String[]{ "user-read-private", "streaming", "playlist-read-private", "playlist-read-collaborative" });
-        builder.setShowDialog(true);
+
+        Activity activity = event.getActivity();
+        if (activity instanceof LogInActivity){
+            builder.setShowDialog(true);
+        }
         AuthenticationRequest request = builder.build();
 
         AuthenticationClient.openLoginActivity(event.getActivity(), LOGIN_REQUEST_CODE, request);
