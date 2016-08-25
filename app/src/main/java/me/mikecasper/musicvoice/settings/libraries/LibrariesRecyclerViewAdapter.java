@@ -28,10 +28,20 @@ public class LibrariesRecyclerViewAdapter extends RecyclerView.Adapter<Libraries
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        // TODO bind correct view (need to just have list of names I think as first item name\nname2\n etc.);
+        if (position == 0) {
+            StringBuilder libraryNameList = new StringBuilder();
 
-        holder.mLibraryName.setText(mLibraries[position]);
-        holder.mLicense.setText(mLicenses[position]);
+            for (String name : mLibraries) {
+                libraryNameList.append("\n");
+                libraryNameList.append(name);
+            }
+
+            holder.mLibraryName.setText(R.string.title_libraries);
+            holder.mLicense.setText(libraryNameList.toString());
+        } else {
+            holder.mLibraryName.setText(mLibraries[position - 1]);
+            holder.mLicense.setText(mLicenses[position - 1]);
+        }
     }
 
     @Override

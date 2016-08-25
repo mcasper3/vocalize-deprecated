@@ -1,5 +1,7 @@
 package me.mikecasper.musicvoice.login;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -30,6 +32,8 @@ public class LogInActivity extends MusicVoiceActivity {
     public static final String IS_LOGGED_IN = "isLoggedIn";
     public static final String FIRST_LOGIN = "firstLogin";
 
+    private static final int EULA_VERSION = 1;
+    private static final String EULA_AGREED = "eulaAgreedV";
     private static final String TAG = "LogInActivity";
     private IEventManager mEventManager;
 
@@ -60,6 +64,29 @@ public class LogInActivity extends MusicVoiceActivity {
                     }
                 });
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!sharedPreferences.contains(EULA_AGREED + EULA_VERSION)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setTitle("vocalize v" + EULA_VERSION)
+                    .setMessage(R.string.vocalize_eula)
+                    .setPositiveButton(R.string.i_agree, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LogInActivity.this);
+                            sharedPreferences.edit()
+                                    .putBoolean(EULA_AGREED + EULA_VERSION, true)
+                                    .apply();
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            LogInActivity.this.onBackPressed();
+                        }
+                    });
+            builder.create().show();
+        }
     }
 
     private void showBackgroundGradient() {

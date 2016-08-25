@@ -111,11 +111,20 @@ public class TrackFragment extends Fragment {
 
         if (savedInstanceState != null) {
             mPlaylist = savedInstanceState.getParcelable(PlaylistFragment.SELECTED_PLAYLIST);
+            mTracks = savedInstanceState.getParcelableArrayList(TRACKS);
 
             View view = getView();
             if (view != null) {
                 View progressBar = view.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.INVISIBLE);
+
+                View shufflePlay = view.findViewById(R.id.shuffle_play_button);
+                shufflePlay.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        shufflePlay();
+                    }
+                });
             }
         }
     }

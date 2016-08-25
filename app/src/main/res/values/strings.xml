@@ -14,6 +14,7 @@
     <string name="title_activity_music_overview">Music Home</string>
     <string name="title_playlists">Playlists</string>
     <string name="title_settings">Settings</string>
+    <string name="title_libraries">Libraries</string>
     <!-- End Titles -->
 
     <!-- TrackFragment Strings -->
@@ -58,9 +59,11 @@
     <!-- Settings Strings -->
     <string-array name="settings">
         <item>Cool software that was used</item>
+        <item>Voice Commands</item>
     </string-array>
     <string-array name="settings_descriptions">
         <item>vocalize is built using a bunch of cool libraries! Check them out here!</item>
+        <item>Review how to use vocalize\'s voice commands</item>
     </string-array>
     <!-- End Settings Strings -->
 
@@ -107,6 +110,14 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</item>
+        <item>@string/apache</item>
+        <item>@string/apache</item>
+        <item>@string/apache</item>
+        <item>@string/apache</item>
+        <item>@string/apache</item>
+        <item>@string/apache</item>
+        <item>Spotify license?</item>
+        <item>@string/apache</item>
     </string-array>
     <string name="apache">Apache License
 
@@ -179,5 +190,53 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
     </string>
+    <string name="vocalize_eula">
+        End-User Licence Agreement (\"Agreement\")
+
+\n\nLast updated: August 25, 2016
+\nPlease read this End-User License Agreement (\"Agreement\") carefully before clicking the \"I Agree\" button, downloading or using vocalize (\"Application\").
+
+\n\nBy clicking the \"I Agree\" button, downloading or using the Application, you are agreeing to be bound by the terms and conditions of this Agreement.
+
+\n\nIf you do not agree to the terms of this Agreement, do not click on the \"I Agree\" button and do not download or use the Application.
+
+\n\nLicense
+\nMichael Casper (The Developer) grants you a revocable, nonexclusive, nontransferable, limited license to download, install and use the Application solely for your personal, noncommercial purposes strictly in accordance with the terms of this Agreement.
+
+\n\nRestrictions
+\nYou agree not to, and you will not permit others to:
+\na) license, sell, rent, lease, assign, distribute, transmit, host, outsource, disclose or otherwise commercially exploit the Application or make the Application available to any third party.
+
+\n\nThe Developer also does not make any warranties or representations on behalf of Spotify and expressly disclaim all implied warranties with respect to the Spotify Platform, Spotify Service and Spotify Content, including the implied warranties of merchantability, fitness for a particular purpose and non-infringement.
+
+\n\nYou agree not to modify or create derivative works based on the Spotify Platform, Spotify Service or Spotify Content. You also agree to not decompile, reverse-engineer, disassemble, and otherwise reduce the Spotify Platform, Spotify Service, and Spotify Content to source code or other human-perceivable form, to the full extent allowed by law.
+
+\n\nSpotify is a third party beneficiary of your end user license agreement and privacy policy and is entitled to directly enforce your end user license agreement.
+
+\n\nModifications to Application
+\nThe Developer reserves the right to modify, suspend or discontinue, temporarily or permanently, the Application or any service to which it connects, with or without notice and without liability to you.
+
+\n\nTerm and Termination
+\nThis Agreement shall remain in effect until terminated by you or The Developer.
+
+\n\nThe Developer may, in its sole discretion, at any time and for any or no reason, suspend or terminate this Agreement with or without prior notice.
+
+\nThis Agreement will terminate immediately, without prior notice from My Company The Developer, in the event that you fail to comply with any provision of this Agreement. You may also terminate this Agreement by deleting the Application and all copies thereof from your mobile device or from your desktop.
+
+\n\nUpon termination of this Agreement, you shall cease all use of the Application and delete all copies of the Application from your mobile device or from your desktop.
+
+\n\nSeverability
+\nIf any provision of this Agreement is held to be unenforceable or invalid, such provision will be changed and interpreted to accomplish the objectives of such provision to the greatest extent possible under applicable law and the remaining provisions will continue in full force and effect.
+
+\n\nAmendments to this Agreement
+\nMichael Casper reserves the right, at its sole discretion, to modify or replace this Agreement at any time. If a revision is material we will provide at least 30 (changes this) days\' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
+
+\n\nContact Information
+\nIf you have any questions about this Agreement, please contact us at appvocalize@gmail.com.
+    </string>
+    <string name="i_agree">I Agree</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
     <!-- End Copyright Strings -->
 </resources>

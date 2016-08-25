@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 
 import me.mikecasper.musicvoice.MusicVoiceActivity;
 import me.mikecasper.musicvoice.R;
+import me.mikecasper.musicvoice.settings.libraries.LibrariesFragment;
+import me.mikecasper.musicvoice.settings.voicecommands.VoiceCommandsFragment;
 import me.mikecasper.musicvoice.views.DividerItemDecoration;
 
 public class SettingFragment extends Fragment {
@@ -63,13 +65,26 @@ public class SettingFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        mRecyclerViewAdapter.cleanUp();
-        mRecyclerViewAdapter = null;
+        if (mRecyclerViewAdapter != null) {
+            mRecyclerViewAdapter.cleanUp();
+            mRecyclerViewAdapter = null;
+        }
     }
 
     public void onClick(int position) {
         if (position == 0) {
             // Start libraries fragment
+            getFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_content, new LibrariesFragment())
+                    .addToBackStack(null)
+                    .commit();
+        } else if (position == 1) {
+            getFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_content, new VoiceCommandsFragment())
+                    .addToBackStack(null)
+                    .commit();
         }
     }
 }
