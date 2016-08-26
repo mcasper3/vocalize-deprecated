@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center">
 
-        <me.mikecasper.musicvoice.views.SquareImageView
+        <me.mikecasper.vocalize.views.SquareImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="center_vertical"

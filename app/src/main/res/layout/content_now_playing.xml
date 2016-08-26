@@ -46,7 +46,7 @@
         android:id="@+id/music_controls"
         layout="@layout/music_controls" />
 
-    <me.mikecasper.musicvoice.views.TransparentToolbar
+    <me.mikecasper.vocalize.views.TransparentToolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/toolbar" />

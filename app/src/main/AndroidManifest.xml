@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="me.mikecasper.musicvoice">
+    package="me.mikecasper.vocalize">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <permission
-        android:name="me.mikecasper.musicvoice.MUSIC_PLAYER"
+        android:name="me.mikecasper.vocalize.MUSIC_PLAYER"
         android:label="MusicPlayer"
         android:protectionLevel="signature" />
 
     <application
-        android:name=".MusicVoiceApplication"
+        android:name="me.mikecasper.vocalize.MusicVoiceApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".login.LogInActivity"
+            android:name="me.mikecasper.vocalize.login.LogInActivity"
             android:screenOrientation="portrait"></activity>
         <!-- Spotify log in activity -->
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
-            android:name=".MainActivity"
+            android:name="me.mikecasper.vocalize.MainActivity"
             android:label="@string/title_activity_music_overview"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".nowplaying.NowPlayingActivity"
+            android:name="me.mikecasper.vocalize.nowplaying.NowPlayingActivity"
             android:label=""
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".onboarding.OnboardingActivity"
+            android:name="me.mikecasper.vocalize.onboarding.OnboardingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
 
         <service
-            android:name=".services.musicplayer.MusicPlayer"
+            android:name="me.mikecasper.vocalize.services.musicplayer.MusicPlayer"
             android:enabled="true"
             android:exported="false"
             android:permission="me.mikecasper.musicvoice.MUSIC_PLAYER" />
 
         <receiver
-            android:name=".services.AudioBroadcastReceiver"
+            android:name="me.mikecasper.vocalize.services.AudioBroadcastReceiver"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".testnowplaying.AlternateNowPlaying"
+            android:name="me.mikecasper.vocalize.testnowplaying.AlternateNowPlaying"
             android:label=""
             android:screenOrientation="portrait" />
         <activity
-            android:name=".SplashActivity"
+            android:name="me.mikecasper.vocalize.SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>

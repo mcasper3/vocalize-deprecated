@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="me.mikecasper.musicvoice.nowplaying.QueueFragment">
+    tools:context="me.mikecasper.vocalize.nowplaying.QueueFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"

@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "me.mikecasper.musicvoice"
+        applicationId "me.mikecasper.vocalize"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
@@ -15,7 +15,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

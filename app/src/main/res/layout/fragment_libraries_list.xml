@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="me.mikecasper.musicvoice.settings.libraries.LibrariesFragment" >
+    tools:context="me.mikecasper.vocalize.settings.libraries.LibrariesFragment" >
 
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
@@ -24,7 +24,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="me.mikecasper.musicvoice.settings.libraries.LibrariesFragment"
+        tools:context="me.mikecasper.vocalize.settings.libraries.LibrariesFragment"
         tools:listitem="@layout/item_library_license" />
 
 </LinearLayout>

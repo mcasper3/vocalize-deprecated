@@ -13,7 +13,7 @@
         android:background="@drawable/mini_now_playing_gradient"
         android:layout_below="@+id/mini_song_time">
 
-        <me.mikecasper.musicvoice.views.SquareImageView
+        <me.mikecasper.vocalize.views.SquareImageView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -54,7 +54,7 @@
 
         </LinearLayout>
 
-        <me.mikecasper.musicvoice.views.SquareImageView
+        <me.mikecasper.vocalize.views.SquareImageView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
