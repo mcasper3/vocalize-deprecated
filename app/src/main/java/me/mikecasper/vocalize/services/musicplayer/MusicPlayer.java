@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.spotify.sdk.android.player.Config;
@@ -305,6 +306,10 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             mIsPlaying = false;
         }
 
+        try {
+            unregisterReceiver(mHeadphonesBroadcastReceiver);
+        } catch (IllegalArgumentException e) {}
+
         mVoiceRecognizer.stopListening();
         abandonFocus();
         mHasFocus = false;
@@ -353,11 +358,13 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
     @Subscribe
     public void onBeginListening(BeginListeningEvent event) {
+        Log.e(TAG, "Starting listening");
         mVoiceRecognizer.startListening();
     }
 
     @Subscribe
     public void onPauseListening(PauseListeningEvent event) {
+        Log.e(TAG, "Pausing listening");
         mVoiceRecognizer.stopListening();
     }
 
@@ -637,9 +644,6 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
 
         try {
             unregisterReceiver(mAudioBroadcastReceiver);
-        } catch (IllegalArgumentException e) {}
-        try {
-            unregisterReceiver(mHeadphonesBroadcastReceiver);
         } catch (IllegalArgumentException e) {}
 
         if (mIsForeground) {
@@ -1027,6 +1031,9 @@ public class MusicPlayer extends Service implements ConnectionStateCallback, Pla
             case AudioManager.AUDIOFOCUS_LOSS:
                 abandonFocus();
                 mHasFocus = false;
+                try {
+                    unregisterReceiver(mHeadphonesBroadcastReceiver);
+                } catch (IllegalArgumentException e) {}
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 if (mIsPlaying) {

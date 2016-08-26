@@ -30,14 +30,14 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
     private static final String ENGLISH_US_DICT = "cmudict-en-us.dict";
     private static final String ALL_PHONE = "-allphone_ci";
     private static final String MAIN_SEARCH = "main";
-    private static final String KEYPHRASE = "vocalize hear me out";
+    private static final String KEYPHRASE = "vocalize";
     private static final String COMMAND_SEARCH = "commands";
 
     // Basic commands
     private static final String SKIP = "skip to next song";
-    private static final String PREVIOUS = "play previous song";
+    private static final String PREVIOUS = "skip to previous song";
     private static final String PAUSE = "pause music";
-    private static final String RESUME = "resume playback";
+    private static final String RESUME = "resume music";
     private static final String SHUFFLE = "shuffle play";
 
     private static final float KEYWORD_THRESHOLD = 1e-20f;
@@ -149,7 +149,7 @@ public class PocketSphinxVoiceRecognizer implements RecognitionListener, IVoiceR
 
         // TODO figure out if this needs to change with two grammars
         if (searchName.equals(MAIN_SEARCH)) {
-            mRecognizer.startListening(searchName, 4000);
+            mRecognizer.startListening(searchName, 2000);
         } else {
             // TODO why is this the same?
             mRecognizer.startListening(searchName);

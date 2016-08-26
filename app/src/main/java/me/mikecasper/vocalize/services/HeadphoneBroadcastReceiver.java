@@ -22,11 +22,9 @@ public class HeadphoneBroadcastReceiver extends BroadcastReceiver {
             if (mIsPluggedIn && intent.getIntExtra("state", 0) == 0){
                 mIsPluggedIn = false;
                 eventManager.postEvent(new PauseListeningEvent());
-                Log.e("DSF", "unplugged");
             } else if (!mIsPluggedIn && intent.getIntExtra("state", 0) == 1){
                 mIsPluggedIn = true;
                 eventManager.postEvent(new BeginListeningEvent());
-                Log.e("DSF", "unplugged not");
             }
         }
     }
