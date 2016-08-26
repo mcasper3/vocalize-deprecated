@@ -1,9 +1,11 @@
 package me.mikecasper.vocalize.nowplaying;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -17,11 +19,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import me.mikecasper.vocalize.MusicVoiceActivity;
 import me.mikecasper.vocalize.MusicVoiceApplication;
 import me.mikecasper.vocalize.R;
@@ -29,6 +33,7 @@ import me.mikecasper.vocalize.controllers.MusicButtonsController;
 import me.mikecasper.vocalize.controllers.MusicInfoController;
 import me.mikecasper.vocalize.controllers.NowPlayingMusicControls;
 import me.mikecasper.vocalize.controllers.NowPlayingTrackInfoController;
+import me.mikecasper.vocalize.models.SpotifyUser;
 import me.mikecasper.vocalize.models.Track;
 import me.mikecasper.vocalize.nowplaying.events.StartQueueFragmentEvent;
 import me.mikecasper.vocalize.services.eventmanager.EventManagerProvider;
@@ -185,6 +190,22 @@ public class NowPlayingFragment extends Fragment implements NavigationView.OnNav
 
         MusicVoiceActivity activity = (MusicVoiceActivity) getActivity();
         mNavViewController = new NavViewController(activity, mDrawerLayout);
+
+        View headerView = navigationView.getHeaderView(0);
+        CircleImageView profileImage = (CircleImageView) headerView.findViewById(R.id.profile_image);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        String imageUrl = sharedPreferences.getString(SpotifyUser.PROFILE_IMAGE, null);
+        if (profileImage != null && imageUrl != null) {
+            Picasso.with(getContext()).load(imageUrl).fit().into(profileImage);
+        }
+
+        TextView profileName = (TextView) headerView.findViewById(R.id.user_name);
+        String displayName = sharedPreferences.getString(SpotifyUser.NAME, null);
+        if (profileName != null) {
+            profileName.setText(displayName);
+        }
     }
 
     @Override
