@@ -36,7 +36,7 @@
 
     <!-- Onboarding Strings -->
     <string name="settings_onboarding">Customize your music controls to fit your style; which hand do you hold your phone in?</string>
-    <string name="voice_onboarding">Initiate a voice command by saying \"vocalize\" followed by a brief pause and then one of the following commands:\n</string>
+    <string name="voice_onboarding">To use voice commands, you  must be listening to music with headphones. Initiate a voice command by saying \"vocalize\" followed by a brief pause and then one of the following commands:\n</string>
     <string-array name="voice_commands">
         <item name="play_hint">Resume music</item>
         <item name="pause_hint">Pause music</item>
