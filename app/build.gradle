@@ -12,6 +12,14 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a", "x86", "mips"
+        }
+
+        packagingOptions {
+            exclude "lib/arm64-v8a/libpocketsphinx_jni.so"
+        }
     }
     buildTypes {
         release {
