@@ -3,6 +3,8 @@ vocalize is a way to control Spotify Playback using voice commands. In order to 
 
 To start a command, say "vocalize" followed by a short pause and then one of the commands.
 
+adsfasdl;kfjasdjfa;j
+
 ####Available commands:
 - play music
 - pause music
